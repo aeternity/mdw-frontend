@@ -8,6 +8,7 @@ use super::schema::key_blocks;
 use super::schema::key_blocks::dsl::*;
 use super::schema::micro_blocks;
 use super::schema::name_auction_entries;
+use super::schema::name_pointers;
 use super::schema::names;
 use super::schema::names::dsl::*;
 use super::schema::oracle_queries;
@@ -688,7 +689,8 @@ impl InsertableAssociatedAccount {
         _transaction_id: i32,
     ) -> MiddlewareResult<Vec<Self>> {
         let name_hashes = get_name_hashes(&transaction)?;
-        if name_hashes.len() == 0 {
+        debug!("name_hashes: {:?}", name_hashes);
+        if name_hashes.is_empty() {
             return Ok(vec![]);
         }
         let mut result = vec![];
@@ -701,6 +703,8 @@ impl InsertableAssociatedAccount {
                     name_hash: _name_hash,
                     aeternity_id: n,
                 });
+            } else {
+                warn!("Failed to lookup account {}", _name_hash);
             }
         }
         Ok(vec![])
@@ -1014,7 +1018,9 @@ lazy_static! {
         { Arc::new((Mutex::new(false), Condvar::new())) };
 }
 
-#[derive(AsChangeset, Clone, Identifiable, Queryable, QueryableByName, Deserialize, Serialize)]
+#[derive(
+    AsChangeset, Clone, Debug, Identifiable, Queryable, QueryableByName, Deserialize, Serialize,
+)]
 #[table_name = "names"]
 pub struct Name {
     #[serde(skip_serializing)]
@@ -1071,6 +1077,7 @@ impl Name {
             .filter(name_hash.eq(_hash))
             .load::<Self>(connection)?;
         if result.len() > 0 {
+            debug!("Found {:?}", result[0]);
             Ok(Some(result[0].clone()))
         } else {
             Ok(None)
@@ -1083,9 +1090,11 @@ impl Name {
         _hash: &String,
     ) -> MiddlewareResult<Option<String>> {
         if let Some(_info) = Self::get_for_height_and_name(connection, _height, _hash)? {
+            debug!("Info: {:?}", _info);
             if let Some(_pointers) = _info.pointers {
                 for entry in _pointers.as_array()? {
-                    if let Some(_key) = entry["key"].as_str() {
+                    debug!("checking pointer {:?}", entry);
+                    if let Some(_key) = entry["account_pubkey"].as_str() {
                         return Ok(Some(String::from(entry["id"].as_str()?)));
                     }
                 }
@@ -1131,6 +1140,45 @@ fn test_name_events() {
     std::thread::sleep_ms(300); // random amount, should be enough
     assert_eq!(*(lock.lock().unwrap()), false);
     handle.join().unwrap(); // check thread has terminated.
+}
+
+#[derive(
+    AsChangeset, Clone, Debug, Identifiable, Queryable, QueryableByName, Deserialize, Serialize,
+)]
+#[table_name = "name_pointers"]
+pub struct NamePointer {
+    #[serde(skip_serializing)]
+    pub id: i32,
+    pub name_hash: String,
+    pub pointer_type: String,
+    pub pointer_target: String,
+    pub active_from: i64,
+    pub expires: i64,
+    #[serde(skip_serializing)]
+    pub transaction_id: i32,
+}
+
+#[derive(Insertable)]
+#[table_name = "name_pointers"]
+pub struct InsertableNamePointer {
+    pub name_hash: String,
+    pub pointer_type: String,
+    pub pointer_target: String,
+    pub active_from: i64,
+    pub expires: i64,
+    pub transaction_id: i32,
+}
+
+impl InsertableNamePointer {
+    pub fn save(&self, conn: &PgConnection) -> MiddlewareResult<i32> {
+        use diesel::dsl::insert_into;
+        use schema::name_pointers::dsl::*;
+        let generated_ids: Vec<i32> = insert_into(name_pointers)
+            .values(self)
+            .returning(id)
+            .get_results(&*conn)?;
+        Ok(generated_ids[0])
+    }
 }
 
 #[derive(AsChangeset, Queryable, QueryableByName, Serialize, Clone, Debug)]
