@@ -445,25 +445,8 @@ fn transaction_count_for_account(
     if account.len() == 0 {
         return Err(Status::new(400, "No account given"));
     }
-    check_object!(&account);
-    let s_acc = sanitize(&account);
-    let txtype_sql: String = match txtype {
-        Some(txtype) => format!(" '{}') and tx_type ilike '{}' ", s_acc, sanitize(&txtype)),
-        _ => format!(" '{}') ", s_acc),
-    };
-    let sql = format!(
-        "select count(1) from transactions where ( \
-         tx->>'sender_id'='{}' or \
-         tx->>'account_id' = '{}' or \
-         tx->>'recipient_id'='{}' or \
-         tx->>'owner_id' = {} ",
-        s_acc, s_acc, s_acc, txtype_sql
-    );
-    debug!("{}", sql);
-    let rows = SQLCONNECTION.get().unwrap().query(&sql, &[]).unwrap();
-    let count: i64 = rows.get(0).get(0);
     Ok(Json(json!({
-        "count": count,
+        "count": transactions_for_account(_state, account, None, None, txtype, )?.len(),
     })))
 }
 
@@ -496,15 +479,11 @@ fn transactions_for_account(
     page: Option<i32>,
     txtype: Option<String>,
 ) -> Result<Json<Vec<JsonValue>>, Status> {
-    check_object!(&account);
-    let s_acc = sanitize(&account);
-    let (offset_sql, limit_sql) = offset_limit(limit, page);
     let txtype_sql: String = match txtype {
-        Some(txtype) => format!(" '{}') and tx_type ilike '{}' ", s_acc, sanitize(&txtype)),
-        _ => format!(" '{}') ", s_acc),
+        Some(txtype) => txtype,
+        _ => String::from("%"),
     };
-    let sql = format!(
-        r#"
+    let sql = r#"
 SELECT
     m.time_, t.*
 FROM
@@ -513,35 +492,53 @@ JOIN
     micro_blocks m ON m.id=t.micro_block_id
 WHERE
     m.id = t.micro_block_id AND
-   (t.tx->>'sender_id'='{}' OR
-    t.tx->>'account_id' = '{}' OR
-    t.tx->>'ga_id' = '{}' OR
-    t.tx->>'caller_id' = '{}' OR
-    t.tx->>'recipient_id'='{}' OR
-    t.tx->>'initiator_id'='{}' OR
-    t.tx->>'responder_id'='{}' OR
-    t.tx->>'from_id'='{}' OR
-    t.tx->>'to_id'='{}' OR
-    t.tx->>'owner_id' = {}
-ORDER BY m.time_ DESC
-LIMIT {} OFFSET {} "#,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        txtype_sql,
-        limit_sql,
-        offset_sql
-    );
+   (t.tx->>'sender_id'=$1 OR
+    t.tx->>'account_id' = $1 OR
+    t.tx->>'ga_id' = $1 OR
+    t.tx->>'caller_id' = $1 OR
+    t.tx->>'recipient_id'= $1 OR
+    t.tx->>'initiator_id'= $1 OR
+    t.tx->>'responder_id'= $1 OR
+    t.tx->>'from_id'= $1 OR
+    t.tx->>'to_id'= $1 OR
+    t.tx->>'owner_id' = $1) AND
+    t.tx_type ILIKE $2
+UNION
+SELECT
+    m.id, t.*
+FROM
+    transactions t
+JOIN
+    name_pointers np ON (
+    t.tx->>'sender_id'=np.name_hash OR
+    t.tx->>'account_id' = np.name_hash OR
+    t.tx->>'ga_id' = np.name_hash OR
+    t.tx->>'caller_id' = np.name_hash OR
+    t.tx->>'recipient_id'= np.name_hash OR
+    t.tx->>'initiator_id'= np.name_hash OR
+    t.tx->>'responder_id'= np.name_hash OR
+    t.tx->>'from_id'= np.name_hash OR
+    t.tx->>'to_id'= np.name_hash OR
+    t.tx->>'owner_id' = np.name_hash) AND
+    t.tx_type ILIKE $2 AND
+    np.pointer_target = $1
+JOIN
+    micro_blocks m ON t.micro_block_id=m.id
+WHERE
+    np.active_from <= t.block_height AND
+    np.expires > t.block_height AND
+    np.pointer_target = $1 AND
+    t.tx_type ILIKE $2
+"#;
     info!("{}", sql);
 
     let mut results: Vec<JsonValue> = Vec::new();
-    for row in &SQLCONNECTION.get().unwrap().query(&sql, &[]).unwrap() {
+    for row in &SQLCONNECTION
+        .get()
+        .unwrap()
+        .query(&sql, &[&account, &txtype_sql])
+        .unwrap()
+    {
         let time: i64 = row.get(0);
         let block_height: i32 = row.get(3);
         let block_hash: String = row.get(4);
@@ -561,6 +558,7 @@ LIMIT {} OFFSET {} "#,
             "tx": tx,
         }));
     }
+    limit_page_vec!(limit, page, results);
     Ok(Json(results))
 }
 

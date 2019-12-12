@@ -1056,7 +1056,7 @@ impl Name {
         }
     }
 
-    pub fn get_for_hash(connection: &PgConnection, _name_hash: &String) -> MiddlewareResult<Self> {
+    pub fn get_for_hash(connection: &PgConnection, _name_hash: &str) -> MiddlewareResult<Self> {
         use schema::names::dsl::*;
         Ok(names
             .filter(name_hash.eq(_name_hash))
@@ -1174,6 +1174,44 @@ impl NamePointer {
             .limit(1)
             .first(conn)?)
     }
+
+    pub fn update_pointers_and_name_ttl(
+        conn: &PgConnection,
+        _name_hash: &str,
+        _pointers: &serde_json::Value,
+        _transaction_id: i32,
+        _height: i64,
+        _name_ttl: i64,
+    ) -> MiddlewareResult<()> {
+        use schema::name_pointers::dsl::*;
+        let values = _pointers.as_array()?;
+        conn.transaction::<i32, MiddlewareError, _>(|| {
+            // expire all active name pointers for this hash
+            diesel::update(name_pointers)
+                .set(expires.eq(_height))
+                .filter(crate::schema::name_pointers::name_hash.eq(_name_hash))
+                .filter(active_from.le(_height))
+                .filter(expires.gt(_height))
+                .execute(conn)?;
+            // and then add all the new ones in.
+            for value in values {
+                InsertableNamePointer {
+                    name_hash: String::from(_name_hash),
+                    pointer_type: String::from(value["key"].as_str()?),
+                    pointer_target: String::from(value["id"].as_str()?),
+                    active_from: _height,
+                    expires: _height + _name_ttl,
+                    transaction_id: _transaction_id,
+                }
+                .save(conn)?;
+            }
+            let mut _name = Name::get_for_hash(conn, _name_hash)?;
+            _name.expires_at = _height + _name_ttl;
+            _name.update(conn)?;
+            Ok(1)
+        })?;
+        Ok(())
+    }
 }
 
 #[derive(Insertable)]
@@ -1196,43 +1234,6 @@ impl InsertableNamePointer {
             .returning(id)
             .get_results(&*conn)?;
         Ok(generated_ids[0])
-    }
-
-    pub fn update_pointers(
-        conn: &PgConnection,
-        _name_hash: &str,
-        _pointers: serde_json::Value,
-        _active_from: i64,
-        _expires: i64,
-        _transaction_id: i32,
-        _height: i64,
-    ) -> MiddlewareResult<()> {
-        use diesel::dsl::update;
-        use schema::name_pointers::dsl::*;
-        let values = _pointers.as_array()?;
-        conn.transaction::<i32, MiddlewareError, _>(|| {
-            // expire all active name pointers for this hash
-            diesel::update(name_pointers)
-                .set(expires.eq(_height))
-                .filter(name_hash.eq(_name_hash))
-                .filter(active_from.le(_height))
-                .filter(expires.gt(_height))
-                .execute(conn)?;
-            // and then add all the new ones in.
-            for value in values {
-                InsertableNamePointer {
-                    name_hash: String::from(_name_hash),
-                    pointer_type: String::from(value["key"].as_str()?),
-                    pointer_target: String::from(value["id"].as_str()?),
-                    active_from: _active_from,
-                    expires: _expires,
-                    transaction_id: _transaction_id,
-                }
-                .save(conn)?;
-            }
-            Ok(1)
-        })?;
-        Ok(())
     }
 }
 
