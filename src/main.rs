@@ -332,7 +332,7 @@ fn main() {
             thread::sleep(std::time::Duration::new(40, 0));
         }
     }
-    if !populate && !serve && !heights {
+    if !populate && !serve && !heights && !transactions {
         warn!("Nothing to do!");
     }
 
