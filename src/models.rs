@@ -1158,6 +1158,24 @@ pub struct NamePointer {
     pub transaction_id: i32,
 }
 
+impl NamePointer {
+    pub fn get_for_hash_and_height(
+        conn: &PgConnection,
+        _hash: &str,
+        _height: i64,
+    ) -> MiddlewareResult<Self> {
+        use schema::name_pointers::dsl::*;
+        use schema::name_pointers::*;
+        Ok(name_pointers
+            .filter(name_hash.eq(_hash))
+            .filter(active_from.le(_height))
+            .filter(expires.gt(_height))
+            .order_by(active_from.desc())
+            .limit(1)
+            .first(conn)?)
+    }
+}
+
 #[derive(Insertable)]
 #[table_name = "name_pointers"]
 pub struct InsertableNamePointer {
@@ -1178,6 +1196,43 @@ impl InsertableNamePointer {
             .returning(id)
             .get_results(&*conn)?;
         Ok(generated_ids[0])
+    }
+
+    pub fn update_pointers(
+        conn: &PgConnection,
+        _name_hash: &str,
+        _pointers: serde_json::Value,
+        _active_from: i64,
+        _expires: i64,
+        _transaction_id: i32,
+        _height: i64,
+    ) -> MiddlewareResult<()> {
+        use diesel::dsl::update;
+        use schema::name_pointers::dsl::*;
+        let values = _pointers.as_array()?;
+        conn.transaction::<i32, MiddlewareError, _>(|| {
+            // expire all active name pointers for this hash
+            diesel::update(name_pointers)
+                .set(expires.eq(_height))
+                .filter(name_hash.eq(_name_hash))
+                .filter(active_from.le(_height))
+                .filter(expires.gt(_height))
+                .execute(conn)?;
+            // and then add all the new ones in.
+            for value in values {
+                InsertableNamePointer {
+                    name_hash: String::from(_name_hash),
+                    pointer_type: String::from(value["key"].as_str()?),
+                    pointer_target: String::from(value["id"].as_str()?),
+                    active_from: _active_from,
+                    expires: _expires,
+                    transaction_id: _transaction_id,
+                }
+                .save(conn)?;
+            }
+            Ok(1)
+        })?;
+        Ok(())
     }
 }
 
