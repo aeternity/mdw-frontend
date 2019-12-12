@@ -521,7 +521,8 @@ JOIN
     t.tx->>'to_id'= np.name_hash OR
     t.tx->>'owner_id' = np.name_hash) AND
     t.tx_type ILIKE $2 AND
-    np.pointer_target = $1
+    np.pointer_target = $1 AND
+    np.pointer_type = 'account_pupkey'
 JOIN
     micro_blocks m ON t.micro_block_id=m.id
 WHERE
@@ -558,6 +559,7 @@ WHERE
             "tx": tx,
         }));
     }
+    results.sort_by(|a, b| a["time"].as_i64().cmp(&b["time"].as_i64()));
     limit_page_vec!(limit, page, results);
     Ok(Json(results))
 }

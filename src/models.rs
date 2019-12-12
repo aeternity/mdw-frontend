@@ -1402,7 +1402,7 @@ ORDER BY block_height DESC
     }
 }
 
-#[derive(Queryable, QueryableByName)]
+#[derive(Debug, Queryable, QueryableByName)]
 #[table_name = "contract_calls"]
 pub struct ContractCall {
     pub id: i32,
