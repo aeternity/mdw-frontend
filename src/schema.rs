@@ -79,6 +79,18 @@ table! {
 }
 
 table! {
+    name_pointers (id) {
+        id -> Int4,
+        name_hash -> Varchar,
+        pointer_type -> Varchar,
+        pointer_target -> Varchar,
+        active_from -> Int8,
+        expires -> Int8,
+        transaction_id -> Int4,
+    }
+}
+
+table! {
     oracle_queries (id) {
         id -> Int4,
         oracle_id -> Nullable<Varchar>,
@@ -130,6 +142,7 @@ joinable!(contract_calls -> transactions (transaction_id));
 joinable!(contract_identifiers -> transactions (transaction_id));
 joinable!(micro_blocks -> key_blocks (key_block_id));
 joinable!(names -> transactions (transaction_id));
+joinable!(name_pointers -> transactions (transaction_id));
 joinable!(oracle_queries -> transactions (transaction_id));
 joinable!(associated_accounts -> transactions (transaction_id));
 joinable!(transactions -> micro_blocks (micro_block_id));
