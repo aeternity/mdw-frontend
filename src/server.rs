@@ -324,11 +324,13 @@ fn transactions_in_micro_block_at_hash(
     _state: State<MiddlewareServer>,
     hash: String,
 ) -> Result<Json<JsonTransactionList>, Status> {
+    use diesel::sql_types::Varchar;
     check_object!(&hash);
-    let sql = format!("select t.* from transactions t, micro_blocks m where t.micro_block_id = m.id and m.hash = '{}'", sanitize(&hash));
-    let transactions: Vec<Transaction> =
-        sql_query(sql).load(&*PGCONNECTION.get().unwrap()).unwrap();
-
+    let sql = "select t.* from transactions t, micro_blocks m where t.micro_block_id = m.id and m.hash = $1";
+    let transactions: Vec<Transaction> = sql_query(sql)
+        .bind::<Varchar, _>(hash)
+        .get_results(&*PGCONNECTION.get().unwrap())
+        .unwrap();
     let json_transactions = transactions
         .iter()
         .map(JsonTransaction::from_transaction)
@@ -577,16 +579,15 @@ fn transactions_for_account_to_account(
     check_object!(&receiver);
     let s_acc = sanitize(&sender);
     let r_acc = sanitize(&receiver);
-    let sql = format!(
-        "select * from transactions where \
-         tx->>'sender_id'='{}' and \
-         tx->>'recipient_id' = '{}' \
-         order by id desc",
-        s_acc, r_acc
-    );
-    info!("{}", sql);
-    let transactions: Vec<Transaction> =
-        sql_query(sql).load(&*PGCONNECTION.get().unwrap()).unwrap();
+    let sql = "select * from transactions where \
+               tx->>'sender_id'= $1 and \
+               tx->>'recipient_id' = $2 \
+               order by id desc";
+    let transactions: Vec<Transaction> = sql_query(sql)
+        .bind::<diesel::sql_types::Varchar, _>(s_acc)
+        .bind::<diesel::sql_types::Varchar, _>(r_acc)
+        .load(&*PGCONNECTION.get().unwrap())
+        .unwrap();
 
     let json_transactions = transactions
         .iter()
@@ -674,14 +675,13 @@ fn transactions_for_contract_address(
 
     impl Eq for Transaction {}
     check_object!(&address);
-    let sql = format!(
-        r#"SELECT t.* FROM transactions t WHERE t.tx_type='ContractCallTx' AND t.tx->>'contract_id' = '{}' UNION SELECT t.* from transactions t JOIN contract_identifiers c ON t.id=c.transaction_id WHERE contract_identifier='{}';
-"#,
-        sanitize(&address),
-        sanitize(&address),
-    );
-    let mut transactions: Vec<Transaction> =
-        sql_query(sql).load(&*PGCONNECTION.get().unwrap()).unwrap();
+    let sql =
+        r#"SELECT t.* FROM transactions t WHERE t.tx_type='ContractCallTx' AND t.tx->>'contract_id' = $1 UNION SELECT t.* from transactions t JOIN contract_identifiers c ON t.id=c.transaction_id WHERE contract_identifier= $2 "#;
+    let mut transactions: Vec<Transaction> = sql_query(sql)
+        .bind::<diesel::sql_types::Varchar, _>(&address)
+        .bind::<diesel::sql_types::Varchar, _>(&address)
+        .get_results(&*PGCONNECTION.get().unwrap())
+        .unwrap();
     transactions.sort_by(|a, b| a.cmp(&b));
     limit_page_vec!(limit, page, transactions);
     let json_transactions = transactions
@@ -691,6 +691,22 @@ fn transactions_for_contract_address(
     Ok(Json(JsonTransactionList {
         transactions: json_transactions,
     }))
+}
+
+#[get("/contracts/transactions/creation/address/<address>")]
+fn creation_tx_for_contract_address(address: String) -> Result<Json<Transaction>, Status> {
+    let connection = PGCONNECTION.get().unwrap();
+    let sql = r#"
+SELECT t.* FROM transactions t JOIN contract_identifiers c ON t.id=c.transaction_id WHERE c.contract_identifier = $1"#;
+    let trans: Vec<Transaction> = sql_query(sql)
+        .bind::<diesel::sql_types::VarChar, _>(address)
+        .get_results(&*connection)
+        .unwrap();
+    if !trans.is_empty() {
+        Ok(Json(trans[0].clone()))
+    } else {
+        Err(rocket::http::Status::new(404, "Not found"))
+    }
 }
 
 #[get("/contracts/calls/address/<address>?<limit>&<page>")]
@@ -1405,6 +1421,7 @@ impl MiddlewareServer {
             .mount("/middleware", routes![bids_for_account])
             .mount("/middleware", routes![bids_for_name])
             .mount("/middleware", routes![calls_for_contract_address])
+            .mount("/middleware", routes![creation_tx_for_contract_address])
             .mount("/middleware", routes![current_count])
             .mount("/middleware", routes![current_size])
             .mount("/middleware", routes![error])

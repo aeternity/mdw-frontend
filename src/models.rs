@@ -58,17 +58,15 @@ pub struct KeyBlock {
 
 impl KeyBlock {
     pub fn from_json_key_block(jb: &JsonKeyBlock) -> MiddlewareResult<KeyBlock> {
-        let n: u64 = match jb.nonce.as_u64() {
-            Some(val) => val,
-            None => 0,
-        };
+        let _nonce: bigdecimal::BigDecimal =
+            bigdecimal::BigDecimal::from_str(&jb.nonce.to_string())?;
         Ok(KeyBlock {
             id: -1, // TODO
             hash: jb.hash.clone(),
             height: jb.height,
             info: jb.info.to_owned(),
             miner: jb.miner.clone(),
-            nonce: bigdecimal::BigDecimal::from(n),
+            nonce: _nonce,
             beneficiary: jb.beneficiary.clone(),
             pow: format!("{:?}", jb.pow),
             prev_hash: jb.prev_hash.clone(),

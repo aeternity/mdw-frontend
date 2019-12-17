@@ -61,6 +61,27 @@
         }
       }
     },
+    "/contracts/transactions/creation/address/{address}" : {
+       "get": {
+        "description": "Get the creation transaction for a contract",
+        "operationId": "getContractCreationTx",
+        "deprecated": false,
+        "produces": ["application/json"],
+        "parameters": [{
+          "in": "path",
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "description": "Contract Address/id"
+        }],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        }
+      }
+    },
     "/contracts/transactions/address/{address}": {
       "get": {
         "description": "Get all the transactions for a contract",
