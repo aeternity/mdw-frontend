@@ -35,10 +35,20 @@ use node::Node;
 use loader::SQLCONNECTION;
 
 #[derive(
-    Associations, Deserialize, Identifiable, Queryable, QueryableByName, Hash, PartialEq, Eq,
+    Associations,
+    Clone,
+    Deserialize,
+    Identifiable,
+    Serialize,
+    Queryable,
+    QueryableByName,
+    Hash,
+    PartialEq,
+    Eq,
 )]
 #[table_name = "key_blocks"]
 pub struct KeyBlock {
+    #[serde(skip_serializing)]
     #[sql_type = "diesel::sql_types::Int4"]
     pub id: i32,
     pub hash: String,
@@ -274,11 +284,20 @@ fn zero_vec_i32() -> Vec<i32> {
 }
 
 #[derive(
-    Deserialize, Associations, Identifiable, Queryable, QueryableByName, Hash, Eq, PartialEq,
+    Deserialize,
+    Serialize,
+    Associations,
+    Identifiable,
+    Queryable,
+    QueryableByName,
+    Hash,
+    Eq,
+    PartialEq,
 )]
 #[table_name = "micro_blocks"]
 #[belongs_to(KeyBlock)]
 pub struct MicroBlock {
+    #[serde(skip_serializing)]
     pub id: i32,
     pub key_block_id: i32,
     pub hash: String,

@@ -610,18 +610,24 @@ fn transactions_for_interval(
     page: Option<i32>,
     txtype: Option<String>,
 ) -> Json<JsonTransactionList> {
-    let (offset_sql, limit_sql) = offset_limit(limit, page);
-    let txtype_sql: String = match txtype {
-        Some(txtype) => format!(" {}  and tx_type ilike '{}' ", to, sanitize(&txtype)),
-        _ => to.to_string(),
-    };
-    let sql = format!(
-        "select t.* from transactions t where t.block_height >= {} and t.block_height <= {} order by t.block_height desc, t.id desc limit {} offset {}",
-        from, txtype_sql, limit_sql, offset_sql
-    );
-    let transactions: Vec<Transaction> =
-        sql_query(sql).load(&*PGCONNECTION.get().unwrap()).unwrap();
+    let sql = r#"
+SELECT t.* FROM transactions t
+WHERE
+   t.block_height >= $1 AND
+    t.block_height <= $2
+ORDER BY
+    t.block_height DESC, t.id DESC
+"#;
 
+    let mut transactions: Vec<Transaction> = sql_query(sql)
+        .bind::<diesel::sql_types::Int4, _>(from as i32)
+        .bind::<diesel::sql_types::Int4, _>(to as i32)
+        .load(&*PGCONNECTION.get().unwrap())
+        .unwrap();
+    if let Some(_txtype) = txtype {
+        transactions.retain(|t| t.tx_type.eq(&_txtype));
+    }
+    limit_page_vec!(limit, page, transactions);
     let json_transactions = transactions
         .iter()
         .map(JsonTransaction::from_transaction)
@@ -744,6 +750,47 @@ fn calls_for_contract_address(
     }
     limit_page_vec!(limit, page, calls);
     Ok(Json(calls))
+}
+
+#[get("/new/generations/<from>/<to>?<limit>&<page>")]
+fn generations_by_range2(
+    from: i64,
+    to: i64,
+    limit: Option<i32>,
+    page: Option<i32>,
+) -> Result<Json<JsonValue>, Status> {
+    use diesel::PgConnection;
+    fn mbs_for_kb(conn: &PgConnection, kb: &KeyBlock) -> Vec<JsonValue> {
+        let mbs = MicroBlock::belonging_to(kb).get_results(conn).unwrap();
+        let mut _results: Vec<JsonValue> = vec![];
+        for mb in mbs {
+            _results.push(json!({
+                "micro_block" : mb,
+                "transactions" : trans_for_mb(conn, &mb),
+            }));
+        }
+        _results
+    }
+    fn trans_for_mb(conn: &PgConnection, mb: &MicroBlock) -> Vec<Transaction> {
+        Transaction::belonging_to(mb).get_results(conn).unwrap()
+    }
+    use crate::schema::key_blocks::dsl::*;
+    use diesel::{BelongingToDsl, ExpressionMethods, QueryDsl};
+    let conn = &*PGCONNECTION.get().unwrap();
+    let mut _result: Vec<JsonValue> = vec![];
+    let mut _key_blocks: Vec<KeyBlock> = key_blocks
+        .filter(height.ge(from))
+        .filter(height.le(to))
+        .get_results(conn)
+        .unwrap();
+    limit_page_vec!(limit, page, _key_blocks);
+    for _kb in _key_blocks {
+        _result.push(json!({
+            "key_block" : _kb,
+            "micro_blocks" : mbs_for_kb(conn, &_kb),
+        }));
+    }
+    Ok(Json(json!(_result)))
 }
 
 // TODO: Lot of refactoring in the below method
@@ -1427,6 +1474,7 @@ impl MiddlewareServer {
             .mount("/middleware", routes![error])
             .mount("/middleware", routes![get_available_compilers])
             .mount("/middleware", routes![generations_by_range])
+            .mount("/middleware", routes![generations_by_range2])
             .mount("/middleware", routes![height_at_epoch])
             .mount("/middleware", routes![info_for_auction])
             .mount("/middleware", routes![name_for_hash])
