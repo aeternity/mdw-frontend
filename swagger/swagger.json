@@ -214,6 +214,47 @@
         }
       }
     },
+    "/new/generations/{from}/{to}": {
+      "get": {
+        "description": "Get generations between a given range",
+        "operationId": "getGenerationsByRange",
+        "deprecated": false,
+        "produces": ["application/json"],
+        "parameters": [{
+          "in": "path",
+          "name": "from",
+          "type": "integer",
+          "required": true,
+          "description": "Start Generation or Key Block Number"
+        }, {
+          "in": "path",
+          "name": "to",
+          "type": "integer",
+          "required": true,
+          "description": "End Generation or Key Block Number"
+        }, {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "format": "int32",
+          "description": ""
+        }, {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "format": "int32",
+          "description": ""
+        }],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        }
+      }
+    },
     "/height/at/{milliseconds}": {
       "get": {
         "description": "Get block height at a given time(provided in milliseconds)",
