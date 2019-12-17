@@ -752,7 +752,7 @@ fn calls_for_contract_address(
     Ok(Json(calls))
 }
 
-#[get("/generations/<from>/<to>?<limit>&<page>")]
+#[get("/new/generations/<from>/<to>?<limit>&<page>")]
 fn generations_by_range2(
     from: i64,
     to: i64,
@@ -783,6 +783,7 @@ fn generations_by_range2(
         .filter(height.le(to))
         .get_results(conn)
         .unwrap();
+    limit_page_vec!(limit, page, _key_blocks);
     for _kb in _key_blocks {
         _result.push(json!({
             "key_block" : _kb,
@@ -1472,6 +1473,7 @@ impl MiddlewareServer {
             .mount("/middleware", routes![current_size])
             .mount("/middleware", routes![error])
             .mount("/middleware", routes![get_available_compilers])
+            .mount("/middleware", routes![generations_by_range])
             .mount("/middleware", routes![generations_by_range2])
             .mount("/middleware", routes![height_at_epoch])
             .mount("/middleware", routes![info_for_auction])

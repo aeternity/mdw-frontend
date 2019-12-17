@@ -36,6 +36,7 @@ use loader::SQLCONNECTION;
 
 #[derive(
     Associations,
+    Clone,
     Deserialize,
     Identifiable,
     Serialize,
