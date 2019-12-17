@@ -561,7 +561,7 @@ WHERE
             "tx": tx,
         }));
     }
-    results.sort_by(|a, b| a["time"].as_i64().cmp(&b["time"].as_i64()));
+    results.sort_by(|a, b| b["time"].as_i64().cmp(&a["time"].as_i64()));
     limit_page_vec!(limit, page, results);
     Ok(Json(results))
 }
