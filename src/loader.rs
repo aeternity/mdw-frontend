@@ -428,8 +428,9 @@ impl BlockLoader {
             let trans: JsonTransactionList =
                 serde_json::from_value(self.node.get_transaction_list_by_micro_block(&mb_hash)?)?;
             for transaction in trans.transactions {
-                name_update_needed = name_update_needed
-                    || self.save_transaction(connection, &transaction, _micro_block_id)?;
+                let is_name_update =
+                    self.save_transaction(connection, &transaction, _micro_block_id)?;
+                name_update_needed = name_update_needed || is_name_update;
             }
             count += 1;
         }
@@ -516,6 +517,8 @@ impl BlockLoader {
                                     &transaction.tx["name"].as_str()?.to_string(),
                                 )?)
                             .into();
+                            name.owner = transaction.tx["account_id"].as_str()?.to_string();
+                            // owner is actually winning bidder as well...
                             name.update(connection)?;
                         } else {
                             error!("Couldn't load name {}", name);
@@ -542,14 +545,14 @@ impl BlockLoader {
                 }
                 "NameUpdateTx" => {
                     debug!("NameUpdateTx: {:?}", transaction);
-                    if let Some(name_id) = transaction.tx["name_id"].as_str() {
-                        if let Some(mut name) = Name::load_for_hash(connection, name_id) {
-                            name.expires_at = transaction.tx["name_ttl"].as_i64()?
-                                + transaction.block_height as i64; // TODO: confirm
-                            name.pointers = Some(transaction.tx["pointers"].clone());
-                            name.update(connection)?;
-                        }
-                    }
+                    NamePointer::update_pointers_and_name_ttl(
+                        connection,
+                        transaction.tx["name_id"].as_str()?,
+                        &transaction.tx["pointers"],
+                        tx_id,
+                        transaction.block_height as i64,
+                        transaction.tx["name_ttl"].as_i64()?,
+                    )?;
                 }
                 _ => (),
             }

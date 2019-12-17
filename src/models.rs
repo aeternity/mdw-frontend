@@ -8,6 +8,7 @@ use super::schema::key_blocks;
 use super::schema::key_blocks::dsl::*;
 use super::schema::micro_blocks;
 use super::schema::name_auction_entries;
+use super::schema::name_pointers;
 use super::schema::names;
 use super::schema::names::dsl::*;
 use super::schema::oracle_queries;
@@ -34,10 +35,20 @@ use node::Node;
 use loader::SQLCONNECTION;
 
 #[derive(
-    Associations, Deserialize, Identifiable, Queryable, QueryableByName, Hash, PartialEq, Eq,
+    Associations,
+    Clone,
+    Deserialize,
+    Identifiable,
+    Serialize,
+    Queryable,
+    QueryableByName,
+    Hash,
+    PartialEq,
+    Eq,
 )]
 #[table_name = "key_blocks"]
 pub struct KeyBlock {
+    #[serde(skip_serializing)]
     #[sql_type = "diesel::sql_types::Int4"]
     pub id: i32,
     pub hash: String,
@@ -57,17 +68,15 @@ pub struct KeyBlock {
 
 impl KeyBlock {
     pub fn from_json_key_block(jb: &JsonKeyBlock) -> MiddlewareResult<KeyBlock> {
-        let n: u64 = match jb.nonce.as_u64() {
-            Some(val) => val,
-            None => 0,
-        };
+        let _nonce: bigdecimal::BigDecimal =
+            bigdecimal::BigDecimal::from_str(&jb.nonce.to_string())?;
         Ok(KeyBlock {
             id: -1, // TODO
             hash: jb.hash.clone(),
             height: jb.height,
             info: jb.info.to_owned(),
             miner: jb.miner.clone(),
-            nonce: bigdecimal::BigDecimal::from(n),
+            nonce: _nonce,
             beneficiary: jb.beneficiary.clone(),
             pow: format!("{:?}", jb.pow),
             prev_hash: jb.prev_hash.clone(),
@@ -275,11 +284,20 @@ fn zero_vec_i32() -> Vec<i32> {
 }
 
 #[derive(
-    Deserialize, Associations, Identifiable, Queryable, QueryableByName, Hash, Eq, PartialEq,
+    Deserialize,
+    Serialize,
+    Associations,
+    Identifiable,
+    Queryable,
+    QueryableByName,
+    Hash,
+    Eq,
+    PartialEq,
 )]
 #[table_name = "micro_blocks"]
 #[belongs_to(KeyBlock)]
 pub struct MicroBlock {
+    #[serde(skip_serializing)]
     pub id: i32,
     pub key_block_id: i32,
     pub hash: String,
@@ -688,7 +706,8 @@ impl InsertableAssociatedAccount {
         _transaction_id: i32,
     ) -> MiddlewareResult<Vec<Self>> {
         let name_hashes = get_name_hashes(&transaction)?;
-        if name_hashes.len() == 0 {
+        debug!("name_hashes: {:?}", name_hashes);
+        if name_hashes.is_empty() {
             return Ok(vec![]);
         }
         let mut result = vec![];
@@ -701,6 +720,8 @@ impl InsertableAssociatedAccount {
                     name_hash: _name_hash,
                     aeternity_id: n,
                 });
+            } else {
+                warn!("Failed to lookup account {}", _name_hash);
             }
         }
         Ok(vec![])
@@ -1014,7 +1035,9 @@ lazy_static! {
         { Arc::new((Mutex::new(false), Condvar::new())) };
 }
 
-#[derive(AsChangeset, Clone, Identifiable, Queryable, QueryableByName, Deserialize, Serialize)]
+#[derive(
+    AsChangeset, Clone, Debug, Identifiable, Queryable, QueryableByName, Deserialize, Serialize,
+)]
 #[table_name = "names"]
 pub struct Name {
     #[serde(skip_serializing)]
@@ -1050,7 +1073,7 @@ impl Name {
         }
     }
 
-    pub fn get_for_hash(connection: &PgConnection, _name_hash: &String) -> MiddlewareResult<Self> {
+    pub fn get_for_hash(connection: &PgConnection, _name_hash: &str) -> MiddlewareResult<Self> {
         use schema::names::dsl::*;
         Ok(names
             .filter(name_hash.eq(_name_hash))
@@ -1071,6 +1094,7 @@ impl Name {
             .filter(name_hash.eq(_hash))
             .load::<Self>(connection)?;
         if result.len() > 0 {
+            debug!("Found {:?}", result[0]);
             Ok(Some(result[0].clone()))
         } else {
             Ok(None)
@@ -1083,9 +1107,11 @@ impl Name {
         _hash: &String,
     ) -> MiddlewareResult<Option<String>> {
         if let Some(_info) = Self::get_for_height_and_name(connection, _height, _hash)? {
+            debug!("Info: {:?}", _info);
             if let Some(_pointers) = _info.pointers {
                 for entry in _pointers.as_array()? {
-                    if let Some(_key) = entry["key"].as_str() {
+                    debug!("checking pointer {:?}", entry);
+                    if let Some(_key) = entry["account_pubkey"].as_str() {
                         return Ok(Some(String::from(entry["id"].as_str()?)));
                     }
                 }
@@ -1133,6 +1159,101 @@ fn test_name_events() {
     handle.join().unwrap(); // check thread has terminated.
 }
 
+#[derive(
+    AsChangeset, Clone, Debug, Identifiable, Queryable, QueryableByName, Deserialize, Serialize,
+)]
+#[table_name = "name_pointers"]
+pub struct NamePointer {
+    #[serde(skip_serializing)]
+    pub id: i32,
+    pub name_hash: String,
+    pub pointer_type: String,
+    pub pointer_target: String,
+    pub active_from: i64,
+    pub expires: i64,
+    #[serde(skip_serializing)]
+    pub transaction_id: i32,
+}
+
+impl NamePointer {
+    pub fn get_for_hash_and_height(
+        conn: &PgConnection,
+        _hash: &str,
+        _height: i64,
+    ) -> MiddlewareResult<Self> {
+        use schema::name_pointers::dsl::*;
+        use schema::name_pointers::*;
+        Ok(name_pointers
+            .filter(name_hash.eq(_hash))
+            .filter(active_from.le(_height))
+            .filter(expires.gt(_height))
+            .order_by(active_from.desc())
+            .limit(1)
+            .first(conn)?)
+    }
+
+    pub fn update_pointers_and_name_ttl(
+        conn: &PgConnection,
+        _name_hash: &str,
+        _pointers: &serde_json::Value,
+        _transaction_id: i32,
+        _height: i64,
+        _name_ttl: i64,
+    ) -> MiddlewareResult<()> {
+        use schema::name_pointers::dsl::*;
+        let values = _pointers.as_array()?;
+        conn.transaction::<i32, MiddlewareError, _>(|| {
+            // expire all active name pointers for this hash
+            diesel::update(name_pointers)
+                .set(expires.eq(_height))
+                .filter(crate::schema::name_pointers::name_hash.eq(_name_hash))
+                .filter(active_from.le(_height))
+                .filter(expires.gt(_height))
+                .execute(conn)?;
+            // and then add all the new ones in.
+            for value in values {
+                InsertableNamePointer {
+                    name_hash: String::from(_name_hash),
+                    pointer_type: String::from(value["key"].as_str()?),
+                    pointer_target: String::from(value["id"].as_str()?),
+                    active_from: _height,
+                    expires: _height + _name_ttl,
+                    transaction_id: _transaction_id,
+                }
+                .save(conn)?;
+            }
+            let mut _name = Name::get_for_hash(conn, _name_hash)?;
+            _name.expires_at = _height + _name_ttl;
+            _name.update(conn)?;
+            Ok(1)
+        })?;
+        Ok(())
+    }
+}
+
+#[derive(Insertable)]
+#[table_name = "name_pointers"]
+pub struct InsertableNamePointer {
+    pub name_hash: String,
+    pub pointer_type: String,
+    pub pointer_target: String,
+    pub active_from: i64,
+    pub expires: i64,
+    pub transaction_id: i32,
+}
+
+impl InsertableNamePointer {
+    pub fn save(&self, conn: &PgConnection) -> MiddlewareResult<i32> {
+        use diesel::dsl::insert_into;
+        use schema::name_pointers::dsl::*;
+        let generated_ids: Vec<i32> = insert_into(name_pointers)
+            .values(self)
+            .returning(id)
+            .get_results(&*conn)?;
+        Ok(generated_ids[0])
+    }
+}
+
 #[derive(AsChangeset, Queryable, QueryableByName, Serialize, Clone, Debug)]
 #[table_name = "name_auction_entries"]
 pub struct NameAuctionEntry {
@@ -1170,20 +1291,6 @@ impl Name {
         let sql = format!("select * from names where name='{}'", _name);
         let mut _names: Vec<Name> = sql_query(sql).load(connection).unwrap();
         Some(_names.pop()?)
-    }
-
-    pub fn owner_at_height(
-        connection: &PgConnection,
-        _name: &str,
-        _height: i64,
-    ) -> MiddlewareResult<Self> {
-        use schema::names::dsl::*;
-        let result = names
-            .filter(name.eq(_name))
-            .filter(created_at_height.le(_height))
-            .filter(expires_at.ge(_height))
-            .first::<Self>(connection)?;
-        Ok(result)
     }
 
     pub fn reverse_name_at_height(
@@ -1305,14 +1412,14 @@ ORDER BY block_height DESC
         _name: String,
     ) -> MiddlewareResult<Vec<Transaction>> {
         let sql = format!(
-            "SELECT * FROM transactions WHERE tx_type='NameClaimTx' AND tx->>'name'='{}' AND block_height >= (SELECT MAX(block_height) FROM transactions WHERE tx_type= 'NameClaimTx' AND tx->>'name' = '{}' AND tx->>'name_salt'::text <> '0') ORDER BY block_height DESC",
+            "SELECT * FROM transactions WHERE tx_type='NameClaimTx' AND tx->>'name' ILIKE '{}' AND block_height >= (SELECT MAX(block_height) FROM transactions WHERE tx_type= 'NameClaimTx' AND tx->>'name' ILIKE '{}' AND tx->>'name_salt'::text <> '0') ORDER BY block_height DESC",
             _name, _name,
         );
         Ok(sql_query(sql).get_results(connection)?)
     }
 }
 
-#[derive(Queryable, QueryableByName)]
+#[derive(Debug, Queryable, QueryableByName)]
 #[table_name = "contract_calls"]
 pub struct ContractCall {
     pub id: i32,

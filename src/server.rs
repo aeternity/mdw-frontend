@@ -33,22 +33,36 @@ fn sanitize(s: &String) -> String {
     s.replace("'", "\\'")
 }
 
-fn check_object(s: &str) {
-    lazy_static! {
-        static ref OBJECT_REGEX: Regex = Regex::new(
-            "[a-z][a-z]_[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{38,60}"
-        )
-        .unwrap();
+lazy_static! {
+    static ref OBJECT_REGEX: Regex = Regex::new(
+        "[a-z][a-z]_[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{38,60}"
+    )
+    .unwrap();
+}
+
+#[macro_export]
+macro_rules! http_error {
+    {$code:expr, $reason:expr} => {
+        return Err(Status::new($code, $reason));
     }
-    if !OBJECT_REGEX.is_match(s) {
-        panic!("Invalid input"); // be paranoid
-    };
+}
+
+#[macro_export]
+macro_rules! check_object {
+    {$object:expr} => {
+        if !OBJECT_REGEX.is_match($object) {
+            {
+                return Err(Status::new(400, "Invalid object"));
+            }
+        }
+    }
 }
 
 /*
  * Macro to do offset and limit inside a vector of results instead of in SQL.
  * If page is None then it defaults to 1.
  * Testing indicates that this is about 25% slower than LIMIT and OFFSET in SQL.
+ * NB: Update, with a release build this appears at least as fast as SQL.
 */
 #[macro_export]
 macro_rules! limit_page_vec {
@@ -81,7 +95,7 @@ fn test_limit_page_vec() {
     assert_eq!(call_olv(10, 1, &vec), vec!(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
     assert_eq!(call_olv(5, 2, &vec), vec!(5, 6, 7, 8, 9));
     assert_eq!(call_olv(10, 4, &vec), vec!(30, 31));
-
+    assert_eq!(call_olv(1, 1, &vec), vec!(0));
     assert_eq!(call_olv(10, 1, &vec!(0, 1, 2, 3)), vec!(0, 1, 2, 3));
     let v: Vec<i32> = Vec::new();
     assert_eq!(call_olv(10, 2, &vec!(0, 1, 2, 3)), v);
@@ -309,19 +323,21 @@ fn key_block_at_hash(
 fn transactions_in_micro_block_at_hash(
     _state: State<MiddlewareServer>,
     hash: String,
-) -> Json<JsonTransactionList> {
-    check_object(&hash);
-    let sql = format!("select t.* from transactions t, micro_blocks m where t.micro_block_id = m.id and m.hash = '{}'", sanitize(&hash));
-    let transactions: Vec<Transaction> =
-        sql_query(sql).load(&*PGCONNECTION.get().unwrap()).unwrap();
-
+) -> Result<Json<JsonTransactionList>, Status> {
+    use diesel::sql_types::Varchar;
+    check_object!(&hash);
+    let sql = "select t.* from transactions t, micro_blocks m where t.micro_block_id = m.id and m.hash = $1";
+    let transactions: Vec<Transaction> = sql_query(sql)
+        .bind::<Varchar, _>(hash)
+        .get_results(&*PGCONNECTION.get().unwrap())
+        .unwrap();
     let json_transactions = transactions
         .iter()
         .map(JsonTransaction::from_transaction)
         .collect();
-    Json(JsonTransactionList {
+    Ok(Json(JsonTransactionList {
         transactions: json_transactions,
-    })
+    }))
 }
 
 #[get("/micro-blocks/hash/<hash>/header", rank = 1)]
@@ -427,27 +443,13 @@ fn transaction_count_for_account(
     _state: State<MiddlewareServer>,
     account: String,
     txtype: Option<String>,
-) -> Json<JsonValue> {
-    check_object(&account);
-    let s_acc = sanitize(&account);
-    let txtype_sql: String = match txtype {
-        Some(txtype) => format!(" '{}') and tx_type ilike '{}' ", s_acc, sanitize(&txtype)),
-        _ => format!(" '{}') ", s_acc),
-    };
-    let sql = format!(
-        "select count(1) from transactions where ( \
-         tx->>'sender_id'='{}' or \
-         tx->>'account_id' = '{}' or \
-         tx->>'recipient_id'='{}' or \
-         tx->>'owner_id' = {} ",
-        s_acc, s_acc, s_acc, txtype_sql
-    );
-    debug!("{}", sql);
-    let rows = SQLCONNECTION.get().unwrap().query(&sql, &[]).unwrap();
-    let count: i64 = rows.get(0).get(0);
-    Json(json!({
-        "count": count,
-    }))
+) -> Result<Json<JsonValue>, Status> {
+    if account.len() == 0 {
+        return Err(Status::new(400, "No account given"));
+    }
+    Ok(Json(json!({
+        "count": transactions_for_account(_state, account, None, None, txtype, )?.len(),
+    })))
 }
 
 fn offset_limit(limit: Option<i32>, page: Option<i32>) -> (String, String) {
@@ -478,16 +480,12 @@ fn transactions_for_account(
     limit: Option<i32>,
     page: Option<i32>,
     txtype: Option<String>,
-) -> Json<Vec<JsonValue>> {
-    check_object(&account);
-    let s_acc = sanitize(&account);
-    let (offset_sql, limit_sql) = offset_limit(limit, page);
+) -> Result<Json<Vec<JsonValue>>, Status> {
     let txtype_sql: String = match txtype {
-        Some(txtype) => format!(" '{}') and tx_type ilike '{}' ", s_acc, sanitize(&txtype)),
-        _ => format!(" '{}') ", s_acc),
+        Some(txtype) => txtype,
+        _ => String::from("%"),
     };
-    let sql = format!(
-        r#"
+    let sql = r#"
 SELECT
     m.time_, t.*
 FROM
@@ -496,35 +494,54 @@ JOIN
     micro_blocks m ON m.id=t.micro_block_id
 WHERE
     m.id = t.micro_block_id AND
-   (t.tx->>'sender_id'='{}' OR
-    t.tx->>'account_id' = '{}' OR
-    t.tx->>'ga_id' = '{}' OR
-    t.tx->>'caller_id' = '{}' OR
-    t.tx->>'recipient_id'='{}' OR
-    t.tx->>'initiator_id'='{}' OR
-    t.tx->>'responder_id'='{}' OR
-    t.tx->>'from_id'='{}' OR
-    t.tx->>'to_id'='{}' OR
-    t.tx->>'owner_id' = {}
-ORDER BY m.time_ DESC
-LIMIT {} OFFSET {} "#,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        s_acc,
-        txtype_sql,
-        limit_sql,
-        offset_sql
-    );
+   (t.tx->>'sender_id'=$1 OR
+    t.tx->>'account_id' = $1 OR
+    t.tx->>'ga_id' = $1 OR
+    t.tx->>'caller_id' = $1 OR
+    t.tx->>'recipient_id'= $1 OR
+    t.tx->>'initiator_id'= $1 OR
+    t.tx->>'responder_id'= $1 OR
+    t.tx->>'from_id'= $1 OR
+    t.tx->>'to_id'= $1 OR
+    t.tx->>'owner_id' = $1) AND
+    t.tx_type ILIKE $2
+UNION
+SELECT
+    m.id, t.*
+FROM
+    transactions t
+JOIN
+    name_pointers np ON (
+    t.tx->>'sender_id'=np.name_hash OR
+    t.tx->>'account_id' = np.name_hash OR
+    t.tx->>'ga_id' = np.name_hash OR
+    t.tx->>'caller_id' = np.name_hash OR
+    t.tx->>'recipient_id'= np.name_hash OR
+    t.tx->>'initiator_id'= np.name_hash OR
+    t.tx->>'responder_id'= np.name_hash OR
+    t.tx->>'from_id'= np.name_hash OR
+    t.tx->>'to_id'= np.name_hash OR
+    t.tx->>'owner_id' = np.name_hash) AND
+    t.tx_type ILIKE $2 AND
+    np.pointer_target = $1 AND
+    np.pointer_type = 'account_pupkey'
+JOIN
+    micro_blocks m ON t.micro_block_id=m.id
+WHERE
+    np.active_from <= t.block_height AND
+    np.expires > t.block_height AND
+    np.pointer_target = $1 AND
+    t.tx_type ILIKE $2
+"#;
     info!("{}", sql);
 
     let mut results: Vec<JsonValue> = Vec::new();
-    for row in &SQLCONNECTION.get().unwrap().query(&sql, &[]).unwrap() {
+    for row in &SQLCONNECTION
+        .get()
+        .unwrap()
+        .query(&sql, &[&account, &txtype_sql])
+        .unwrap()
+    {
         let time: i64 = row.get(0);
         let block_height: i32 = row.get(3);
         let block_hash: String = row.get(4);
@@ -544,7 +561,9 @@ LIMIT {} OFFSET {} "#,
             "tx": tx,
         }));
     }
-    Json(results)
+    results.sort_by(|a, b| a["time"].as_i64().cmp(&b["time"].as_i64()));
+    limit_page_vec!(limit, page, results);
+    Ok(Json(results))
 }
 
 /*
@@ -555,29 +574,28 @@ fn transactions_for_account_to_account(
     _state: State<MiddlewareServer>,
     sender: String,
     receiver: String,
-) -> Json<JsonTransactionList> {
-    check_object(&sender);
-    check_object(&receiver);
+) -> Result<Json<JsonTransactionList>, Status> {
+    check_object!(&sender);
+    check_object!(&receiver);
     let s_acc = sanitize(&sender);
     let r_acc = sanitize(&receiver);
-    let sql = format!(
-        "select * from transactions where \
-         tx->>'sender_id'='{}' and \
-         tx->>'recipient_id' = '{}' \
-         order by id desc",
-        s_acc, r_acc
-    );
-    info!("{}", sql);
-    let transactions: Vec<Transaction> =
-        sql_query(sql).load(&*PGCONNECTION.get().unwrap()).unwrap();
+    let sql = "select * from transactions where \
+               tx->>'sender_id'= $1 and \
+               tx->>'recipient_id' = $2 \
+               order by id desc";
+    let transactions: Vec<Transaction> = sql_query(sql)
+        .bind::<diesel::sql_types::Varchar, _>(s_acc)
+        .bind::<diesel::sql_types::Varchar, _>(r_acc)
+        .load(&*PGCONNECTION.get().unwrap())
+        .unwrap();
 
     let json_transactions = transactions
         .iter()
         .map(JsonTransaction::from_transaction)
         .collect();
-    Json(JsonTransactionList {
+    Ok(Json(JsonTransactionList {
         transactions: json_transactions,
-    })
+    }))
 }
 
 /*
@@ -592,18 +610,24 @@ fn transactions_for_interval(
     page: Option<i32>,
     txtype: Option<String>,
 ) -> Json<JsonTransactionList> {
-    let (offset_sql, limit_sql) = offset_limit(limit, page);
-    let txtype_sql: String = match txtype {
-        Some(txtype) => format!(" {}  and tx_type ilike '{}' ", to, sanitize(&txtype)),
-        _ => to.to_string(),
-    };
-    let sql = format!(
-        "select t.* from transactions t where t.block_height >= {} and t.block_height <= {} order by t.block_height desc, t.id desc limit {} offset {}",
-        from, txtype_sql, limit_sql, offset_sql
-    );
-    let transactions: Vec<Transaction> =
-        sql_query(sql).load(&*PGCONNECTION.get().unwrap()).unwrap();
+    let sql = r#"
+SELECT t.* FROM transactions t
+WHERE
+   t.block_height >= $1 AND
+    t.block_height <= $2
+ORDER BY
+    t.block_height DESC, t.id DESC
+"#;
 
+    let mut transactions: Vec<Transaction> = sql_query(sql)
+        .bind::<diesel::sql_types::Int4, _>(from as i32)
+        .bind::<diesel::sql_types::Int4, _>(to as i32)
+        .load(&*PGCONNECTION.get().unwrap())
+        .unwrap();
+    if let Some(_txtype) = txtype {
+        transactions.retain(|t| t.tx_type.eq(&_txtype));
+    }
+    limit_page_vec!(limit, page, transactions);
     let json_transactions = transactions
         .iter()
         .map(JsonTransaction::from_transaction)
@@ -632,28 +656,63 @@ fn transactions_for_contract_address(
     address: String,
     limit: Option<i32>,
     page: Option<i32>,
-) -> Json<JsonTransactionList> {
-    check_object(&address);
-    let sql = format!(
-        "select t.* from transactions t where \
-         t.tx_type='ContractCallTx' and \
-         t.tx->>'contract_id' = '{}' or \
-         t.id in (select transaction_id from contract_identifiers where \
-         contract_identifier='{}') ORDER by t.block_height ASC \
-         ",
-        sanitize(&address),
-        sanitize(&address),
-    );
-    let mut transactions: Vec<Transaction> =
-        sql_query(sql).load(&*PGCONNECTION.get().unwrap()).unwrap();
+) -> Result<Json<JsonTransactionList>, Status> {
+    use std::cmp::Ordering;
+    impl Ord for Transaction {
+        // this is to ensure that the ContractCreateTx is always first in the list.
+        fn cmp(&self, other: &Self) -> Ordering {
+            if self.tx["type"].as_str().unwrap() == "ContractCreateTx" {
+                return Ordering::Less;
+            }
+            return self.block_height.cmp(&other.block_height);
+        }
+    }
+    impl PartialOrd for Transaction {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+
+    impl PartialEq for Transaction {
+        fn eq(&self, other: &Self) -> bool {
+            self.hash == other.hash
+        }
+    }
+
+    impl Eq for Transaction {}
+    check_object!(&address);
+    let sql =
+        r#"SELECT t.* FROM transactions t WHERE t.tx_type='ContractCallTx' AND t.tx->>'contract_id' = $1 UNION SELECT t.* from transactions t JOIN contract_identifiers c ON t.id=c.transaction_id WHERE contract_identifier= $2 "#;
+    let mut transactions: Vec<Transaction> = sql_query(sql)
+        .bind::<diesel::sql_types::Varchar, _>(&address)
+        .bind::<diesel::sql_types::Varchar, _>(&address)
+        .get_results(&*PGCONNECTION.get().unwrap())
+        .unwrap();
+    transactions.sort_by(|a, b| a.cmp(&b));
     limit_page_vec!(limit, page, transactions);
     let json_transactions = transactions
         .iter()
         .map(JsonTransaction::from_transaction)
         .collect();
-    Json(JsonTransactionList {
+    Ok(Json(JsonTransactionList {
         transactions: json_transactions,
-    })
+    }))
+}
+
+#[get("/contracts/transactions/creation/address/<address>")]
+fn creation_tx_for_contract_address(address: String) -> Result<Json<Transaction>, Status> {
+    let connection = PGCONNECTION.get().unwrap();
+    let sql = r#"
+SELECT t.* FROM transactions t JOIN contract_identifiers c ON t.id=c.transaction_id WHERE c.contract_identifier = $1"#;
+    let trans: Vec<Transaction> = sql_query(sql)
+        .bind::<diesel::sql_types::VarChar, _>(address)
+        .get_results(&*connection)
+        .unwrap();
+    if !trans.is_empty() {
+        Ok(Json(trans[0].clone()))
+    } else {
+        Err(rocket::http::Status::new(404, "Not found"))
+    }
 }
 
 #[get("/contracts/calls/address/<address>?<limit>&<page>")]
@@ -662,8 +721,8 @@ fn calls_for_contract_address(
     address: String,
     limit: Option<i32>,
     page: Option<i32>,
-) -> Json<Vec<JsonValue>> {
-    check_object(&address);
+) -> Result<Json<Vec<JsonValue>>, Status> {
+    check_object!(&address);
     let sql = "SELECT t.hash, contract_id, caller_id, arguments, callinfo, result FROM \
                contract_calls c join transactions t on t.id=c.transaction_id WHERE \
                contract_id = $1 ORDER BY t.block_height ASC";
@@ -690,7 +749,48 @@ fn calls_for_contract_address(
         }));
     }
     limit_page_vec!(limit, page, calls);
-    Json(calls)
+    Ok(Json(calls))
+}
+
+#[get("/new/generations/<from>/<to>?<limit>&<page>")]
+fn generations_by_range2(
+    from: i64,
+    to: i64,
+    limit: Option<i32>,
+    page: Option<i32>,
+) -> Result<Json<JsonValue>, Status> {
+    use diesel::PgConnection;
+    fn mbs_for_kb(conn: &PgConnection, kb: &KeyBlock) -> Vec<JsonValue> {
+        let mbs = MicroBlock::belonging_to(kb).get_results(conn).unwrap();
+        let mut _results: Vec<JsonValue> = vec![];
+        for mb in mbs {
+            _results.push(json!({
+                "micro_block" : mb,
+                "transactions" : trans_for_mb(conn, &mb),
+            }));
+        }
+        _results
+    }
+    fn trans_for_mb(conn: &PgConnection, mb: &MicroBlock) -> Vec<Transaction> {
+        Transaction::belonging_to(mb).get_results(conn).unwrap()
+    }
+    use crate::schema::key_blocks::dsl::*;
+    use diesel::{BelongingToDsl, ExpressionMethods, QueryDsl};
+    let conn = &*PGCONNECTION.get().unwrap();
+    let mut _result: Vec<JsonValue> = vec![];
+    let mut _key_blocks: Vec<KeyBlock> = key_blocks
+        .filter(height.ge(from))
+        .filter(height.le(to))
+        .get_results(conn)
+        .unwrap();
+    limit_page_vec!(limit, page, _key_blocks);
+    for _kb in _key_blocks {
+        _result.push(json!({
+            "key_block" : _kb,
+            "micro_blocks" : mbs_for_kb(conn, &_kb),
+        }));
+    }
+    Ok(Json(json!(_result)))
 }
 
 // TODO: Lot of refactoring in the below method
@@ -701,7 +801,7 @@ fn generations_by_range(
     to: i64,
     limit: Option<i32>,
     page: Option<i32>,
-) -> Json<JsonValue> {
+) -> Result<Json<JsonValue>, Status> {
     let (offset, limit) = offset_limit(limit, page);
     let sql = format!(
         "select k.height, k.beneficiary, k.hash, k.miner, k.nonce::text, k.pow, \
@@ -819,19 +919,19 @@ fn generations_by_range(
         }
     }
 
-    Json(json!({
+    Ok(Json(json!({
         "total_transactions": tx_count,
         "total_micro_blocks": mb_count,
         "data": list
-    }))
+    })))
 }
 
 #[get("/channels/transactions/address/<address>")]
 fn transactions_for_channel_address(
     _state: State<MiddlewareServer>,
     address: String,
-) -> Json<JsonTransactionList> {
-    check_object(&address);
+) -> Result<Json<JsonTransactionList>, Status> {
+    check_object!(&address);
     let sql = format!(
         "select t.* from transactions t where \
          t.tx->>'channel_id' = '{}' or \
@@ -848,9 +948,9 @@ fn transactions_for_channel_address(
         .iter()
         .map(JsonTransaction::from_transaction)
         .collect();
-    Json(JsonTransactionList {
+    Ok(Json(JsonTransactionList {
         transactions: json_transactions,
-    })
+    }))
 }
 
 #[get("/channels/active")]
@@ -1098,9 +1198,9 @@ fn reverse_names(
     account: String,
     limit: Option<i32>,
     page: Option<i32>,
-) -> Json<Vec<Name>> {
+) -> Result<Json<Vec<Name>>, Status> {
     let connection = PGCONNECTION.get().unwrap();
-    check_object(&account);
+    check_object!(&account);
     let s_acc = sanitize(&account);
     let (offset_sql, limit_sql) = offset_limit(limit, page);
     let sql = format!(
@@ -1112,7 +1212,7 @@ fn reverse_names(
     );
     debug!("{}", sql);
     let names: Vec<Name> = sql_query(sql).load(&*PGCONNECTION.get().unwrap()).unwrap();
-    Json(names)
+    Ok(Json(names))
 }
 
 fn active_name_auctions_internal(
@@ -1368,11 +1468,13 @@ impl MiddlewareServer {
             .mount("/middleware", routes![bids_for_account])
             .mount("/middleware", routes![bids_for_name])
             .mount("/middleware", routes![calls_for_contract_address])
+            .mount("/middleware", routes![creation_tx_for_contract_address])
             .mount("/middleware", routes![current_count])
             .mount("/middleware", routes![current_size])
             .mount("/middleware", routes![error])
             .mount("/middleware", routes![get_available_compilers])
             .mount("/middleware", routes![generations_by_range])
+            .mount("/middleware", routes![generations_by_range2])
             .mount("/middleware", routes![height_at_epoch])
             .mount("/middleware", routes![info_for_auction])
             .mount("/middleware", routes![name_for_hash])
