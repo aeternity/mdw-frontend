@@ -609,32 +609,44 @@ fn transactions_for_interval(
     limit: Option<i32>,
     page: Option<i32>,
     txtype: Option<String>,
-) -> Json<JsonTransactionList> {
+) -> Result<Json<JsonTransactionList>, Status> {
     let sql = r#"
 SELECT t.* FROM transactions t
 WHERE
    t.block_height >= $1 AND
-    t.block_height <= $2
+   t.block_height <= $2 AND
+   t.tx_type ILIKE $3
 ORDER BY
     t.block_height DESC, t.id DESC
+LIMIT $4 OFFSET $5
 "#;
-
-    let mut transactions: Vec<Transaction> = sql_query(sql)
+    if limit == None || Some(1000) < limit && (from - to > 1000) {
+        return Err(Status::new(400, "Too many results requested"));
+    }
+    let transactions: Vec<Transaction> = sql_query(sql)
         .bind::<diesel::sql_types::Int4, _>(from as i32)
         .bind::<diesel::sql_types::Int4, _>(to as i32)
+        .bind::<diesel::sql_types::VarChar, _>(match txtype {
+            Some(x) => x,
+            None => "%".to_string(),
+        })
+        .bind::<diesel::sql_types::Int4, _>(match limit {
+            Some(x) => x,
+            None => std::i32::MAX,
+        })
+        .bind::<diesel::sql_types::Int4, _>(match page {
+            Some(x) => x,
+            None => 1,
+        })
         .load(&*PGCONNECTION.get().unwrap())
         .unwrap();
-    if let Some(_txtype) = txtype {
-        transactions.retain(|t| t.tx_type.eq(&_txtype));
-    }
-    limit_page_vec!(limit, page, transactions);
     let json_transactions = transactions
         .iter()
         .map(JsonTransaction::from_transaction)
         .collect();
-    Json(JsonTransactionList {
+    Ok(Json(JsonTransactionList {
         transactions: json_transactions,
-    })
+    }))
 }
 
 #[get("/micro-blocks/hash/<hash>/transactions/count")]
