@@ -1224,6 +1224,7 @@ impl NamePointer {
             }
             let mut _name = Name::get_for_hash(conn, _name_hash)?;
             _name.expires_at = _height + _name_ttl;
+            _name.pointers = Some(_pointers.clone());
             _name.update(conn)?;
             Ok(1)
         })?;
