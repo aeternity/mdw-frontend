@@ -1393,7 +1393,7 @@ ORDER BY block_height DESC
         let transactions: Vec<Transaction> = sql_query(sql).get_results(connection)?;
         let mut result = vec![];
         for transaction in transactions {
-            let _name = String::from(transaction.tx["name"].as_str()?);
+            let _name = String::from(transaction.tx["name"].as_str()?).to_lowercase();
             if let Ok(name_auction_entry) = name_auction_entries
                 .filter(name.eq(_name))
                 .first::<NameAuctionEntry>(connection)
