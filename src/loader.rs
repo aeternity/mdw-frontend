@@ -619,15 +619,6 @@ impl BlockLoader {
             data: serde_json::to_value(trans)?,
         })?; //broadcast transaction
         let transaction_id: i32 = _tx.save(conn)?;
-        let associated_accounts = crate::models::InsertableAssociatedAccount::from_transaction(
-            conn,
-            &serde_json::to_value(trans)?,
-            trans.block_height as i64,
-            transaction_id,
-        )?;
-        for associated_account in associated_accounts {
-            associated_account.save(conn)?;
-        }
         Ok(transaction_id)
     }
 

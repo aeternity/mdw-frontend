@@ -533,8 +533,6 @@ WHERE
     np.pointer_target = $1 AND
     t.tx_type ILIKE $2
 "#;
-    info!("{}", sql);
-
     let mut results: Vec<JsonValue> = Vec::new();
     for row in &SQLCONNECTION
         .get()

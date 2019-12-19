@@ -1,6 +1,5 @@
 #![allow(proc_macro_derive_resolution_fallback)]
 
-use super::schema::associated_accounts;
 use super::schema::channel_identifiers;
 use super::schema::contract_calls;
 use super::schema::contract_identifiers;
@@ -678,54 +677,6 @@ pub fn size_at_height(
         return Ok(Some(result));
     }
     Ok(None)
-}
-
-#[derive(Insertable)]
-#[table_name = "associated_accounts"]
-pub struct InsertableAssociatedAccount {
-    pub transaction_id: i32,
-    pub name_hash: String,
-    pub aeternity_id: String,
-}
-
-impl InsertableAssociatedAccount {
-    pub fn save(&self, conn: &PgConnection) -> MiddlewareResult<i32> {
-        use diesel::dsl::insert_into;
-        use schema::associated_accounts::dsl::*;
-        let generated_ids: Vec<i32> = insert_into(associated_accounts)
-            .values(self)
-            .returning(id)
-            .get_results(&*conn)?;
-        Ok(generated_ids[0])
-    }
-
-    pub fn from_transaction(
-        connection: &PgConnection,
-        transaction: &serde_json::Value,
-        _height: i64,
-        _transaction_id: i32,
-    ) -> MiddlewareResult<Vec<Self>> {
-        let name_hashes = get_name_hashes(&transaction)?;
-        debug!("name_hashes: {:?}", name_hashes);
-        if name_hashes.is_empty() {
-            return Ok(vec![]);
-        }
-        let mut result = vec![];
-        for _name_hash in name_hashes {
-            if let Some(n) =
-                Name::lookup_account_for_height_and_hash(connection, _height, &_name_hash)?
-            {
-                result.push(InsertableAssociatedAccount {
-                    transaction_id: _transaction_id,
-                    name_hash: _name_hash,
-                    aeternity_id: n,
-                });
-            } else {
-                warn!("Failed to lookup account {}", _name_hash);
-            }
-        }
-        Ok(vec![])
-    }
 }
 
 pub fn get_name_hashes(v: &serde_json::Value) -> MiddlewareResult<Vec<String>> {
