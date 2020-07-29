@@ -97,7 +97,7 @@ export default {
       const tx = await this.$store.dispatch('transactions/getTxByType', {
         page: this.typePage,
         limit: 10,
-        txtype: this.value
+        type: this.value
       })
       tx.forEach(element => {
         element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
