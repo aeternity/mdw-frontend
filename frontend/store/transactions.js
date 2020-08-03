@@ -49,9 +49,9 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTransactionByHash: async function ({ rootState: { nodeUrl }, commit }, hash) {
+  getTransactionById: async function ({ rootState: { nodeUrl }, commit }, id) {
     try {
-      const url = `${nodeUrl}/tx/${hash}`
+      const url = `${nodeUrl}/txi/${id}`
       const tx = await axios.get(url)
       console.info('MDW 🔗 ' + url)
       commit('setTransactions', [tx.data])
@@ -63,9 +63,9 @@ export const actions = {
   },
   getTransactionByAccount: async function ({ rootState: { nodeUrl }, commit }, { account, limit, page, txtype }) {
     try {
-      let url = `${nodeUrl}/middleware/transactions/account/${account}?page=${page}&limit=${limit}`
+      let url = `${nodeUrl}/txs/backward?account=${account}&page=${page}&limit=${limit}`
       if (txtype) {
-        url += `&txtype=${txtype}`
+        url += `&type=${txtype}`
       }
       const tx = await axios.get(url)
       console.info('MDW 🔗 ' + url)

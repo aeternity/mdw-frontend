@@ -2,7 +2,7 @@
   <div class="transaction">
     <div class="transaction-main-info">
       <div class="transaction-main-info-inner">
-        <nuxt-link :to="`/transactions/${transaction.hash}`">
+        <nuxt-link :to="`/transactions/${transaction.tx_index}`">
           <div class="transaction-label">
             <LabelType
               :title="updateType"

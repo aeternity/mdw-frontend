@@ -45,7 +45,7 @@ export const actions = {
   },
   getGenerationByRange: async function ({ rootState: { nodeUrl }, commit }, { start, end }) {
     try {
-      const url = `${nodeUrl}/middleware/generations/${start}/${end}`
+      const url = `${nodeUrl}/txs/gen/${start}-${end}`
       const generations = await axios.get(url)
       console.info('MDW 🔗 ' + url)
       commit('setGenerations', generations.data.data)

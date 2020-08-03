@@ -98,8 +98,8 @@ export const mutations = {
 export const actions = {
   async height ({ rootState: { nodeUrl }, commit }) {
     try {
-      const url = `${nodeUrl}/v2/key-blocks/current/height`
-      const { height } = (await axios.get(url)).data
+      const url = `${nodeUrl}/status`
+      const { height } = (await axios.get(url)).data.mdw_height
       console.info('MDW 🔗 ' + url)
       commit('setHeight', height)
       return height
@@ -109,7 +109,7 @@ export const actions = {
   },
   async status ({ rootState: { nodeUrl }, commit }) {
     try {
-      const url = `${nodeUrl}/v2/status`
+      const url = `${nodeUrl}/status`
       const status = (await axios.get(url)).data
       console.info('MDW 🔗 ' + url)
       commit('setStatus', status)
