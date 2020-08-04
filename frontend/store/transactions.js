@@ -69,7 +69,7 @@ export const actions = {
       }
       const tx = await axios.get(url)
       console.info('MDW 🔗 ' + url)
-      return tx.data
+      return tx.data.data
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })

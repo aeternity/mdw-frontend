@@ -3,7 +3,7 @@
     <PageHeader
       title="Account"
       :has-crumbs="true"
-      :page="{to: `/account/transactions/${$route.params.id}`, name: `${account.id}(${amount})`}"
+      :page="{to: `/account/transactions/${$route.params.id}`, name: `${$route.params.id}`}"
     />
     <div class="filter">
       <multiselect
@@ -15,7 +15,7 @@
         @input="processInput"
       />
     </div>
-    <div v-if="transactions.length > 0 && !account.error">
+    <div v-if="transactions.length > 0">
       <TxList>
         <TXListItem
           v-for="(tx, index) of transactions"
@@ -29,11 +29,8 @@
     <div v-if="loading">
       Loading....
     </div>
-    <div v-if="!loading && !account.error &&transactions.length == 0">
+    <div v-if="!loading &&transactions.length == 0">
       No matching transactions found for the selected type.
-    </div>
-    <div v-if="!loading && account.error">
-      {{ account.error }}
     </div>
   </div>
 </template>
@@ -44,7 +41,6 @@ import TxList from '../../../partials/transactions/txList'
 import TXListItem from '../../../partials/transactions/txListItem'
 import PageHeader from '../../../components/PageHeader'
 import LoadMoreButton from '../../../components/loadMoreButton'
-import prefixAmount from '../../../plugins/filters/prefixedAmount'
 import Multiselect from 'vue-multiselect'
 import { transformMetaTx } from '../../../store/utils'
 
@@ -60,18 +56,13 @@ export default {
   data () {
     return {
       account: {
-        balance: 0
+        id: this.$route.params.id
       },
       transactions: [],
       page: 1,
       loading: true,
       value: 'All',
       options: this.$store.state.filterOptions
-    }
-  },
-  computed: {
-    amount () {
-      return prefixAmount(this.account.balance)
     }
   },
   async asyncData ({ store, params, query }) {
@@ -82,14 +73,13 @@ export default {
       }
     }
     const tx = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page: 1, limit: 10, txtype: value })
-    const account = await store.dispatch('account/getAccountDetails', params.id)
     const transactions = []
     tx.forEach(element => {
       element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
       transactions.push(element)
     })
     value = value || 'All'
-    return { address: params.id, transactions, page: 2, account, value, loading: false }
+    return { address: params.id, transactions, page: 2, value, loading: false }
   },
   methods: {
     async loadMore () {
