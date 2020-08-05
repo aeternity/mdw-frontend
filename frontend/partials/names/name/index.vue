@@ -2,21 +2,21 @@
   <div class="name">
     <div class="container-first">
       <div class="container-first-inner">
-        <nuxt-link :to="`/transactions/${data.tx_hash}`">
+        <nuxt-link :to="`/transactions/${getData().claimant}`">
           <LabelType
             title="Name"
             fill="green"
           />
         </nuxt-link>
-        <nuxt-link :to="`/transactions/${data.tx_hash}`">
+        <nuxt-link :to="`/transactions/${getData().claimant}`">
           <div class="name-value">
-            {{ data.name }}
+            {{ getName() }}
           </div>
         </nuxt-link>
       </div>
       <div class="container-first-inner">
         <Account
-          :value="data.owner"
+          :value="getData().owner"
           title="Owner"
           icon
         />
@@ -28,15 +28,15 @@
           title="Block Height"
           class="container-last-inner"
         >
-          <nuxt-link :to="`/generations/${data.created_at_height}`">
-            {{ data.created_at_height }}
+          <nuxt-link :to="`/generations/${getData().claim_height}`">
+            {{ getData().claim_height }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
           class="container-last-inner"
           title="Expires At"
         >
-          {{ data.expires_at }}
+          {{ getData().expiration_height }}
         </AppDefinition>
       </div>
       <div
@@ -85,10 +85,23 @@ export default {
   },
   computed: {
     firstPointerKey () {
-      return this.data.pointers ? this.data.pointers[0].key : '-'
+      const pointers = Object.keys(this.getData().pointers)
+
+      return pointers.length > 0 ? pointers[0] : '-'
     },
     firstPointerId () {
-      return this.data.pointers ? this.data.pointers[0].id : '-'
+      const pointers = Object.keys(this.getData().pointers)
+      const pointersKeys = Object.keys(pointers)
+
+      return pointersKeys.length > 0 ? pointers[pointersKeys[0]] : '-'
+    }
+  },
+  methods: {
+    getName () {
+      return Object.keys(this.data)[0]
+    },
+    getData () {
+      return this.data[this.getName()]
     }
   }
 }

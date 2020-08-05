@@ -12,11 +12,11 @@ export const mutations = {
 export const actions = {
   getNames: async function ({ rootState: { nodeUrl }, commit }, { page, limit }) {
     try {
-      const url = `${nodeUrl}/middleware/names?limit=${limit}&page=${page}`
+      const url = `${nodeUrl}/names/all?limit=${limit}&page=${page}`
       const names = await axios.get(url)
       console.info('MDW 🔗 ' + url)
-      commit('setNames', names.data)
-      return names.data
+      commit('setNames', names.data.data)
+      return names.data.data
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
