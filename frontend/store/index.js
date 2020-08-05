@@ -15,29 +15,31 @@ export const state = () => ({
   wsConnected: false,
   filterOptions: [
     'All',
-    'SpendTx',
-    'OracleRegisterTx',
-    'OracleExtendTx',
-    'OracleQueryTx',
-    'OracleResponseTx',
-    'NamePreclaimTx',
-    'NameClaimTx',
-    'NameUpdateTx',
-    'NameTransferTx',
-    'NameRevokeTx',
-    'GAAttachTx',
-    'GAMetaTx',
-    'ContractCallTx',
-    'ContractCreateTx',
-    'ChannelCreateTx',
-    'ChannelDepositTx',
-    'ChannelWithdrawTx',
-    'ChannelCloseMutualTx',
-    'ChannelForceProgressTx',
-    'ChannelCloseSoloTx',
-    'ChannelSlashTx',
-    'ChannelSettleTx',
-    'ChannelSnapshotSoloTx'
+    'spend',
+    'paying_for',
+    'oracle_extend',
+    'oracle_query',
+    'oracle_register',
+    'oracle_response',
+    'name_claim',
+    'name_preclaim',
+    'name_revoke',
+    'name_transfer',
+    'name_update',
+    'ga_attach',
+    'ga_meta',
+    'contract_call',
+    'contract_create',
+    'channel_close_mutual',
+    'channel_close_solo',
+    'channel_create',
+    'channel_deposit',
+    'channel_force_progress',
+    'channel_offchain',
+    'channel_settle',
+    'channel_slash',
+    'channel_snapshot_solo',
+    'channel_withdraw'
   ]
 })
 
@@ -96,8 +98,8 @@ export const mutations = {
 export const actions = {
   async height ({ rootState: { nodeUrl }, commit }) {
     try {
-      const url = `${nodeUrl}/v2/key-blocks/current/height`
-      const { height } = (await axios.get(url)).data
+      const url = `${nodeUrl}/status`
+      const { height } = (await axios.get(url)).data.mdw_height
       console.info('MDW 🔗 ' + url)
       commit('setHeight', height)
       return height
@@ -107,7 +109,7 @@ export const actions = {
   },
   async status ({ rootState: { nodeUrl }, commit }) {
     try {
-      const url = `${nodeUrl}/v2/status`
+      const url = `${nodeUrl}/status`
       const status = (await axios.get(url)).data
       console.info('MDW 🔗 ' + url)
       commit('setStatus', status)
