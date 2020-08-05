@@ -2,15 +2,15 @@
   <div class="contract">
     <div class="container-first">
       <div class="container-first-inner">
-        <nuxt-link :to="`/contracts/transactions/${data.contract_id}`">
+        <nuxt-link :to="`/contracts/transactions/${data.tx.contract_id}`">
           <LabelType
             title="Contract"
             fill="green"
           />
         </nuxt-link>
         <Account
-          v-if="data.contract_id"
-          :value="data.contract_id"
+          v-if="data.tx.contract_id"
+          :value="data.tx.contract_id"
           title="Contract ID"
           icon
         />
@@ -32,8 +32,8 @@
       </div>
 
       <Account
-        v-if="data.transaction_hash"
-        :value="data.transaction_hash"
+        v-if="data.hash"
+        :value="data.hash"
         title="Transaction Hash"
         icon
       />
