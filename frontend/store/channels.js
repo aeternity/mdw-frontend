@@ -25,10 +25,10 @@ export const actions = {
   },
   getChannelTx: async function ({ rootState: { nodeUrl }, commit }, channelId) {
     try {
-      const url = `${nodeUrl}/middleware/channels/transactions/address/${channelId}`
+      const url = `${nodeUrl}/txs/forward?channel=${channelId}`
       const channelTx = await axios.get(url)
       console.info('MDW 🔗 ' + url)
-      return channelTx.data.transactions
+      return channelTx.data.data
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
