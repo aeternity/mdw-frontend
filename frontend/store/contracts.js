@@ -28,9 +28,9 @@ export const actions = {
     }
   },
 
-  getContractTx: async function ({ rootState: { nodeUrl }, commit }, { contract, page, limit }) {
+  getContractCreateTx: async function ({ rootState: { nodeUrl }, commit }, { contract, page, limit }) {
     try {
-      const url = `${nodeUrl}/txs/backward?contract=${contract}&limit=${limit}&page=${page}`
+      const url = `${nodeUrl}/txs/backward?contract=${contract}&type=contract_create&limit=${limit}&page=${page}`
       const contractTx = await axios.get(url)
       console.info('MDW 🔗 ' + url)
       return contractTx.data.data
