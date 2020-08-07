@@ -48,34 +48,17 @@ export default {
     }
   },
   async asyncData ({ store, params }) {
-    let transactions = await store.dispatch('contracts/getContractTx', { contract: params.id, page: 1, limit: 10 })
+    let createTransactions = await store.dispatch('contracts/getContractCreateTx', { contract: params.id, page: 1, limit: 10 })
     const calls = await store.dispatch('contracts/getContractCalls', { contract: params.id, page: 1, limit: 10 })
-    for (const tx of transactions) {
-      const call = calls.find(x => x.transaction_id === tx.hash)
-      if (call) {
-        tx.arguments = call.arguments
-        tx.callinfo = call.callinfo
-        if (call.result) {
-          tx.result = call.result
-        }
-      }
+    let transactions = []
+    if (createTransactions && calls) {
+      transactions = [...createTransactions, ...calls]
     }
     return { contract: params.id, transactions, loading: false, page: 2 }
   },
   methods: {
     async loadMore () {
-      let transactions = await this.$store.dispatch('contracts/getContractTx', { contract: this.contract, page: this.page, limit: 10 })
-      const calls = await this.$store.dispatch('contracts/getContractCalls', { contract: this.contract, page: this.page, limit: 10 })
-      for (const tx of transactions) {
-        const call = calls.find(x => x.transaction_id === tx.hash)
-        if (call) {
-          tx.arguments = call.arguments
-          tx.callinfo = call.callinfo
-          if (call.result) {
-            tx.result = call.result
-          }
-        }
-      }
+      const transactions = await this.$store.dispatch('contracts/getContractCalls', { contract: this.contract, page: this.page, limit: 10 })
       this.transactions = [...this.transactions, ...transactions]
       this.page += 1
     }
