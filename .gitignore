@@ -1,0 +1,7 @@
+**/*~
+/target
+**/*.rs.bk
+.env
+conf/log4rs.yaml
+node_modules
+.DS_Store
