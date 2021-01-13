@@ -2,16 +2,16 @@
   <div class="oracle">
     <div class="container-first">
       <div class="container-first-inner">
-        <nuxt-link :to="`/oracles/queries/${data.oracle_id}`">
+        <!-- <nuxt-link :to="`/oracles/queries/${data.oracle}`"> -->
           <LabelType
             title="Oracle"
             fill="green"
           />
-        </nuxt-link>
+        <!-- </nuxt-link> -->
       </div>
       <div class="containter-first-inner">
         <Account
-          :value="data.oracle_id"
+          :value="data.oracle"
           title="Oracle Id"
           icon
         />
@@ -23,15 +23,15 @@
           title="Block Height"
           class="container-last-inner"
         >
-          <nuxt-link :to="`/generations/${data.block_height}`">
-            {{ data.block_height }}
+          <nuxt-link :to="`/generations/${data.active_from}`">
+            {{ data.active_from }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
           class="container-last-inner"
           title="Expires At"
         >
-          {{ data.expires_at }}
+          {{ data.expire_height }}
         </AppDefinition>
       </div>
       <div class="container-last-wrapper">
@@ -40,21 +40,21 @@
           title="Query Fee"
         >
           <FormatAeUnit
-            :value="data.tx.query_fee"
+            :value="data.query_fee"
           />
         </AppDefinition>
         <AppDefinition
           class="container-last-inner"
           title="Query Format"
         >
-          {{ data.tx.query_format }}
+          {{ data.format.query }}
         </AppDefinition>
 
         <AppDefinition
           class="container-last-inner"
           title="Response Format"
         >
-          {{ data.tx.response_format }}
+          {{ data.format.response }}
         </AppDefinition>
       </div>
     </div>
