@@ -8,7 +8,7 @@ export const state = () => ({
 export const mutations = {
   setOracles (state, oracles) {
     for (let oracle of oracles) {
-      Vue.set(state.oracles, oracle.transaction_hash, oracle)
+      Vue.set(state.oracles, oracle.oracle, oracle)
     }
   }
 }
@@ -16,11 +16,11 @@ export const mutations = {
 export const actions = {
   getOracles: async function ({ rootState: { nodeUrl }, commit }, { page, limit }) {
     try {
-      const url = `${nodeUrl}/middleware/oracles/list?limit=${limit}&page=${page}`
+      const url = `${nodeUrl}/oracles/active?limit=${limit}&page=${page}`
       const oracles = await axios.get(url)
       console.info('MDW 🔗 ' + url)
-      commit('setOracles', oracles.data)
-      return oracles.data
+      commit('setOracles', oracles.data.data)
+      return oracles.data.data
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })

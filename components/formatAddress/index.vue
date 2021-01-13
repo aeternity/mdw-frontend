@@ -137,7 +137,8 @@ export default {
         return `/transactions/${this.value}`
       }
       if (this.value.match(/^ok_[1-9A-HJ-NP-Za-km-z]{48,50}$/)) {
-        return `/oracles/queries/${this.value}`
+        // return `/oracles/queries/${this.value}`
+        return ''
       }
       if (this.value.match(/^ch_[1-9A-HJ-NP-Za-km-z]{48,50}$/)) {
         return `/channels/transactions/${this.value}`
