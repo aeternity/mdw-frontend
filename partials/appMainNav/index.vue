@@ -27,9 +27,9 @@
         <AppNavLink to="/transactions">
           Transactions
         </AppNavLink>
-        <AppNavLink to="/channels">
+        <!-- <AppNavLink to="/channels">
           Channels
-        </AppNavLink>
+        </AppNavLink> -->
         <AppNavLink to="/contracts">
           Contracts
         </AppNavLink>
