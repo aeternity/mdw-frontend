@@ -7,9 +7,7 @@ export const state = () => ({
 
 export const mutations = {
   setContracts (state, contracts) {
-    for (let contract of contracts) {
-      Vue.set(state.contracts, contract.hash, contract)
-    }
+    contracts.forEach(contract => Vue.set(state.contracts, contract.hash, contract))
   }
 }
 

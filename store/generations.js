@@ -9,14 +9,13 @@ export const state = () => ({
 
 export const mutations = {
   setGenerations (state, generations) {
-    for (let i of Object.keys(generations)) {
-      const generation = generations[i]
+    Object.keys(generations).forEach(generation => {
       if (!generation.micro_blocks) {
         generation.micro_blocks = {}
       }
       Vue.set(state.hashToHeight, generation.hash, generation.height)
       Vue.set(state.generations, generation.height, generation)
-    }
+    })
   },
   setLastFetched (state, last) {
     state.lastFetchedGen = last

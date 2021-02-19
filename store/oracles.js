@@ -7,9 +7,7 @@ export const state = () => ({
 
 export const mutations = {
   setOracles (state, oracles) {
-    for (let oracle of oracles) {
-      Vue.set(state.oracles, oracle.oracle, oracle)
-    }
+    oracles.forEach(oracle => Vue.set(state.oracles, oracle.oracle, oracle))
   }
 }
 
