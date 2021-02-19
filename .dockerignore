@@ -1,4 +1,14 @@
+Dockerfile
 Makefile
-build
-test
-target/**
+node_modules
+.nuxt
+.postcssrc.js
+.travis.yml
+.editorconfig
+.eslintrc.js
+.prettierrc
+babel.config.js
+CHANGELOG.md
+.gitignore
+deploy.esc
+README.md
