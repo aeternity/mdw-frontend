@@ -1,8 +1,6 @@
 const pkg = require('./package')
 
 module.exports = {
-  mode: process.env.NUXT_APP_MODE || 'universal',
-
   /*
   ** Headers of the page
   */
@@ -87,15 +85,15 @@ module.exports = {
         autoprefixer: {}
       }
     },
-    extend (config, ctx) {
-      // Run ESLint on save
-      if (ctx.isDev && ctx.isClient) {
-        config.module.rules.push({
-          enforce: 'pre',
-          test: /\.(js|vue)$/,
-          loader: 'eslint-loader',
-          exclude: /(node_modules)/
-        })
+    extend(config, { isDev, isClient }) {
+      if (isDev && isClient) {
+        const options = {
+          exclude: ['node_modules'],
+          fix: true,
+          extensions: ['.js', '.vue'],
+        }
+        const EslintPlugin = require('eslint-webpack-plugin')
+        config.plugins.push(new EslintPlugin(options))
       }
     }
   }
