@@ -32,14 +32,6 @@ export default {
     TransactionDetails,
     PageHeader
   },
-  data () {
-    return {
-      transation: {},
-      generation: {},
-      height: 0,
-      loading: true
-    }
-  },
   async asyncData ({ store, params: { transaction }, error }) {
     let txDetails = null
     let generation = null
@@ -69,6 +61,14 @@ export default {
       height = await store.dispatch('height')
     }
     return { transaction: txDetails, generation, height, loading: false }
+  },
+  data () {
+    return {
+      transation: {},
+      generation: {},
+      height: 0,
+      loading: true
+    }
   }
 }
 </script>

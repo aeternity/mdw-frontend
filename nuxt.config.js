@@ -85,12 +85,12 @@ module.exports = {
         autoprefixer: {}
       }
     },
-    extend(config, { isDev, isClient }) {
+    extend (config, { isDev, isClient }) {
       if (isDev && isClient) {
         const options = {
           exclude: ['node_modules'],
           fix: true,
-          extensions: ['.js', '.vue'],
+          extensions: ['.js', '.vue']
         }
         const EslintPlugin = require('eslint-webpack-plugin')
         config.plugins.push(new EslintPlugin(options))
