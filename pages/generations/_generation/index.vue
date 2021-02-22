@@ -10,12 +10,13 @@
       :next="next"
     />
     <GenerationDetails
+      v-if="generation"
       :data="generation"
       :dynamic-data="height"
     />
     <MicroBlocks>
       <MicroBlock
-        v-for="(microBlock, number) in generation.micro_blocks"
+        v-for="(microBlock, number) in generation.microBlocks"
         :key="number"
         :data="microBlock"
       >
@@ -66,7 +67,7 @@ export default {
       generation = store.generations.generations[current]
     } else {
       const generations = await store.dispatch('generations/getGenerationByRange', { start: current - 1, end: current + 1 })
-      generation = generations[current]
+      generation = generations.find(g => g.height === current)
     }
     const prev = current < 1 ? '' : `/generations/${current - 1}`
     const next = height === current ? '' : `/generations/${current + 1}`

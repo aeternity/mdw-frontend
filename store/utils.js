@@ -1,3 +1,79 @@
+import camelcaseKeysDeep from 'camelcase-keys-deep'
+import Swagger from '@aeternity/aepp-sdk/es/utils/swagger'
+import swag from '../swagger.json'
+
+export const initMiddleware = () => {
+  swag.paths = {
+    ...swag.paths,
+    'name/auction/{name}': {
+      get: {
+        operationId: 'getAuctionInfoByName',
+        parameters: [
+          {
+            in: 'path',
+            name: 'name',
+            required: true,
+            type: 'string'
+          }
+        ]
+      }
+    },
+    'txs/backward': {
+      get: {
+        operationId: 'getTxBackward',
+        parameters: [
+          {
+            in: 'query',
+            name: 'type',
+            required: false,
+            type: 'string'
+          },
+          {
+            in: 'query',
+            name: 'type_group',
+            required: false,
+            type: 'string'
+          },
+          {
+            in: 'query',
+            name: 'account',
+            required: false,
+            type: 'string'
+          },
+          {
+            in: 'query',
+            name: 'limit',
+            required: false,
+            type: 'integer'
+          },
+          {
+            in: 'query',
+            name: 'page',
+            required: false,
+            type: 'integer'
+          },
+          {
+            in: 'query',
+            name: 'contract',
+            required: false,
+            type: 'string'
+          }
+        ]
+      }
+    }
+  }
+
+  const swg = Swagger.compose({
+    methods: {
+      urlFor: (path) => process.env.middlewareURL + path,
+      axiosError: () => ''
+    }
+  })({ swag })
+  swg.Swagger = { defaults: {} }
+
+  return camelcaseKeysDeep(swg.api)
+}
+
 // replacement for lodash times function in vanilla ES5
 export const times = (count, func) => {
   let i = 0
@@ -26,14 +102,14 @@ export const times = (count, func) => {
 
 export const transformMetaTx = (txDetails) => {
   return {
-    block_height: txDetails.block_height,
-    block_hash: txDetails.block_hash,
+    blockHeight: txDetails.blockHeight,
+    blockHash: txDetails.blockHash,
     gas: txDetails.tx.gas,
     hash: txDetails.hash,
     ga_id: txDetails.tx.ga_id,
-    gas_price: txDetails.tx.gas_price,
+    gasPrice: txDetails.tx.gasPrice,
     fee: txDetails.tx.fee,
-    abi_version: txDetails.tx.abi_version,
+    abiVersion: txDetails.tx.abiVersion,
     auth_data: txDetails.tx.auth_data,
     tx: txDetails.tx.tx.tx
   }
@@ -45,4 +121,9 @@ export const transformTxType = (transaction) => {
     txType += ' (GA)'
   }
   return txType
+}
+
+export const fetchJson = async (...args) => {
+  const response = await fetch(...args)
+  return response.json()
 }

@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import axios from 'axios'
 import { transformMetaTx } from './utils'
 
 export const state = () => ({
@@ -25,51 +24,40 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatestTransactions: async function ({ state, rootState: { nodeUrl, height }, commit }, { limit }) {
+  getLatestTransactions: async function ({ state, rootState: { middleware }, commit }, { limit }) {
     try {
       const page = state.lastPage + 1
-      const url = `${nodeUrl}/txs/backward?limit=${limit}&page=${page}`
-      const transactions = await axios.get(url)
-      console.info('MDW 🔗 ' + url)
-      commit('setTransactions', transactions.data.data)
+      const transactions = await middleware.getTxBackward({ page, limit })
+      commit('setTransactions', transactions.data)
       commit('setLastPage', page)
-      return transactions.data.data
+      return transactions.data
     } catch (e) {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTxByType: async function ({ rootState: { nodeUrl, height }, commit }, { page, limit, type }) {
+  getTxByType: async function ({ rootState: { middleware }, commit }, { page, limit, type }) {
     try {
-      const url = `${nodeUrl}/txs/backward?type=${type}&limit=${limit}&page=${page}`
-      const transactions = await axios.get(url)
-      console.info('MDW 🔗 ' + url)
-      return transactions.data.data
+      const transactions = await middleware.getTxBackward({ page, limit, type })
+      return transactions.data
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTransactionById: async function ({ rootState: { nodeUrl }, commit }, id) {
+  getTransactionByHash: async function ({ rootState: { middleware }, commit }, hash) {
     try {
-      const url = `${nodeUrl}/txi/${id}`
-      const tx = await axios.get(url)
-      console.info('MDW 🔗 ' + url)
-      commit('setTransactions', [tx.data])
+      const tx = await middleware.getTxByHash(hash)
+      commit('setTransactions', [tx])
+      return tx
+    } catch (e) {
+      console.log(e)
+      commit('catchError', 'Error', { root: true })
+    }
+  },
+  getTransactionByAccount: async function ({ rootState: { middleware }, commit }, { account, limit, page, txtype }) {
+    try {
+      const tx = await middleware.getTxBackward({ account, limit, page, type: txtype || undefined })
       return tx.data
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-    }
-  },
-  getTransactionByAccount: async function ({ rootState: { nodeUrl }, commit }, { account, limit, page, txtype }) {
-    try {
-      let url = `${nodeUrl}/txs/backward?account=${account}&page=${page}&limit=${limit}`
-      if (txtype) {
-        url += `&type=${txtype}`
-      }
-      const tx = await axios.get(url)
-      console.info('MDW 🔗 ' + url)
-      return tx.data.data
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })

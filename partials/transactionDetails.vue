@@ -184,7 +184,7 @@
             </AppTableCell>
           </AppTableRow>
           <AppTableRow
-            v-if="data.gas_price"
+            v-if="data.gasPrice"
             extend
           >
             <AppTableCell extend>
@@ -192,7 +192,7 @@
                 type="list"
                 title="Gas Price"
               >
-                {{ data.gas_price }}
+                {{ data.gasPrice }}
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>
@@ -249,7 +249,7 @@
             </AppTableCell>
           </AppTableRow>
           <AppTableRow
-            v-if="data.tx.vm_version"
+            v-if="data.tx.vmVersion"
             extend
           >
             <AppTableCell extend>
@@ -257,12 +257,12 @@
                 type="list"
                 title="VM Version"
               >
-                {{ data.tx.vm_version }}
+                {{ data.tx.vmVersion }}
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>
           <AppTableRow
-            v-if="data.tx.abi_version"
+            v-if="data.tx.abiVersion"
             extend
           >
             <AppTableCell extend>
@@ -270,7 +270,7 @@
                 type="list"
                 title="ABI Version"
               >
-                {{ data.tx.abi_version }}
+                {{ data.tx.abiVersion }}
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>

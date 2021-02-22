@@ -17,8 +17,8 @@
           length="nochunk"
           icon
         />
-        <Account
-          :value="data.winning_bidder"
+        <!--TODO: not a winning bid--><Account
+          :value="data.info.lastBid.tx.accountId"
           title="Winning Bidder"
           icon
         />
@@ -29,14 +29,14 @@
         <AppDefinition
           title="Winning Bid"
         >
-          <FormatAeUnit :value="Number(data.winning_bid)" />
+          <FormatAeUnit :value="Number(5)" />
         </AppDefinition>
       </div>
       <div class="auction-type-info-item">
         <AppDefinition
           title="Expiration Height"
         >
-          {{ data.expiration }}
+          {{ data.info.auctionEnd }}
         </AppDefinition>
         <AppDefinition
           title="Estimated Expiration Time"
@@ -70,7 +70,7 @@ export default {
   },
   computed: {
     estimatedExpiration () {
-      const heightDiff = this.data.expiration - this.$store.state.height
+      const heightDiff = this.data.info.auctionEnd - this.$store.state.height
       const epoch = new Date()
       epoch.setSeconds(heightDiff * 180) // considering 1 block takes 3 minutes
       const date = epoch.toISOString().replace('T', ' ')

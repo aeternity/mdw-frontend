@@ -1,7 +1,7 @@
 <template>
   <ul class="format-pow">
     <li
-      v-for="pow in formattedPow"
+      v-for="pow in value"
       :key="pow.id"
     >
       {{ pow }}
@@ -14,13 +14,8 @@ export default {
   name: 'FormatPow',
   props: {
     value: {
-      type: String,
+      type: Array,
       required: true
-    }
-  },
-  computed: {
-    formattedPow () {
-      return this.value.replace(/\[|\]/g, '').split(', ')
     }
   }
 }

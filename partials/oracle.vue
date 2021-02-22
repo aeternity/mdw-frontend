@@ -23,15 +23,15 @@
           title="Block Height"
           class="container-last-inner"
         >
-          <nuxt-link :to="`/generations/${data.active_from}`">
-            {{ data.active_from }}
+          <nuxt-link :to="`/generations/${data.activeFrom}`">
+            {{ data.activeFrom }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
           class="container-last-inner"
           title="Expires At"
         >
-          {{ data.expire_height }}
+          {{ data.expireHeight }}
         </AppDefinition>
       </div>
       <div class="container-last-wrapper">
@@ -40,7 +40,7 @@
           title="Query Fee"
         >
           <FormatAeUnit
-            :value="data.query_fee"
+            :value="data.queryFee"
           />
         </AppDefinition>
         <AppDefinition

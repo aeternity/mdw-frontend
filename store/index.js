@@ -1,7 +1,8 @@
-import axios from 'axios'
+import { initMiddleware } from './utils'
 
 export const state = () => ({
   nodeStatus: {},
+  middleware: null,
   nodeUrl: process.env.middlewareURL,
   wsUrl: process.env.middlewareWS,
   networkName: process.env.networkName,
@@ -82,28 +83,26 @@ export const mutations = {
   },
   setWsConnectionStatus (state, status) {
     state.wsConnected = status
+  },
+  setMiddleware (state, payload) {
+    state.middleware = payload
   }
 }
 
 export const actions = {
-  async height ({ rootState: { nodeUrl }, commit }) {
+  async height ({ rootState: { middleware }, commit }) {
     try {
-      const url = `${nodeUrl}/status`
-      const { height } = (await axios.get(url)).data.mdw_height
-      console.info('MDW 🔗 ' + url)
+      const { mdwHeight: height } = await middleware.getStatus()
       commit('setHeight', height)
       return height
     } catch (e) {
       commit('catchError', 'Error', { root: true })
     }
   },
-  async status ({ rootState: { nodeUrl }, commit }) {
+  async status ({ rootState: { middleware }, commit }) {
     try {
-      const url = `${nodeUrl}/status`
-      const status = (await axios.get(url)).data
-      console.info('MDW 🔗 ' + url)
+      const status = await middleware.getStatus()
       commit('setStatus', status)
-      return status
     } catch (e) {
       commit('catchError', 'Error', { root: true })
     }
@@ -125,7 +124,8 @@ export const actions = {
       }
     }
   },
-  async nuxtServerInit ({ dispatch }, { context }) {
+  async nuxtServerInit ({ commit, dispatch }, { context }) {
+    commit('setMiddleware', initMiddleware())
     await dispatch('height')
     await Promise.all([
       dispatch('generations/nuxtServerInit', context),

@@ -2,21 +2,22 @@
   <div class="name">
     <div class="container-first">
       <div class="container-first-inner">
-        <nuxt-link :to="`/transactions/${getData().claimant}`">
-          <LabelType
-            title="Name"
-            fill="green"
-          />
-        </nuxt-link>
-        <nuxt-link :to="`/transactions/${getData().claimant}`">
-          <div class="name-value">
-            {{ getName() }}
-          </div>
-        </nuxt-link>
+        <!--<nuxt-link :to="`/transactions/${data.info.claimant}`">-->
+        <!--TODO: claimant?-->
+        <LabelType
+          title="Name"
+          fill="green"
+        />
+        <!--</nuxt-link> -->
+        <!--<nuxt-link :to="`/transactions/${data.info.claimant}`"> -->
+        <div class="name-value">
+          {{ data.name }}
+        </div>
+        <!--</nuxt-link>-->
       </div>
       <div class="container-first-inner">
         <Account
-          :value="getData().owner"
+          :value="data.info.ownership.current"
           title="Owner"
           icon
         />
@@ -28,15 +29,15 @@
           title="Block Height"
           class="container-last-inner"
         >
-          <nuxt-link :to="`/generations/${getData().claim_height}`">
-            {{ getData().claim_height }}
+          <nuxt-link :to="`/generations/${data.info.activeFrom}`">
+            {{ data.info.activeFrom }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
           class="container-last-inner"
           title="Expires At"
         >
-          {{ getData().expiration_height }}
+          {{ data.info.expireHeight }}
         </AppDefinition>
       </div>
       <div
@@ -85,23 +86,15 @@ export default {
   },
   computed: {
     firstPointerKey () {
-      const pointers = Object.keys(this.getData().pointers)
+      const pointers = Object.keys(this.data.info.pointers)
 
       return pointers.length > 0 ? pointers[0] : '-'
     },
     firstPointerId () {
-      const pointers = Object.keys(this.getData().pointers)
+      const pointers = this.data.info.pointers
       const pointersKeys = Object.keys(pointers)
 
       return pointersKeys.length > 0 ? pointers[pointersKeys[0]] : '-'
-    }
-  },
-  methods: {
-    getName () {
-      return Object.keys(this.data)[0]
-    },
-    getData () {
-      return this.data[this.getName()]
     }
   }
 }

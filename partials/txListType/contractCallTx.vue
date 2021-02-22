@@ -2,7 +2,7 @@
   <div class="transaction">
     <div class="transaction-main-info">
       <div class="transaction-main-info-inner">
-        <nuxt-link :to="`/transactions/${transaction.tx_index}`">
+        <nuxt-link :to="`/transactions/${transaction.hash}`">
           <div class="transaction-label">
             <LabelType
               :title="transaction | transformTxType"
@@ -14,14 +14,14 @@
       <div class="transaction-main-info-inner accounts">
         <AccountGroup>
           <Account
-            v-if="transaction.tx.caller_id"
-            :value="transaction.tx.caller_id"
+            v-if="transaction.tx.callerId"
+            :value="transaction.tx.callerId"
             title="caller"
             icon
           />
           <Account
-            v-if="transaction.tx.contract_id"
-            :value="transaction.tx.contract_id"
+            v-if="transaction.tx.contractId"
+            :value="transaction.tx.contractId"
             title="contract"
             icon
           />
@@ -33,8 +33,8 @@
         <AppDefinition
           title="Block Height"
         >
-          <nuxt-link :to="`/generations/${transaction.block_height}`">
-            {{ transaction.block_height }}
+          <nuxt-link :to="`/generations/${transaction.blockHeight}`">
+            {{ transaction.blockHeight }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
@@ -43,10 +43,10 @@
           <FormatAeUnit :value="transaction.tx.gas" />
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.tx.gas_price"
+          v-if="transaction.tx.gasPrice"
           title="gas price"
         >
-          <FormatAeUnit :value="transaction.tx.gas_price" />
+          <FormatAeUnit :value="transaction.tx.gasPrice" />
         </AppDefinition>
       </div>
       <div class="transaction-type-info-item">
@@ -68,11 +68,11 @@
           {{ transaction.tx.nonce }}
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.time"
+          v-if="transaction.microTime"
           title="Time"
           class="tx-time"
         >
-          {{ transaction.time | timestampToUTC }}
+          {{ transaction.microTime | timestampToUTC }}
         </AppDefinition>
       </div>
     </div>

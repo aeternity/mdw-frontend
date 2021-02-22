@@ -18,7 +18,7 @@
       <div class="containter-first-inner">
         <Account
           v-if="data.request"
-          :value="data.request.oracle_id"
+          :value="data.request.oracleId"
           length="full"
           title="Oracle Id"
           icon

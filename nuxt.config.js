@@ -48,7 +48,8 @@ module.exports = {
   plugins: [
     { src: '~/plugins/directives/copyToClipboard.js' },
     { src: '~/plugins/directives/removeSpacesOnCopy.js' },
-    { src: '~/plugins/directives/vueSliderComponent.js', mode: 'client' }
+    { src: '~/plugins/directives/vueSliderComponent.js', mode: 'client' },
+    { src: '~/store/plugins/initMiddleware.js', ssr: false }
   ],
   /*
     ** Router config
@@ -61,16 +62,8 @@ module.exports = {
   ** Nuxt.js modules
   */
   modules: [
-    // Doc: https://github.com/nuxt-community/axios-module#usage
-    '@nuxtjs/axios',
     '@nuxtjs/svg-sprite'
   ],
-  /*
-  ** Axios module configuration
-  */
-  axios: {
-    // See https://github.com/nuxt-community/axios-module#options
-  },
 
   /*
   ** Build configuration
@@ -79,6 +72,7 @@ module.exports = {
     /*
     ** You can extend webpack config here
     */
+    transpile: ['@aeternity/aepp-sdk/es/utils/swagger'],
 
     postcss: {
       plugins: {

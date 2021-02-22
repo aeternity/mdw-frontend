@@ -2,7 +2,7 @@
   <div class="transaction">
     <div class="transaction-main-info">
       <div class="transaction-main-info-inner">
-        <nuxt-link :to="`/transactions/${transaction.tx_index}`">
+        <nuxt-link :to="`/transactions/${transaction.hash}`">
           <div class="transaction-label">
             <LabelType
               :title="transaction | transformTxType"
@@ -14,14 +14,14 @@
       <div class="transaction-main-info-inner accounts">
         <AccountGroup>
           <Account
-            v-if="transaction.tx.account_id"
-            :value="transaction.tx.account_id"
+            v-if="transaction.tx.accountId"
+            :value="transaction.tx.accountId"
             title="account"
             icon
           />
           <Account
-            v-if="transaction.tx.name_id"
-            :value="transaction.tx.name_id"
+            v-if="transaction.tx.nameId"
+            :value="transaction.tx.nameId"
             title="Name Id"
             icon
           />
@@ -40,15 +40,15 @@
         <AppDefinition
           title="Block Height"
         >
-          <nuxt-link :to="`/generations/${transaction.block_height}`">
-            {{ transaction.block_height }}
+          <nuxt-link :to="`/generations/${transaction.blockHeight}`">
+            {{ transaction.blockHeight }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.tx.name_ttl"
+          v-if="transaction.tx.nameTtl"
           title="name ttl"
         >
-          {{ transaction.tx.name_ttl }}
+          {{ transaction.tx.nameTtl }}
         </AppDefinition>
         <AppDefinition
           v-if="transaction.tx.deposit"
@@ -75,11 +75,11 @@
           {{ transaction.tx.nonce }}
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.time"
+          v-if="transaction.microTime"
           title="Time"
           class="tx-time"
         >
-          {{ transaction.time | timestampToUTC }}
+          {{ transaction.microTime | timestampToUTC }}
         </AppDefinition>
       </div>
     </div>

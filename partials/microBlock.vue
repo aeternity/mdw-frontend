@@ -30,7 +30,7 @@
                   type="list"
                   title="Pof"
                 >
-                  {{ data.pof_hash }}
+                  {{ data.pofHash }}
                 </AppDefinition>
               </AppTableCell>
             </AppTableRow>
@@ -38,9 +38,9 @@
               <AppTableCell extend>
                 <AppDefinition
                   type="list"
-                  title="txs_hash"
+                  title="txsHash"
                 >
-                  {{ data.txs_hash }}
+                  {{ data.txsHash }}
                 </AppDefinition>
               </AppTableCell>
             </AppTableRow>
@@ -61,7 +61,7 @@
                   title="Prev hash"
                 >
                   <FormatAddress
-                    :value="data.prev_hash"
+                    :value="data.prevHash"
                     length="full"
                   />
                 </AppDefinition>
@@ -76,7 +76,7 @@
                   title="Prev key hash"
                 >
                   <FormatAddress
-                    :value="data.prev_key_hash"
+                    :value="data.prevKeyHash"
                     length="full"
                   />
                 </AppDefinition>
@@ -89,7 +89,7 @@
                   title="State hash"
                 >
                   <FormatAddress
-                    :value="data.state_hash"
+                    :value="data.stateHash"
                     length="full"
                   />
                 </AppDefinition>
