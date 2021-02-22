@@ -35,7 +35,7 @@ import GenerationDetails from '../../../partials/generationDetails'
 import MicroBlocks from '../../../partials/microBlocks'
 import MicroBlock from '../../../partials/microBlock'
 import PageHeader from '../../../components/PageHeader'
-import TXListItem from '../../../partials/transactions/txListItem'
+import TXListItem from '../../../partials/txListItem'
 import { transformMetaTx } from '../../../store/utils'
 
 export default {

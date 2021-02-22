@@ -25,8 +25,8 @@
 </template>
 
 <script>
-import NameList from '../../partials/names/nameList'
-import Name from '../../partials/names/name'
+import NameList from '../../partials/nameList'
+import Name from '../../partials/name'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
 import { mapState } from 'vuex'

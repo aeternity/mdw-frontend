@@ -24,8 +24,8 @@
 </template>
 
 <script>
-import ChannelList from '../../partials/channels/channelList'
-import Channel from '../../partials/channels/channel'
+import ChannelList from '../../partials/channelList'
+import Channel from '../../partials/channel'
 import PageHeader from '../../components/PageHeader'
 import { mapState } from 'vuex'
 

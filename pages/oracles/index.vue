@@ -25,8 +25,8 @@
 </template>
 
 <script>
-import OracleList from '../../partials/oracles/oracleList'
-import Oracle from '../../partials/oracles/oracle'
+import OracleList from '../../partials/oracleList'
+import Oracle from '../../partials/oracle'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
 import { mapState } from 'vuex'
