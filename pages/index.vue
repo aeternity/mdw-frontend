@@ -46,7 +46,6 @@ import { mapState } from 'vuex'
 
 export default {
   name: 'AppDashboard',
-  layout: 'default',
   components: {
     Generations,
     Generation,
@@ -54,6 +53,7 @@ export default {
     TXListItem,
     PageHeader
   },
+  layout: 'default',
   computed: {
     ...mapState('generations', {
       generations (state) {

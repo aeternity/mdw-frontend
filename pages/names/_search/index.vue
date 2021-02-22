@@ -35,15 +35,15 @@ export default {
     Name,
     PageHeader
   },
+  async asyncData ({ store, params }) {
+    const names = await store.dispatch('names/searchNames', params.search)
+    return { names, loading: false }
+  },
   data () {
     return {
       names: [],
       loading: true
     }
-  },
-  async asyncData ({ store, params }) {
-    const names = await store.dispatch('names/searchNames', params.search)
-    return { names, loading: false }
   }
 }
 </script>

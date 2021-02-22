@@ -70,6 +70,10 @@ export default {
     LoadMoreButton,
     Multiselect
   },
+  async asyncData ({ store }) {
+    const auctions = await store.dispatch('names/getActiveNameAuctions', { 'page': 1, 'limit': 10, sort: 'expiration', length: 0 })
+    return { auctions, page: 2, loading: false }
+  },
   data () {
     return {
       page: 1,
@@ -89,10 +93,6 @@ export default {
     actualLength () {
       return this.length > 0 ? this.length + 6 : this.length
     }
-  },
-  async asyncData ({ store }) {
-    const auctions = await store.dispatch('names/getActiveNameAuctions', { 'page': 1, 'limit': 10, sort: 'expiration', length: 0 })
-    return { auctions, page: 2, loading: false }
   },
   methods: {
     async loadMore () {

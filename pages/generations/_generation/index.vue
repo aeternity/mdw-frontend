@@ -47,14 +47,6 @@ export default {
     MicroBlock,
     TXListItem
   },
-  data () {
-    return {
-      height: 0,
-      prev: '',
-      next: '',
-      generation: null
-    }
-  },
   async asyncData ({ store, params, error }) {
     let generation = null
     if (isNaN(params.generation)) {
@@ -79,6 +71,14 @@ export default {
     const prev = current < 1 ? '' : `/generations/${current - 1}`
     const next = height === current ? '' : `/generations/${current + 1}`
     return { generation, prev, next, height }
+  },
+  data () {
+    return {
+      height: 0,
+      prev: '',
+      next: '',
+      generation: null
+    }
   },
   methods: {
     checkTxMeta (transaction) {

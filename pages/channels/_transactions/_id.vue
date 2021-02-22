@@ -40,15 +40,15 @@ export default {
     TXListItem,
     PageHeader
   },
+  async asyncData ({ store, params }) {
+    const transactions = await store.dispatch('channels/getChannelTx', params.id)
+    return { transactions, loading: false }
+  },
   data () {
     return {
       transactions: [],
       loading: true
     }
-  },
-  async asyncData ({ store, params }) {
-    const transactions = await store.dispatch('channels/getChannelTx', params.id)
-    return { transactions, loading: false }
   }
 }
 </script>

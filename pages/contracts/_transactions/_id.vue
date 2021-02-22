@@ -39,14 +39,6 @@ export default {
     LoadMoreButton,
     PageHeader
   },
-  data () {
-    return {
-      contract: '',
-      transactions: [],
-      loading: true,
-      page: 1
-    }
-  },
   async asyncData ({ store, params }) {
     let createTransactions = await store.dispatch('contracts/getContractCreateTx', { contract: params.id, page: 1, limit: 10 })
     const calls = await store.dispatch('contracts/getContractCalls', { contract: params.id, page: 1, limit: 10 })
@@ -55,6 +47,14 @@ export default {
       transactions = [...createTransactions, ...calls]
     }
     return { contract: params.id, transactions, loading: false, page: 2 }
+  },
+  data () {
+    return {
+      contract: '',
+      transactions: [],
+      loading: true,
+      page: 1
+    }
   },
   methods: {
     async loadMore () {

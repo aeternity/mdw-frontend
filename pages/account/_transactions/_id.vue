@@ -53,18 +53,6 @@ export default {
     LoadMoreButton,
     Multiselect
   },
-  data () {
-    return {
-      account: {
-        id: this.$route.params.id
-      },
-      transactions: [],
-      page: 1,
-      loading: true,
-      value: 'All',
-      options: this.$store.state.filterOptions
-    }
-  },
   async asyncData ({ store, params, query }) {
     let value = null
     if (query.txtype) {
@@ -80,6 +68,18 @@ export default {
     })
     value = value || 'All'
     return { address: params.id, transactions, page: 2, value, loading: false }
+  },
+  data () {
+    return {
+      account: {
+        id: this.$route.params.id
+      },
+      transactions: [],
+      page: 1,
+      loading: true,
+      value: 'All',
+      options: this.$store.state.filterOptions
+    }
   },
   methods: {
     async loadMore () {
