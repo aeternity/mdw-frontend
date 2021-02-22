@@ -29,8 +29,8 @@
 
 <script>
 
-import TxList from '../../../partials/transactions/txList'
-import TXListItem from '../../../partials/transactions/txListItem'
+import TxList from '../../../partials/txList'
+import TXListItem from '../../../partials/txListItem'
 import PageHeader from '../../../components/PageHeader'
 
 export default {

@@ -26,8 +26,8 @@
 
 <script>
 
-import OracleList from '../../../partials/oracles/oracleList'
-import OracleQuery from '../../../partials/oracles/oracleQuery'
+import OracleList from '../../../partials/oracleList'
+import OracleQuery from '../../../partials/oracleQuery'
 import PageHeader from '../../../components/PageHeader'
 import LoadMoreButton from '../../../components/loadMoreButton'
 
