@@ -33,7 +33,7 @@ import TransactionDetails from '../../../partials/transactionDetails'
 import LoadMoreButton from '../../../components/loadMoreButton'
 
 export default {
-  name: 'ChannelTransactions',
+  name: 'ContractsTransactions',
   components: {
     TransactionDetails,
     LoadMoreButton,

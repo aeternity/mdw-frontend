@@ -45,9 +45,6 @@ export default {
       } else if (this.query.match(/^ok_[1-9A-HJ-NP-Za-km-z]{48,50}$/)) {
         this.$router.push(`/oracles/queries/${this.query}`)
         this.query = ''
-      } else if (this.query.match(/^ch_[1-9A-HJ-NP-Za-km-z]{48,50}$/)) {
-        this.$router.push(`/channels/transactions/${this.query}`)
-        this.query = ''
       } else if (this.query.match(/^ct_[1-9A-HJ-NP-Za-km-z]{48,50}$/)) {
         this.$router.push(`/contracts/transactions/${this.query}`)
         this.query = ''
