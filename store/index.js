@@ -29,17 +29,7 @@ export const state = () => ({
     'ga_attach',
     'ga_meta',
     'contract_call',
-    'contract_create',
-    'channel_close_mutual',
-    'channel_close_solo',
-    'channel_create',
-    'channel_deposit',
-    'channel_force_progress',
-    'channel_offchain',
-    'channel_settle',
-    'channel_slash',
-    'channel_snapshot_solo',
-    'channel_withdraw'
+    'contract_create'
   ]
 })
 

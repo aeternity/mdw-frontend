@@ -140,9 +140,6 @@ export default {
         // return `/oracles/queries/${this.value}`
         return ''
       }
-      if (this.value.match(/^ch_[1-9A-HJ-NP-Za-km-z]{48,50}$/)) {
-        return `/channels/transactions/${this.value}`
-      }
       if (this.value.match(/^ct_[1-9A-HJ-NP-Za-km-z]{48,50}$/)) {
         return `/contracts/transactions/${this.value}`
       }

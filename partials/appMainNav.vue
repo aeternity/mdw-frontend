@@ -8,7 +8,7 @@
         <div class="mobile-search">
           <SearchBar />
           <p class="mobile-search-info">
-            Search by account, height, tx, oracle, contract, channel
+            Search by account, height, tx, oracle, contract
           </p>
         </div>
       </AppNavAccordion>
@@ -27,9 +27,6 @@
         <AppNavLink to="/transactions">
           Transactions
         </AppNavLink>
-        <!-- <AppNavLink to="/channels">
-          Channels
-        </AppNavLink> -->
         <AppNavLink to="/contracts">
           Contracts
         </AppNavLink>
