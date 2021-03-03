@@ -56,9 +56,7 @@ export const actions = {
   getGenerationByHash: async function ({ rootGetters: { middleware }, commit, dispatch }, keyHash) {
     try {
       const generation = await middleware.getBlockByHash(keyHash)
-      commit('setGenerations', generation)
-      await dispatch('getGenerationByRange', { start: generation.height, end: generation.height })
-      return generation
+      return await dispatch('getGenerationByRange', { start: generation.height, end: generation.height })
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', {
@@ -83,11 +81,11 @@ export const actions = {
   updateTx: async function ({ state, rootGetters: { middleware }, commit, dispatch }, tx) {
     try {
       if (!state.generations[tx.blockHeight]) {
-        await dispatch('getGenerationByRange', tx.blockHeight, tx.blockHeight)
+        await dispatch('getGenerationByRange', { start: tx.blockHeight, end: tx.blockHeight })
       }
       if (!state.generations[tx.blockHeight]['microBlocks'][tx.blockHash]) {
-        const generation = await middleware.getBlocks(`${tx.blockHeight}`)
-        commit('setMicroBlockGen', generation.microBlocks[tx.blockHash])
+        const generation = (await middleware.getBlocks(`${tx.blockHeight}`)).data[0]
+        commit('setMicroBlockGen', Object.values(generation.microBlocks).find(mb => mb.hash === tx.blockHash))
       }
       commit('setTxGen', tx)
     } catch (e) {
