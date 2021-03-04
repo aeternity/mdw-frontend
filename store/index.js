@@ -2,7 +2,6 @@ import { initMiddleware } from './utils'
 
 export const state = () => ({
   nodeStatus: {},
-  middleware: null,
   nodeUrl: process.env.middlewareURL,
   wsUrl: process.env.middlewareWS,
   networkName: process.env.networkName,
@@ -33,6 +32,10 @@ export const state = () => ({
     'contract_create'
   ]
 })
+
+export const getters = {
+  middleware: () => initMiddleware()
+}
 
 export const mutations = {
   /**
@@ -83,14 +86,11 @@ export const mutations = {
   },
   setWsConnectionStatus (state, status) {
     state.wsConnected = status
-  },
-  setMiddleware (state, payload) {
-    state.middleware = payload
   }
 }
 
 export const actions = {
-  async height ({ rootState: { middleware }, commit }) {
+  async height ({ rootGetters: { middleware }, commit }) {
     try {
       const { mdwHeight: height } = await middleware.getStatus()
       commit('setHeight', height)
@@ -99,7 +99,7 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  async status ({ rootState: { middleware }, commit }) {
+  async status ({ rootGetters: { middleware }, commit }) {
     try {
       const status = await middleware.getStatus()
       commit('setStatus', status)
@@ -125,7 +125,6 @@ export const actions = {
     }
   },
   async nuxtServerInit ({ commit, dispatch }, { context }) {
-    commit('setMiddleware', initMiddleware())
     await dispatch('height')
     await Promise.all([
       dispatch('generations/nuxtServerInit', context),

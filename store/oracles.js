@@ -13,7 +13,7 @@ export const mutations = {
 }
 
 export const actions = {
-  getOracles: async function ({ rootState: { middleware }, commit }, { page, limit }) {
+  getOracles: async function ({ rootGetters: { middleware }, commit }, { page, limit }) {
     try {
       const oracles = await middleware.getActiveOracles({ page, limit })
       commit('setOracles', oracles.data)

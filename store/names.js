@@ -9,7 +9,7 @@ export const mutations = {
 }
 
 export const actions = {
-  getNames: async function ({ rootState: { middleware }, commit }, { page, limit }) {
+  getNames: async function ({ rootGetters: { middleware }, commit }, { page, limit }) {
     try {
       const names = await middleware.getAllNames({ page, limit })
       commit('setNames', names.data)
@@ -18,7 +18,7 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getActiveNameAuctions: async function ({ rootState: { middleware }, commit }, { page, limit, sort, length }) {
+  getActiveNameAuctions: async function ({ rootGetters: { middleware }, commit }, { page, limit, sort, length }) {
     try {
       const auctions = await middleware.getAllAuctions({ page, limit, sort, length: length > 0 ? length : undefined })
       return auctions.data

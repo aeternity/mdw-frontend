@@ -48,8 +48,7 @@ module.exports = {
   plugins: [
     { src: '~/plugins/directives/copyToClipboard.js' },
     { src: '~/plugins/directives/removeSpacesOnCopy.js' },
-    { src: '~/plugins/directives/vueSliderComponent.js', mode: 'client' },
-    { src: '~/store/plugins/initMiddleware.js', ssr: false }
+    { src: '~/plugins/directives/vueSliderComponent.js', mode: 'client' }
   ],
   /*
     ** Router config

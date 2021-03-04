@@ -13,7 +13,7 @@ export const mutations = {
 }
 
 export const actions = {
-  getContracts: async function ({ rootState: { middleware }, commit }, { page, limit }) {
+  getContracts: async function ({ rootGetters: { middleware }, commit }, { page, limit }) {
     try {
       const contracts = await middleware.getTxBackward({ typeGroup: 'contract', page, limit })
       commit('setContracts', contracts.data)
@@ -25,7 +25,7 @@ export const actions = {
     }
   },
 
-  getContractCreateTx: async function ({ rootState: { middleware }, commit }, { contract, page, limit }) {
+  getContractCreateTx: async function ({ rootGetters: { middleware }, commit }, { contract, page, limit }) {
     try {
       const contractTx = await middleware.getTxBackward({ type: 'contract_create', page, limit, contract })
       return contractTx.data
@@ -35,7 +35,7 @@ export const actions = {
       return { transactions: [] }
     }
   },
-  getContractCalls: async function ({ rootState: { middleware }, commit }, { contract, page, limit }) {
+  getContractCalls: async function ({ rootGetters: { middleware }, commit }, { contract, page, limit }) {
     try {
       const contractCalls = await middleware.getTxBackward({ type: 'contract_call', page, limit, contract })
       return contractCalls.data

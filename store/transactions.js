@@ -24,7 +24,7 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatestTransactions: async function ({ state, rootState: { middleware }, commit }, { limit }) {
+  getLatestTransactions: async function ({ state, rootGetters: { middleware }, commit }, { limit }) {
     try {
       const page = state.lastPage + 1
       const transactions = await middleware.getTxBackward({ page, limit })
@@ -35,7 +35,7 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTxByType: async function ({ rootState: { middleware }, commit }, { page, limit, type }) {
+  getTxByType: async function ({ rootGetters: { middleware }, commit }, { page, limit, type }) {
     try {
       const transactions = await middleware.getTxBackward({ page, limit, type })
       return transactions.data
@@ -44,7 +44,7 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTransactionByHash: async function ({ rootState: { middleware }, commit }, hash) {
+  getTransactionByHash: async function ({ rootGetters: { middleware }, commit }, hash) {
     try {
       const tx = await middleware.getTxByHash(hash)
       commit('setTransactions', [tx])
@@ -54,7 +54,7 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTransactionByAccount: async function ({ rootState: { middleware }, commit }, { account, limit, page, txtype }) {
+  getTransactionByAccount: async function ({ rootGetters: { middleware }, commit }, { account, limit, page, txtype }) {
     try {
       const tx = await middleware.getTxBackward({ account, limit, page, type: txtype || undefined })
       return tx.data

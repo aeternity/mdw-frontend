@@ -42,7 +42,7 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getGenerationByRange: async function ({ rootState: { middleware }, commit }, { start, end }) {
+  getGenerationByRange: async function ({ rootGetters: { middleware }, commit }, { start, end }) {
     try {
       const generations = await middleware.getBlocks(`${start}-${end}`)
       commit('setGenerations', generations.data)
@@ -53,7 +53,7 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getGenerationByHash: async function ({ rootState: { middleware }, commit, dispatch }, keyHash) {
+  getGenerationByHash: async function ({ rootGetters: { middleware }, commit, dispatch }, keyHash) {
     try {
       const generation = await middleware.getBlockByHash(keyHash)
       commit('setGenerations', generation)
@@ -80,7 +80,7 @@ export const actions = {
       })
     }
   },
-  updateTx: async function ({ state, rootState: { middleware }, commit, dispatch }, tx) {
+  updateTx: async function ({ state, rootGetters: { middleware }, commit, dispatch }, tx) {
     try {
       if (!state.generations[tx.blockHeight]) {
         await dispatch('getGenerationByRange', tx.blockHeight, tx.blockHeight)
