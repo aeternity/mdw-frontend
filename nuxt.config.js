@@ -1,8 +1,6 @@
 const pkg = require('./package')
 
 module.exports = {
-  mode: process.env.NUXT_APP_MODE || 'universal',
-
   /*
   ** Headers of the page
   */
@@ -38,7 +36,7 @@ module.exports = {
   ],
   env: {
     middlewareURL: process.env.NUXT_APP_NODE_URL || 'https://mainnet.aeternity.io/mdw',
-    middlewareWS: process.env.NUXT_APP_NODE_WS || 'ws://mainnet.aeternity.io/mdw/websocket',
+    middlewareWS: process.env.NUXT_APP_NODE_WS || 'wss://mainnet.aeternity.io/mdw/websocket',
     networkName: process.env.NUXT_APP_NETWORK_NAME || 'MAIN NET',
     swaggerHub: process.env.NUXT_APP_SWAGGER_HUB || 'https://app.swaggerhub.com/apis/sshekhar/aeternal/1.0',
     enableFaucet: process.env.NUXT_APP_ENABLE_FAUCET || false,
@@ -63,16 +61,8 @@ module.exports = {
   ** Nuxt.js modules
   */
   modules: [
-    // Doc: https://github.com/nuxt-community/axios-module#usage
-    '@nuxtjs/axios',
     '@nuxtjs/svg-sprite'
   ],
-  /*
-  ** Axios module configuration
-  */
-  axios: {
-    // See https://github.com/nuxt-community/axios-module#options
-  },
 
   /*
   ** Build configuration
@@ -81,21 +71,22 @@ module.exports = {
     /*
     ** You can extend webpack config here
     */
+    transpile: ['@aeternity/aepp-sdk/es/utils/swagger'],
 
     postcss: {
       plugins: {
         autoprefixer: {}
       }
     },
-    extend (config, ctx) {
-      // Run ESLint on save
-      if (ctx.isDev && ctx.isClient) {
-        config.module.rules.push({
-          enforce: 'pre',
-          test: /\.(js|vue)$/,
-          loader: 'eslint-loader',
-          exclude: /(node_modules)/
-        })
+    extend (config, { isDev, isClient }) {
+      if (isDev && isClient) {
+        const options = {
+          exclude: ['node_modules'],
+          fix: true,
+          extensions: ['.js', '.vue']
+        }
+        const EslintPlugin = require('eslint-webpack-plugin')
+        config.plugins.push(new EslintPlugin(options))
       }
     }
   }

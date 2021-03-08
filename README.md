@@ -1,11 +1,9 @@
-# Aeternal Frontend
+# Middleware Frontend
 
 ## Getting started
 
-1. Git clone the middleware repository
-2. Navigate to `/frontend` folder
-3. Install the dependencies: `npm install`
-4. Run the application:
+1. Install the dependencies: `npm install`
+2. Run the application:
 
     - Dev Mode: `npm run dev`
     - Prod: `npm run build && npm start`

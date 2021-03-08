@@ -33,19 +33,11 @@ import TransactionDetails from '../../../partials/transactionDetails'
 import LoadMoreButton from '../../../components/loadMoreButton'
 
 export default {
-  name: 'ChannelTransactions',
+  name: 'ContractsTransactions',
   components: {
     TransactionDetails,
     LoadMoreButton,
     PageHeader
-  },
-  data () {
-    return {
-      contract: '',
-      transactions: [],
-      loading: true,
-      page: 1
-    }
   },
   async asyncData ({ store, params }) {
     let createTransactions = await store.dispatch('contracts/getContractCreateTx', { contract: params.id, page: 1, limit: 10 })
@@ -55,6 +47,14 @@ export default {
       transactions = [...createTransactions, ...calls]
     }
     return { contract: params.id, transactions, loading: false, page: 2 }
+  },
+  data () {
+    return {
+      contract: '',
+      transactions: [],
+      loading: true,
+      page: 1
+    }
   },
   methods: {
     async loadMore () {

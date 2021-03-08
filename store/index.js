@@ -1,4 +1,5 @@
-import axios from 'axios'
+import camelcaseKeysDeep from 'camelcase-keys-deep'
+import { initMiddleware } from './utils'
 
 export const state = () => ({
   nodeStatus: {},
@@ -29,19 +30,13 @@ export const state = () => ({
     'ga_attach',
     'ga_meta',
     'contract_call',
-    'contract_create',
-    'channel_close_mutual',
-    'channel_close_solo',
-    'channel_create',
-    'channel_deposit',
-    'channel_force_progress',
-    'channel_offchain',
-    'channel_settle',
-    'channel_slash',
-    'channel_snapshot_solo',
-    'channel_withdraw'
+    'contract_create'
   ]
 })
+
+export const getters = {
+  middleware: () => initMiddleware()
+}
 
 export const mutations = {
   /**
@@ -96,24 +91,19 @@ export const mutations = {
 }
 
 export const actions = {
-  async height ({ rootState: { nodeUrl }, commit }) {
+  async height ({ rootGetters: { middleware }, commit }) {
     try {
-      const url = `${nodeUrl}/status`
-      const { height } = (await axios.get(url)).data.mdw_height
-      console.info('MDW 🔗 ' + url)
+      const { mdwHeight: height } = await middleware.getStatus()
       commit('setHeight', height)
       return height
     } catch (e) {
       commit('catchError', 'Error', { root: true })
     }
   },
-  async status ({ rootState: { nodeUrl }, commit }) {
+  async status ({ rootGetters: { middleware }, commit }) {
     try {
-      const url = `${nodeUrl}/status`
-      const status = (await axios.get(url)).data
-      console.info('MDW 🔗 ' + url)
+      const status = await middleware.getStatus()
       commit('setStatus', status)
-      return status
     } catch (e) {
       commit('catchError', 'Error', { root: true })
     }
@@ -135,7 +125,7 @@ export const actions = {
       }
     }
   },
-  async nuxtServerInit ({ dispatch }, { context }) {
+  async nuxtServerInit ({ commit, dispatch }, { context }) {
     await dispatch('height')
     await Promise.all([
       dispatch('generations/nuxtServerInit', context),
@@ -156,7 +146,7 @@ function handleWsOpen (socket, commit, dispatch) {
 
 function processWsData (data, commit, dispatch) {
   if (data.includes('payload')) {
-    data = JSON.parse(data).payload
+    data = camelcaseKeysDeep(JSON.parse(data).payload)
     if (data.tx) {
       commit('transactions/setTransactions', [data])
       dispatch('generations/updateTx', data)
@@ -167,7 +157,7 @@ function processWsData (data, commit, dispatch) {
           root: true
         })
       }
-    } else if (data.key_block_id) {
+    } else if (data.pofHash) {
       dispatch('generations/updateMicroBlock', data)
     }
   }

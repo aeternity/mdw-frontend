@@ -37,8 +37,8 @@
 
 <script>
 
-import TxList from '../../../partials/transactions/txList'
-import TXListItem from '../../../partials/transactions/txListItem'
+import TxList from '../../../partials/txList'
+import TXListItem from '../../../partials/txListItem'
 import PageHeader from '../../../components/PageHeader'
 import LoadMoreButton from '../../../components/loadMoreButton'
 import Multiselect from 'vue-multiselect'
@@ -52,18 +52,6 @@ export default {
     PageHeader,
     LoadMoreButton,
     Multiselect
-  },
-  data () {
-    return {
-      account: {
-        id: this.$route.params.id
-      },
-      transactions: [],
-      page: 1,
-      loading: true,
-      value: 'All',
-      options: this.$store.state.filterOptions
-    }
   },
   async asyncData ({ store, params, query }) {
     let value = null
@@ -80,6 +68,18 @@ export default {
     })
     value = value || 'All'
     return { address: params.id, transactions, page: 2, value, loading: false }
+  },
+  data () {
+    return {
+      account: {
+        id: this.$route.params.id
+      },
+      transactions: [],
+      page: 1,
+      loading: true,
+      value: 'All',
+      options: this.$store.state.filterOptions
+    }
   },
   methods: {
     async loadMore () {

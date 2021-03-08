@@ -1,6 +1,6 @@
 {
   "name": "aeternal-frontend",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "frontend for aeternal",
   "author": "Shubhendu Shekhar",
   "repository": {
@@ -19,29 +19,29 @@
   },
   "dependencies": {
     "@aeternity/aepp-components-3": "3.0.0-alpha.9",
+    "@aeternity/aepp-sdk": "^7.7.0",
     "@download/blockies": "1.0.3",
-    "@nuxtjs/axios": "5.5.4",
-    "@nuxtjs/svg-sprite": "0.2.1",
-    "bignumber.js": "9.0.0",
+    "@nuxtjs/svg-sprite": "0.5.2",
+    "bignumber.js": "9.0.1",
     "camelcase-keys-deep": "0.1.0",
-    "clipboard-copy": "3.0.0",
+    "clipboard-copy": "4.0.1",
     "normalize-scss": "7.0.1",
-    "nuxt": "2.9.2",
-    "vue": "2.6.10",
+    "nuxt": "2.15.0",
+    "vue": "2.6.12",
     "vue-multiselect": "2.1.6",
-    "vue-slider-component": "3.0.41"
+    "vue-slider-component": "3.2.11"
   },
   "devDependencies": {
     "@vue/eslint-config-standard": "4.0.0",
-    "babel-eslint": "10.0.2",
-    "eslint": "5.16.0",
-    "eslint-config-prettier": "6.0.0",
-    "eslint-loader": "2.1.2",
-    "eslint-plugin-import": "2.18.0",
-    "eslint-plugin-prettier": "3.1.0",
-    "eslint-plugin-vue": "5.2.3",
-    "prettier": "1.18.2",
-    "sass-loader": "7.1.0",
-    "node-sass": "4.12.0"
+    "babel-eslint": "10.0.3",
+    "eslint": "7.20.0",
+    "eslint-config-prettier": "7.2.0",
+    "eslint-webpack-plugin": "2.5.2",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-prettier": "3.3.1",
+    "eslint-plugin-vue": "7.6.0",
+    "prettier": "2.2.1",
+    "sass-loader": "10.1.1",
+    "node-sass": "4.14.1"
   }
 }

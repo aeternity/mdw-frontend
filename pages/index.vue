@@ -39,14 +39,13 @@
 <script>
 import Generations from '../partials/generations'
 import Generation from '../partials/generation'
-import TxList from '../partials/transactions/txList'
-import TXListItem from '../partials/transactions/txListItem'
+import TxList from '../partials/txList'
+import TXListItem from '../partials/txListItem'
 import PageHeader from '../components/PageHeader'
 import { mapState } from 'vuex'
 
 export default {
   name: 'AppDashboard',
-  layout: 'default',
   components: {
     Generations,
     Generation,
@@ -54,6 +53,7 @@ export default {
     TXListItem,
     PageHeader
   },
+  layout: 'default',
   computed: {
     ...mapState('generations', {
       generations (state) {

@@ -10,12 +10,13 @@
       :next="next"
     />
     <GenerationDetails
+      v-if="generation"
       :data="generation"
       :dynamic-data="height"
     />
     <MicroBlocks>
       <MicroBlock
-        v-for="(microBlock, number) in generation.micro_blocks"
+        v-for="(microBlock, number) in generation.microBlocks"
         :key="number"
         :data="microBlock"
       >
@@ -35,7 +36,7 @@ import GenerationDetails from '../../../partials/generationDetails'
 import MicroBlocks from '../../../partials/microBlocks'
 import MicroBlock from '../../../partials/microBlock'
 import PageHeader from '../../../components/PageHeader'
-import TXListItem from '../../../partials/transactions/txListItem'
+import TXListItem from '../../../partials/txListItem'
 import { transformMetaTx } from '../../../store/utils'
 
 export default {
@@ -46,14 +47,6 @@ export default {
     MicroBlocks,
     MicroBlock,
     TXListItem
-  },
-  data () {
-    return {
-      height: 0,
-      prev: '',
-      next: '',
-      generation: null
-    }
   },
   async asyncData ({ store, params, error }) {
     let generation = null
@@ -74,11 +67,19 @@ export default {
       generation = store.generations.generations[current]
     } else {
       const generations = await store.dispatch('generations/getGenerationByRange', { start: current - 1, end: current + 1 })
-      generation = generations[current]
+      generation = generations.find(g => g.height === current)
     }
     const prev = current < 1 ? '' : `/generations/${current - 1}`
     const next = height === current ? '' : `/generations/${current + 1}`
     return { generation, prev, next, height }
+  },
+  data () {
+    return {
+      height: 0,
+      prev: '',
+      next: '',
+      generation: null
+    }
   },
   methods: {
     checkTxMeta (transaction) {

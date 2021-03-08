@@ -1,4 +1,3 @@
-import axios from 'axios'
 export const state = () => ({
   names: []
 })
@@ -10,37 +9,18 @@ export const mutations = {
 }
 
 export const actions = {
-  getNames: async function ({ rootState: { nodeUrl }, commit }, { page, limit }) {
+  getNames: async function ({ rootGetters: { middleware }, commit }, { page, limit }) {
     try {
-      const url = `${nodeUrl}/names/all?limit=${limit}&page=${page}`
-      const names = await axios.get(url)
-      console.info('MDW 🔗 ' + url)
-      commit('setNames', names.data.data)
-      return names.data.data
+      const names = await middleware.getAllNames({ page, limit })
+      commit('setNames', names.data)
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
     }
   },
-  searchNames: async function ({ rootState: { nodeUrl }, commit }, query) {
+  getActiveNameAuctions: async function ({ rootGetters: { middleware }, commit }, { page, limit, sort, length }) {
     try {
-      const url = `${nodeUrl}/middleware/names/${query}`
-      const names = await axios.get(url)
-      console.info('MDW 🔗 ' + url)
-      return names.data
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-    }
-  },
-  getActiveNameAuctions: async function ({ rootState: { nodeUrl }, commit }, { page, limit, sort, length }) {
-    try {
-      let url = `${nodeUrl}/middleware/names/auctions/active?limit=${limit}&page=${page}&sort=${sort}`
-      if (length > 0) {
-        url += `&length=${length}`
-      }
-      const auctions = await axios.get(url)
-      console.info('MDW 🔗 ' + url)
+      const auctions = await middleware.getAllAuctions({ page, limit, sort, length: length > 0 ? length : undefined })
       return auctions.data
     } catch (e) {
       console.log(e)

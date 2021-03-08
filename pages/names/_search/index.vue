@@ -24,8 +24,8 @@
 </template>
 
 <script>
-import NameList from '../../../partials/names/nameList'
-import Name from '../../../partials/names/name'
+import NameList from '../../../partials/nameList'
+import Name from '../../../partials/name'
 import PageHeader from '../../../components/PageHeader'
 
 export default {
@@ -35,15 +35,15 @@ export default {
     Name,
     PageHeader
   },
+  async asyncData ({ store, params }) {
+    const names = await store.dispatch('names/searchNames', params.search)
+    return { names, loading: false }
+  },
   data () {
     return {
       names: [],
       loading: true
     }
-  },
-  async asyncData ({ store, params }) {
-    const names = await store.dispatch('names/searchNames', params.search)
-    return { names, loading: false }
   }
 }
 </script>

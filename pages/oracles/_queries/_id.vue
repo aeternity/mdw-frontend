@@ -26,8 +26,8 @@
 
 <script>
 
-import OracleList from '../../../partials/oracles/oracleList'
-import OracleQuery from '../../../partials/oracles/oracleQuery'
+import OracleList from '../../../partials/oracleList'
+import OracleQuery from '../../../partials/oracleQuery'
 import PageHeader from '../../../components/PageHeader'
 import LoadMoreButton from '../../../components/loadMoreButton'
 
@@ -39,16 +39,16 @@ export default {
     PageHeader,
     LoadMoreButton
   },
+  async asyncData ({ store, params }) {
+    const queries = await store.dispatch('oracles/getAllQueries', { oracleId: params.id, 'page': 1, 'limit': 10 })
+    return { oracleId: params.id, queries, page: 2 }
+  },
   data () {
     return {
       oracleId: null,
       queries: [],
       page: 1
     }
-  },
-  async asyncData ({ store, params }) {
-    const queries = await store.dispatch('oracles/getAllQueries', { oracleId: params.id, 'page': 1, 'limit': 10 })
-    return { oracleId: params.id, queries, page: 2 }
   },
   methods: {
     async loadMore () {
