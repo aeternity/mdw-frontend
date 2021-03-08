@@ -1,3 +1,4 @@
+import camelcaseKeysDeep from 'camelcase-keys-deep'
 import { initMiddleware } from './utils'
 
 export const state = () => ({
@@ -145,7 +146,7 @@ function handleWsOpen (socket, commit, dispatch) {
 
 function processWsData (data, commit, dispatch) {
   if (data.includes('payload')) {
-    data = JSON.parse(data).payload
+    data = camelcaseKeysDeep(JSON.parse(data).payload)
     if (data.tx) {
       commit('transactions/setTransactions', [data])
       dispatch('generations/updateTx', data)
@@ -156,7 +157,7 @@ function processWsData (data, commit, dispatch) {
           root: true
         })
       }
-    } else if (data.key_block_id) {
+    } else if (data.pofHash) {
       dispatch('generations/updateMicroBlock', data)
     }
   }
