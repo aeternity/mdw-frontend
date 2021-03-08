@@ -40,22 +40,17 @@ export default {
     PageHeader,
     LoadMoreButton
   },
+  async asyncData ({ store }) {
+    await store.dispatch('contracts/getContracts', { page: 1, limit: 10 })
+    return { loading: false }
+  },
   data () {
     return {
-      page: 1,
+      page: 2,
       loading: true
     }
   },
-  computed: {
-    ...mapState('contracts', [
-      'contracts'
-    ])
-  },
-  async mounted () {
-    this.loading = true
-    await this.loadMore()
-    this.loading = false
-  },
+  computed: mapState('contracts', ['contracts']),
   methods: {
     async loadMore () {
       await this.$store.dispatch('contracts/getContracts', { 'page': this.page, 'limit': 10 })
