@@ -124,13 +124,6 @@ export const actions = {
         handleWsOpen(state.ws, commit, dispatch)
       }
     }
-  },
-  async nuxtServerInit ({ commit, dispatch }, { context }) {
-    await dispatch('height')
-    await Promise.all([
-      dispatch('generations/nuxtServerInit', context),
-      dispatch('transactions/nuxtServerInit', context)
-    ])
   }
 }
 
