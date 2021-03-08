@@ -2,7 +2,7 @@
   <div class="transaction">
     <div class="transaction-main-info">
       <div class="transaction-main-info-inner">
-        <nuxt-link :to="`/transactions/${transaction.tx_index}`">
+        <nuxt-link :to="`/transactions/${transaction.hash}`">
           <div class="transaction-label">
             <LabelType
               :title="transaction | transformTxType"
@@ -14,14 +14,14 @@
       <div class="transaction-main-info-inner accounts">
         <AccountGroup>
           <Account
-            v-if="transaction.tx.sender_id"
-            :value="transaction.tx.sender_id"
+            v-if="transaction.tx.senderId"
+            :value="transaction.tx.senderId"
             title="Sender"
             icon
           />
           <Account
-            v-if="transaction.tx.oracle_id"
-            :value="transaction.tx.oracle_id"
+            v-if="transaction.tx.oracleId"
+            :value="transaction.tx.oracleId"
             title="oracle"
             icon
           />
@@ -33,8 +33,8 @@
         <AppDefinition
           title="Block Height"
         >
-          <nuxt-link :to="`/generations/${transaction.block_height}`">
-            {{ transaction.block_height }}
+          <nuxt-link :to="`/generations/${transaction.blockHeight}`">
+            {{ transaction.blockHeight }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
@@ -60,19 +60,19 @@
           {{ transaction.tx.query }}
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.tx.query_fee"
+          v-if="transaction.tx.queryFee"
           title="Query fee"
         >
           <FormatAeUnit
-            :value="transaction.tx.query_fee"
+            :value="transaction.tx.queryFee"
           />
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.time"
+          v-if="transaction.microTime"
           title="Time"
           class="tx-time"
         >
-          {{ transaction.time | timestampToUTC }}
+          {{ transaction.microTime | timestampToUTC }}
         </AppDefinition>
       </div>
     </div>

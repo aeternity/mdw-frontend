@@ -2,7 +2,7 @@
   <div class="transaction">
     <div class="transaction-main-info">
       <div class="transaction-main-info-inner">
-        <nuxt-link :to="`/transactions/${transaction.tx_index}`">
+        <nuxt-link :to="`/transactions/${transaction.hash}`">
           <div class="transaction-label">
             <LabelType
               :title="transaction | transformTxType"
@@ -13,8 +13,8 @@
       </div>
       <div class="transaction-main-info-inner accounts">
         <Account
-          v-if="transaction.tx.oracle_id"
-          :value="transaction.tx.oracle_id"
+          v-if="transaction.tx.oracleId"
+          :value="transaction.tx.oracleId"
           title="oracle"
           icon
         />
@@ -25,8 +25,8 @@
         <AppDefinition
           title="Block Height"
         >
-          <nuxt-link :to="`/generations/${transaction.block_height}`">
-            {{ transaction.block_height }}
+          <nuxt-link :to="`/generations/${transaction.blockHeight}`">
+            {{ transaction.blockHeight }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition

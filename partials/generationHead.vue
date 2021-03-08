@@ -52,7 +52,7 @@
                   <AppDefinition
                     title="Microblocks"
                   >
-                    {{ data.micro_blocks.length }}
+                    {{ data.microBlocks.length }}
                   </AppDefinition>
                 </AppTableCell>
               </AppTableRowColumn>
@@ -122,7 +122,7 @@
                   title="Prev hash"
                 >
                   <FormatAddress
-                    :value="data.prev_hash"
+                    :value="data.prevHash"
                     length="full"
                   />
                 </AppDefinition>
@@ -137,7 +137,7 @@
                   title="Prev key hash"
                 >
                   <FormatAddress
-                    :value="data.prev_key_hash"
+                    :value="data.prevKeyHash"
                     length="full"
                   />
                 </AppDefinition>
@@ -150,7 +150,7 @@
                   title="State hash"
                 >
                   <FormatAddress
-                    :value="data.state_hash"
+                    :value="data.stateHash"
                     length="full"
                   />
                 </AppDefinition>

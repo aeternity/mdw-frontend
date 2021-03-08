@@ -1,12 +1,10 @@
-import axios from 'axios'
+import { fetchJson } from './utils'
 
 export const actions = {
   getAccountDetails: async function ({ rootState: { nodeUrl }, commit }, account) {
     try {
-      const url = `${nodeUrl}/v2/accounts/${account}`
-      const acc = await axios.get(url)
-      console.info('MDW 🔗 ' + url)
-      return acc.data
+      const acc = await fetchJson(`${nodeUrl.slice(0, -4)}/v2/accounts/${account}`)
+      return acc
     } catch (e) {
       commit('catchError', 'Error', { root: true })
       const basicError = {
@@ -23,9 +21,7 @@ export const actions = {
 
   createFaucetTx: async function ({ rootState: { faucetApi }, commit }, account) {
     try {
-      const url = `${faucetApi}/${account}`
-      const acc = await axios.post(url)
-      console.info('MDW 🔗 ' + url)
+      const acc = await fetchJson(`${faucetApi}/${account}`)
       return acc.data
     } catch (e) {
       commit('catchError', 'Error', {

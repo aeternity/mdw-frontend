@@ -2,7 +2,7 @@
   <div class="transaction">
     <div class="transaction-main-info">
       <div class="transaction-main-info-inner">
-        <nuxt-link :to="`/transactions/${transaction.tx_index}`">
+        <nuxt-link :to="`/transactions/${transaction.hash}`">
           <div class="transaction-label">
             <LabelType
               :title="transaction | transformTxType"
@@ -13,8 +13,8 @@
       </div>
       <div class="transaction-main-info-inner accounts">
         <Account
-          v-if="transaction.tx.owner_id"
-          :value="transaction.tx.owner_id"
+          v-if="transaction.tx.ownerId"
+          :value="transaction.tx.ownerId"
           title="owner"
           icon
         />
@@ -25,8 +25,8 @@
         <AppDefinition
           title="Block Height"
         >
-          <nuxt-link :to="`/generations/${transaction.block_height}`">
-            {{ transaction.block_height }}
+          <nuxt-link :to="`/generations/${transaction.blockHeight}`">
+            {{ transaction.blockHeight }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
@@ -54,19 +54,19 @@
           />
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.tx.gas_price"
+          v-if="transaction.tx.gasPrice"
           title="gas price"
         >
           <FormatAeUnit
-            :value="transaction.tx.gas_price"
+            :value="transaction.tx.gasPrice"
           />
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.time"
+          v-if="transaction.microTime"
           title="Time"
           class="tx-time"
         >
-          {{ transaction.time | timestampToUTC }}
+          {{ transaction.microTime | timestampToUTC }}
         </AppDefinition>
       </div>
     </div>

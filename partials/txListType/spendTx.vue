@@ -2,7 +2,7 @@
   <div class="transaction">
     <div class="transaction-main-info">
       <div class="transaction-main-info-inner">
-        <nuxt-link :to="`/transactions/${transaction.tx_index}`">
+        <nuxt-link :to="`/transactions/${transaction.hash}`">
           <div class="transaction-label">
             <LabelType
               :title="updateType"
@@ -14,14 +14,14 @@
       <div class="transaction-main-info-inner accounts">
         <AccountGroup>
           <Account
-            v-if="transaction.tx.sender_id"
-            :value="transaction.tx.sender_id"
+            v-if="transaction.tx.senderId"
+            :value="transaction.tx.senderId"
             title="Sender"
             icon
           />
           <Account
-            v-if="transaction.tx.recipient_id"
-            :value="transaction.tx.recipient_id"
+            v-if="transaction.tx.recipientId"
+            :value="transaction.tx.recipientId"
             title="recipient"
             icon
           />
@@ -33,8 +33,8 @@
         <AppDefinition
           title="Block Height"
         >
-          <nuxt-link :to="`/generations/${transaction.block_height}`">
-            {{ transaction.block_height }}
+          <nuxt-link :to="`/generations/${transaction.blockHeight}`">
+            {{ transaction.blockHeight }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
@@ -46,7 +46,7 @@
           />
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.time && transaction.tx.nonce"
+          v-if="transaction.microTime && transaction.tx.nonce"
           title="nonce"
         >
           {{ transaction.tx.nonce }}
@@ -62,11 +62,11 @@
           />
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.time"
+          v-if="transaction.microTime"
           title="Time"
           class="tx-time"
         >
-          {{ transaction.time | timestampToUTC }}
+          {{ transaction.microTime | timestampToUTC }}
         </AppDefinition>
       </div>
     </div>
@@ -108,10 +108,10 @@ export default {
     updateType () {
       const txType = transformTxType(this.transaction)
       if (this.address && this.transaction.tx.type === 'SpendTx') {
-        if (this.address === this.transaction.tx.sender_id) {
+        if (this.address === this.transaction.tx.senderId) {
           return `${txType} OUT`
         }
-        if (this.address === this.transaction.tx.recipient_id) {
+        if (this.address === this.transaction.tx.recipientId) {
           return `${txType} IN`
         }
       }

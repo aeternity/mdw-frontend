@@ -130,7 +130,7 @@
                   title="Prev hash"
                 >
                   <FormatAddress
-                    :value="data.prev_hash"
+                    :value="data.prevHash"
                     length="full"
                     icon
                   />
@@ -149,8 +149,8 @@
                     title="Prev key hash"
                   >
                     <FormatAddress
-                      v-if="data.prev_key_hash"
-                      :value="data.prev_key_hash"
+                      v-if="data.prevKeyHash"
+                      :value="data.prevKeyHash"
                       length="full"
                       icon
                     />
@@ -165,8 +165,8 @@
                   title="State hash"
                 >
                   <FormatAddress
-                    v-if="data.state_hash"
-                    :value="data.state_hash"
+                    v-if="data.stateHash"
+                    :value="data.stateHash"
                     length="full"
                     icon
                   />
@@ -244,7 +244,7 @@ export default {
   },
   computed: {
     microBlocks () {
-      return this.data.micro_blocks ? Object.values(this.data.micro_blocks).length : 0
+      return this.data.microBlocks ? Object.values(this.data.microBlocks).length : 0
     }
   }
 }

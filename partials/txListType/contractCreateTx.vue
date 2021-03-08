@@ -2,7 +2,7 @@
   <div class="transaction">
     <div class="transaction-main-info">
       <div class="transaction-main-info-inner">
-        <nuxt-link :to="`/transactions/${transaction.tx_index}`">
+        <nuxt-link :to="`/transactions/${transaction.hash}`">
           <div class="transaction-label">
             <LabelType
               :title="transaction | transformTxType"
@@ -13,8 +13,8 @@
       </div>
       <div class="transaction-main-info-inner accounts">
         <Account
-          v-if="transaction.tx.owner_id"
-          :value="transaction.tx.owner_id"
+          v-if="transaction.tx.ownerId"
+          :value="transaction.tx.ownerId"
           title="owner"
           icon
         />
@@ -25,21 +25,21 @@
         <AppDefinition
           title="Block Height"
         >
-          <nuxt-link :to="`/generations/${transaction.block_height}`">
-            {{ transaction.block_height }}
+          <nuxt-link :to="`/generations/${transaction.blockHeight}`">
+            {{ transaction.blockHeight }}
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.tx.abi_version"
+          v-if="transaction.tx.abiVersion"
           title="abi version"
         >
-          {{ transaction.tx.abi_version }}
+          {{ transaction.tx.abiVersion }}
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.tx.vm_version"
+          v-if="transaction.tx.vmVersion"
           title="vm version"
         >
-          {{ transaction.tx.vm_version }}
+          {{ transaction.tx.vmVersion }}
         </AppDefinition>
       </div>
       <div class="transaction-type-info-item">
@@ -58,10 +58,10 @@
           {{ transaction.tx.nonce }}
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.time"
+          v-if="transaction.microTime"
           title="Time"
         >
-          {{ transaction.time | timestampToUTC }}
+          {{ transaction.microTime | timestampToUTC }}
         </AppDefinition>
       </div>
     </div>

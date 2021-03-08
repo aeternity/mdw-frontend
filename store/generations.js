@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import axios from 'axios'
 
 export const state = () => ({
   generations: {},
@@ -11,8 +10,8 @@ export const mutations = {
   setGenerations (state, generations) {
     for (let i of Object.keys(generations)) {
       const generation = generations[i]
-      if (!generation.micro_blocks) {
-        generation.micro_blocks = {}
+      if (!generation.microBlocks) {
+        generation.microBlocks = {}
       }
       Vue.set(state.hashToHeight, generation.hash, generation.height)
       Vue.set(state.generations, generation.height, generation)
@@ -22,14 +21,14 @@ export const mutations = {
     state.lastFetchedGen = last
   },
   setMicroBlockGen (state, mb) {
-    const height = state.hashToHeight[mb.prev_key_hash]
+    const height = state.hashToHeight[mb.prevKeyHash]
     if (!mb.transactions) {
       mb.transactions = {}
     }
-    state.generations[height]['micro_blocks'][mb.hash] = mb
+    state.generations[height]['microBlocks'][mb.hash] = mb
   },
   setTxGen (state, tx) {
-    state.generations[tx.block_height]['micro_blocks'][tx.block_hash]['transactions'][tx.hash] = tx
+    state.generations[tx.blockHeight]['microBlocks'][tx.blockHash]['transactions'][tx.hash] = tx
   }
 }
 
@@ -43,27 +42,23 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getGenerationByRange: async function ({ rootState: { nodeUrl }, commit }, { start, end }) {
+  getGenerationByRange: async function ({ rootGetters: { middleware }, commit }, { start, end }) {
     try {
-      const url = `${nodeUrl}/txs/gen/${start}-${end}`
-      const generations = await axios.get(url)
-      console.info('MDW 🔗 ' + url)
-      commit('setGenerations', generations.data.data)
+      const generations = await middleware.getBlocks(`${start}-${end}`)
+      commit('setGenerations', generations.data)
       commit('setLastFetched', start)
-      return generations.data.data
+      return generations.data
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
     }
   },
-  getGenerationByHash: async function ({ rootState: { nodeUrl }, commit, dispatch }, keyHash) {
+  getGenerationByHash: async function ({ rootGetters: { middleware }, commit, dispatch }, keyHash) {
     try {
-      const url = `${nodeUrl}/v2/key-blocks/hash/${keyHash}`
-      const generations = await axios.get(url)
-      console.info('MDW 🔗 ' + url)
-      commit('setGenerations', generations.data)
-      await dispatch('getGenerationByRange', { start: generations.data.height, end: generations.data.height })
-      return generations.data.data
+      const generation = await middleware.getBlockByHash(keyHash)
+      commit('setGenerations', generation)
+      await dispatch('getGenerationByRange', { start: generation.height, end: generation.height })
+      return generation
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', {
@@ -73,8 +68,8 @@ export const actions = {
   },
   updateMicroBlock: async function ({ state, commit, dispatch }, mb) {
     try {
-      if (!state.hashToHeight[mb.prev_key_hash]) {
-        await dispatch('getGenerationByHash', mb.prev_key_hash)
+      if (!state.hashToHeight[mb.prevKeyHash]) {
+        await dispatch('getGenerationByHash', mb.prevKeyHash)
       } else {
         commit('setMicroBlockGen', mb)
       }
@@ -85,14 +80,14 @@ export const actions = {
       })
     }
   },
-  updateTx: async function ({ state, rootState: { nodeUrl }, commit, dispatch }, tx) {
+  updateTx: async function ({ state, rootGetters: { middleware }, commit, dispatch }, tx) {
     try {
-      if (!state.generations[tx.block_height]) {
-        await dispatch('getGenerationByRange', tx.block_height, tx.block_height)
+      if (!state.generations[tx.blockHeight]) {
+        await dispatch('getGenerationByRange', tx.blockHeight, tx.blockHeight)
       }
-      if (!state.generations[tx.block_height]['micro_blocks'][tx.block_hash]) {
-        const mb = await axios.get(nodeUrl + '/v2/micro-blocks/hash/' + tx.block_hash + '/header')
-        commit('setMicroBlockGen', mb)
+      if (!state.generations[tx.blockHeight]['microBlocks'][tx.blockHash]) {
+        const generation = await middleware.getBlocks(`${tx.blockHeight}`)
+        commit('setMicroBlockGen', generation.microBlocks[tx.blockHash])
       }
       commit('setTxGen', tx)
     } catch (e) {

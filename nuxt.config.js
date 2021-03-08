@@ -61,16 +61,8 @@ module.exports = {
   ** Nuxt.js modules
   */
   modules: [
-    // Doc: https://github.com/nuxt-community/axios-module#usage
-    '@nuxtjs/axios',
     '@nuxtjs/svg-sprite'
   ],
-  /*
-  ** Axios module configuration
-  */
-  axios: {
-    // See https://github.com/nuxt-community/axios-module#options
-  },
 
   /*
   ** Build configuration
@@ -79,6 +71,7 @@ module.exports = {
     /*
     ** You can extend webpack config here
     */
+    transpile: ['@aeternity/aepp-sdk/es/utils/swagger'],
 
     postcss: {
       plugins: {
