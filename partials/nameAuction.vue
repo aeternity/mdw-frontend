@@ -17,7 +17,7 @@
           length="nochunk"
           icon
         />
-        <!--TODO: not a winning bid--><Account
+        <Account
           :value="data.info.lastBid.tx.accountId"
           title="Winning Bidder"
           icon
@@ -29,7 +29,7 @@
         <AppDefinition
           title="Winning Bid"
         >
-          <FormatAeUnit :value="Number(5)" />
+          <FormatAeUnit :value="Number(data.info.lastBid.tx.nameFee)" />
         </AppDefinition>
       </div>
       <div class="auction-type-info-item">
