@@ -40,7 +40,7 @@ export default {
       txDetails = store.transactions.transactions[txDetails]
     }
     if (!txDetails) {
-      txDetails = await store.dispatch('transactions/getTransactionByHash', transaction)
+      txDetails = await store.dispatch('transactions/getTransactionById', transaction)
     }
     if (!txDetails) {
       return error({
