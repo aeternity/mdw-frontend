@@ -17,22 +17,6 @@
         @input="processInput"
       />
     </div>
-    <div class="auction-slider">
-      <client-only>
-        Name Length: {{ length || 'All' }}
-        <vue-slider
-          ref="slider"
-          v-model="length"
-          :min="0"
-          :max="12"
-          :marks="true"
-          :data="auctionMarks"
-          :tooltip="'focus'"
-          :clickable="true"
-          @change="processInput"
-        />
-      </client-only>
-    </div>
     <div class="auction-error-messages">
       <div v-if="!loading && auctions.length > 0">
         <List>
@@ -109,9 +93,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.auction-error-messages {
-  margin-top: 2em;
-}
-</style>
