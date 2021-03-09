@@ -9,7 +9,6 @@ export const state = () => ({
   swaggerHub: process.env.swaggerHub,
   enableFaucet: process.env.enableFaucet,
   faucetApi: process.env.faucetAPI,
-  error: '',
   height: 0,
   status: {},
   ws: null,
@@ -56,21 +55,6 @@ export const mutations = {
     state.nodeUrl = nodeUrl
   },
   /**
-   * catchError
-   * @param state
-   * @param error
-   */
-  catchError (state, error) {
-    state.error = error
-  },
-  /**
-   * clearError
-   * @param state
-   */
-  clearError (state) {
-    state.error = ''
-  },
-  /**
    * setHeight mutates the
    * state property height
    * @param {Object} state
@@ -96,7 +80,6 @@ export const actions = {
       return middleware[functionName](args)
     } catch (e) {
       console.log(e)
-      commit('catchError', e)
       return null
     }
   },
@@ -112,7 +95,7 @@ export const actions = {
         handleWsOpen(state.ws, commit, dispatch)
       }
       state.ws.onerror = e => {
-        commit('catchError', e)
+        console.log(e)
         commit('setWsConnectionStatus', false)
         handleWsOpen(state.ws, commit, dispatch)
       }
