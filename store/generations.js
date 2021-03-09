@@ -33,67 +33,36 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatestGenerations: async function ({ state, rootState: { height }, commit, dispatch }, maxBlocks) {
-    try {
-      const range = calculateBlocksToFetch(height, state.lastFetchedGen, maxBlocks)
-      return await dispatch('getGenerationByRange', range)
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-    }
+  getLatestGenerations: async function ({ state, rootState: { height }, dispatch }, maxBlocks) {
+    const range = calculateBlocksToFetch(height, state.lastFetchedGen, maxBlocks)
+    return dispatch('getGenerationByRange', range)
   },
-  getGenerationByRange: async function ({ rootGetters: { middleware }, commit }, { start, end }) {
-    try {
-      const generations = await middleware.getBlocks(`${start}-${end}`)
-      commit('setGenerations', generations.data)
-      commit('setLastFetched', start)
-      return generations.data
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-    }
+  getGenerationByRange: async function ({ dispatch, commit }, { start, end }) {
+    const generations = await dispatch('callMiddlewareFunction', { functionName: 'getBlocks', args: `${start}-${end}` }, { root: true })
+    commit('setGenerations', generations?.data)
+    commit('setLastFetched', start)
+    return generations?.data
   },
-  getGenerationByHash: async function ({ rootGetters: { middleware }, commit, dispatch }, keyHash) {
-    try {
-      const generation = await middleware.getBlockByHash(keyHash)
-      return await dispatch('getGenerationByRange', { start: generation.height, end: generation.height })
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', {
-        root: true
-      })
-    }
+  getGenerationByHash: async function ({ dispatch }, keyHash) {
+    const generation = await dispatch('callMiddlewareFunction', { functionName: 'getBlockByHash', args: keyHash }, { root: true })
+    return generation && dispatch('getGenerationByRange', { start: generation.height, end: generation.height })
   },
   updateMicroBlock: async function ({ state, commit, dispatch }, mb) {
-    try {
-      if (!state.hashToHeight[mb.prevKeyHash]) {
-        await dispatch('getGenerationByHash', mb.prevKeyHash)
-      } else {
-        commit('setMicroBlockGen', mb)
-      }
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', {
-        root: true
-      })
+    if (!state.hashToHeight[mb.prevKeyHash]) {
+      await dispatch('getGenerationByHash', mb.prevKeyHash)
+    } else {
+      commit('setMicroBlockGen', mb)
     }
   },
-  updateTx: async function ({ state, rootGetters: { middleware }, commit, dispatch }, tx) {
-    try {
-      if (!state.generations[tx.blockHeight]) {
-        await dispatch('getGenerationByRange', { start: tx.blockHeight, end: tx.blockHeight })
-      }
-      if (!state.generations[tx.blockHeight]['microBlocks'][tx.blockHash]) {
-        const generation = (await middleware.getBlocks(`${tx.blockHeight}`)).data[0]
-        commit('setMicroBlockGen', Object.values(generation.microBlocks).find(mb => mb.hash === tx.blockHash))
-      }
-      commit('setTxGen', tx)
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', {
-        root: true
-      })
+  updateTx: async function ({ state, commit, dispatch }, tx) {
+    if (!state.generations[tx.blockHeight]) {
+      await dispatch('getGenerationByRange', { start: tx.blockHeight, end: tx.blockHeight })
     }
+    if (!state.generations[tx.blockHeight]['microBlocks'][tx.blockHash]) {
+      const generation = await dispatch('callMiddlewareFunction', { functionName: 'getBlocks', args: `${tx.blockHeight}` }, { root: true })
+      commit('setMicroBlockGen', Object.values(generation.data[0].microBlocks).find(mb => mb.hash === tx.blockHash))
+    }
+    commit('setTxGen', tx)
   }
 }
 

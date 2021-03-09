@@ -50,8 +50,8 @@ export default {
   },
   computed: mapState('generations', ['generations']),
   methods: {
-    loadMoreGen () {
-      this.$store.dispatch('generations/getLatestGenerations', this.limitGen)
+    async loadMoreGen () {
+      await this.$store.dispatch('generations/getLatestGenerations', this.limitGen)
     }
   }
 }

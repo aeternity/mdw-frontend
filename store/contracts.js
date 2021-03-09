@@ -13,36 +13,21 @@ export const mutations = {
 }
 
 export const actions = {
-  getContracts: async function ({ rootGetters: { middleware }, commit }, { page, limit }) {
-    try {
-      const contracts = await middleware.getTxBackward({ typeGroup: 'contract', page, limit })
-      commit('setContracts', contracts.data)
-      return contracts.data
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-      return []
-    }
+  getContracts: async function ({ dispatch, commit }, { page, limit }) {
+    const args = { typeGroup: 'contract', page, limit }
+    const contracts = await dispatch('callMiddlewareFunction', { functionName: 'getTxBackward', args }, { root: true })
+    commit('setContracts', contracts ? contracts.data : [])
+    return contracts ? contracts.data : []
   },
 
-  getContractCreateTx: async function ({ rootGetters: { middleware }, commit }, { contract, page, limit }) {
-    try {
-      const contractTx = await middleware.getTxBackward({ type: 'contract_create', page, limit, contract })
-      return contractTx.data
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-      return { transactions: [] }
-    }
+  getContractCreateTx: async function ({ dispatch }, { contract, page, limit }) {
+    const args = { type: 'contract_create', page, limit, contract }
+    const contractTx = await dispatch('callMiddlewareFunction', { functionName: 'getTxBackward', args }, { root: true })
+    return contractTx ? contractTx.data : { transactions: [] }
   },
-  getContractCalls: async function ({ rootGetters: { middleware }, commit }, { contract, page, limit }) {
-    try {
-      const contractCalls = await middleware.getTxBackward({ type: 'contract_call', page, limit, contract })
-      return contractCalls.data
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-      return []
-    }
+  getContractCalls: async function ({ dispatch }, { contract, page, limit }) {
+    const args = { type: 'contract_call', page, limit, contract }
+    const contractTx = await dispatch('callMiddlewareFunction', { functionName: 'getTxBackward', args }, { root: true })
+    return contractTx ? contractTx.data : []
   }
 }

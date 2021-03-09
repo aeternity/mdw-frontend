@@ -91,22 +91,19 @@ export const mutations = {
 }
 
 export const actions = {
-  async height ({ rootGetters: { middleware }, commit }) {
+  async callMiddlewareFunction ({ rootGetters: { middleware }, commit }, { functionName, args }) {
     try {
-      const { mdwHeight: height } = await middleware.getStatus()
-      commit('setHeight', height)
-      return height
+      return middleware[functionName](args)
     } catch (e) {
-      commit('catchError', 'Error', { root: true })
+      console.log(e)
+      commit('catchError', e)
+      return null
     }
   },
-  async status ({ rootGetters: { middleware }, commit }) {
-    try {
-      const status = await middleware.getStatus()
-      commit('setStatus', status)
-    } catch (e) {
-      commit('catchError', 'Error', { root: true })
-    }
+  async height ({ dispatch, commit }) {
+    const height = (await dispatch('callMiddlewareFunction', { functionName: 'getStatus' }))?.mdwHeight
+    if (height) commit('setHeight', height)
+    return height
   },
   setupWebSocket ({ state, commit, dispatch }) {
     if (process.client && !state.wsConnected) {

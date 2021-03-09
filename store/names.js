@@ -9,33 +9,17 @@ export const mutations = {
 }
 
 export const actions = {
-  getNames: async function ({ rootGetters: { middleware }, commit }, { page, limit }) {
-    try {
-      const names = await middleware.getAllNames({ page, limit })
-      commit('setNames', names.data)
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-    }
+  getNames: async function ({ dispatch, commit }, { page, limit }) {
+    const names = await dispatch('callMiddlewareFunction', { functionName: 'getAllNames', args: { page, limit } }, { root: true })
+    commit('setNames', names ? names.data : [])
   },
-  searchNames: async function ({ rootGetters: { middleware }, commit }, id) {
-    try {
-      const name = await middleware.getNameById(id)
-      return [name]
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-      return []
-    }
+  searchNames: async function ({ dispatch }, id) {
+    const name = await dispatch('callMiddlewareFunction', { functionName: 'getNameById', args: id }, { root: true })
+    return name ? [name] : []
   },
-  getActiveNameAuctions: async function ({ rootGetters: { middleware }, commit }, { page, limit, by, length }) {
-    try {
-      const auctions = await middleware.getAllAuctions({ page, limit, by, length: length > 0 ? length : undefined })
-      return auctions.data
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-      return []
-    }
+  getActiveNameAuctions: async function ({ dispatch }, { page, limit, by, length }) {
+    const args = { page, limit, by, length: length > 0 ? length : undefined }
+    const auctions = await dispatch('callMiddlewareFunction', { functionName: 'getAllAuctions', args }, { root: true })
+    return auctions ? auctions.data : []
   }
 }
