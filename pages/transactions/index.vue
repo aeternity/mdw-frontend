@@ -16,13 +16,13 @@
       />
     </div>
     <div v-if="Object.keys(transactions).length > 0">
-      <TxList>
+      <List>
         <TXListItem
           v-for="(item, index) in Object.values(transactions)"
           :key="index"
           :data="item"
         />
-      </TxList>
+      </List>
       <LoadMoreButton @update="loadmore" />
     </div>
     <div v-if="loading">
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import TxList from '../../partials/txList'
+import List from '../../components/list'
 import TXListItem from '../../partials/txListItem'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
@@ -45,7 +45,7 @@ import { transformMetaTx } from '../../store/utils'
 export default {
   name: 'AppTransactions',
   components: {
-    TxList,
+    List,
     TXListItem,
     PageHeader,
     LoadMoreButton,

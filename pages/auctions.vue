@@ -35,13 +35,13 @@
     </div>
     <div class="auction-error-messages">
       <div v-if="!loading && auctions.length > 0">
-        <NameAuctionList>
+        <List>
           <NameAuction
             v-for="(item, index) of auctions"
             :key="index"
             :data="item"
           />
-        </NameAuctionList>
+        </List>
         <LoadMoreButton @update="loadMore" />
       </div>
       <div v-if="loading">
@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import NameAuctionList from '../partials/nameAuctionList'
+import List from '../components/list'
 import NameAuction from '../partials/nameAuction'
 import PageHeader from '../components/PageHeader'
 import LoadMoreButton from '../components/loadMoreButton'
@@ -64,7 +64,7 @@ import Multiselect from 'vue-multiselect'
 export default {
   name: 'AppNames',
   components: {
-    NameAuctionList,
+    List,
     NameAuction,
     PageHeader,
     LoadMoreButton,

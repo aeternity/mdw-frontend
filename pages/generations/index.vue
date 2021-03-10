@@ -7,7 +7,7 @@
       :has-crumbs="true"
       :page="{to: '/generations', name: 'Generations'}"
     />
-    <Generations>
+    <List>
       <nuxt-link
         v-for="(generation, number) in Object.values(generations).reverse()"
         :key="number"
@@ -18,7 +18,7 @@
           :data="generation"
         />
       </nuxt-link>
-    </Generations>
+    </List>
     <LoadMoreButton @update="loadMoreGen" />
   </div>
 </template>
@@ -26,7 +26,7 @@
 <script>
 
 import { mapState } from 'vuex'
-import Generations from '../../partials/generations'
+import List from '../../components/list'
 import Generation from '../../partials/generation'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
@@ -34,7 +34,7 @@ import LoadMoreButton from '../../components/loadMoreButton'
 export default {
   name: 'AppGenerations',
   components: {
-    Generations,
+    List,
     Generation,
     PageHeader,
     LoadMoreButton

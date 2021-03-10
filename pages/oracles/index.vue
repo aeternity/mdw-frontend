@@ -6,13 +6,13 @@
       :page="{to: '/oracles', name: 'Oracles'}"
     />
     <div v-if="Object.keys(oracles).length">
-      <OracleList>
+      <List>
         <Oracle
           v-for="(item, index) of Object.values(oracles)"
           :key="index"
           :data="item"
         />
-      </OracleList>
+      </List>
       <LoadMoreButton @update="loadMore" />
     </div>
     <div v-if="loading">
@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import OracleList from '../../partials/oracleList'
+import List from '../../components/list'
 import Oracle from '../../partials/oracle'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
@@ -34,7 +34,7 @@ import { mapState } from 'vuex'
 export default {
   name: 'AppOracles',
   components: {
-    OracleList,
+    List,
     Oracle,
     PageHeader,
     LoadMoreButton
