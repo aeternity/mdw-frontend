@@ -6,13 +6,13 @@
       :page="{to: `/names/search/${$route.params.search}`, name: `Search results for ${$route.params.search}`}"
     />
     <div v-if="!loading && names.length > 0">
-      <NameList>
+      <List>
         <Name
           v-for="(item, index) of names"
           :key="index"
           :data="item"
         />
-      </NameList>
+      </List>
     </div>
     <div v-if="loading">
       Loading....
@@ -24,14 +24,14 @@
 </template>
 
 <script>
-import NameList from '../../../partials/nameList'
+import List from '../../../components/list'
 import Name from '../../../partials/name'
 import PageHeader from '../../../components/PageHeader'
 
 export default {
   name: 'AppNames',
   components: {
-    NameList,
+    List,
     Name,
     PageHeader
   },

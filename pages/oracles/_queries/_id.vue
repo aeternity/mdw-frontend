@@ -9,13 +9,13 @@
     <div
       v-if="queries.length"
     >
-      <OracleList>
+      <List>
         <OracleQuery
           v-for="(item, index) of queries"
           :key="index"
           :data="item"
         />
-      </OracleList>
+      </List>
       <LoadMoreButton @update="loadMore" />
     </div>
     <div v-else>
@@ -26,7 +26,7 @@
 
 <script>
 
-import OracleList from '../../../partials/oracleList'
+import List from '../../../components/list'
 import OracleQuery from '../../../partials/oracleQuery'
 import PageHeader from '../../../components/PageHeader'
 import LoadMoreButton from '../../../components/loadMoreButton'
@@ -34,7 +34,7 @@ import LoadMoreButton from '../../../components/loadMoreButton'
 export default {
   name: 'OracleQueryResponse',
   components: {
-    OracleList,
+    List,
     OracleQuery,
     PageHeader,
     LoadMoreButton

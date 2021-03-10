@@ -6,13 +6,13 @@
       :page="{to: '/contracts', name: 'Contracts'}"
     />
     <div v-if="Object.values(contracts).length">
-      <ContractList>
+      <List>
         <Contract
           v-for="(item, index) in Object.values(contracts)"
           :key="index"
           :data="item"
         />
-      </ContractList>
+      </List>
       <LoadMoreButton @update="loadMore" />
     </div>
     <div v-if="loading">
@@ -26,7 +26,7 @@
 
 <script>
 
-import ContractList from '../../partials/contractList'
+import List from '../../components/list'
 import Contract from '../../partials/contract'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
@@ -35,7 +35,7 @@ import { mapState } from 'vuex'
 export default {
   name: 'AppContracts',
   components: {
-    ContractList,
+    List,
     Contract,
     PageHeader,
     LoadMoreButton
