@@ -62,10 +62,5 @@ export const actions = {
       console.log(e)
       commit('catchError', 'Error', { root: true })
     }
-  },
-  nuxtServerInit ({ dispatch }, context) {
-    return (
-      dispatch('getLatestTransactions', { limit: 10 })
-    )
   }
 }

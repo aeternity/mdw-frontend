@@ -39,22 +39,17 @@ export default {
     PageHeader,
     LoadMoreButton
   },
+  async asyncData ({ store }) {
+    await store.dispatch('oracles/getOracles', { page: 1, limit: 10 })
+    return { loading: false }
+  },
   data () {
     return {
-      page: 1,
+      page: 2,
       loading: true
     }
   },
-  computed: {
-    ...mapState('oracles', [
-      'oracles'
-    ])
-  },
-  async mounted () {
-    this.loading = true
-    await this.loadMore()
-    this.loading = false
-  },
+  computed: mapState('oracles', ['oracles']),
   methods: {
     async loadMore () {
       await this.$store.dispatch('oracles/getOracles', { 'page': this.page, 'limit': 10 })

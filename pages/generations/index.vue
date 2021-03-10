@@ -39,22 +39,16 @@ export default {
     PageHeader,
     LoadMoreButton
   },
+  async asyncData ({ store }) {
+    await store.dispatch('height')
+    await store.dispatch('generations/getLatestGenerations', 10)
+  },
   data () {
     return {
       limitGen: 10
     }
   },
-  computed: {
-    ...mapState('generations', [
-      'generations'
-    ])
-  },
-  async mounted () {
-    if (!Object.keys(this.$store.state.generations.generations).length) {
-      await this.$store.dispatch('height')
-      this.$store.dispatch('generations/getLatestGenerations', 10)
-    }
-  },
+  computed: mapState('generations', ['generations']),
   methods: {
     loadMoreGen () {
       this.$store.dispatch('generations/getLatestGenerations', this.limitGen)

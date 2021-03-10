@@ -51,28 +51,26 @@ export default {
     LoadMoreButton,
     Multiselect
   },
+  async asyncData ({ store, route }) {
+    const type = route.query?.txtype || undefined
+    const transactions = await store.dispatch('transactions/getTxByType', {
+      page: 1,
+      limit: 10,
+      type
+    })
+    transactions.forEach(element => {
+      element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
+    })
+    return { transactions, loading: false }
+  },
   data () {
     return {
-      typePage: 1,
+      typePage: 2,
       loading: true,
       value: 'All',
       transactions: {},
       options: this.$store.state.filterOptions
     }
-  },
-  async mounted () {
-    if (this.$route.query.txtype && this.options.indexOf(this.$route.query.txtype) > 0) {
-      this.value = this.$route.query.txtype
-      await this.getTxByType()
-    } else {
-      if (!Object.keys(this.$store.state.transactions.transactions).length) {
-        await this.$store.dispatch('height')
-        await this.getAllTx()
-      } else {
-        this.transactions = this.$store.state.transactions.transactions
-      }
-    }
-    this.loading = false
   },
   methods: {
     async loadmore () {

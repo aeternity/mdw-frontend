@@ -39,22 +39,17 @@ export default {
     PageHeader,
     LoadMoreButton
   },
+  async asyncData ({ store }) {
+    await store.dispatch('names/getNames', { page: 1, limit: 10 })
+    return { loading: false }
+  },
   data () {
     return {
-      page: 1,
+      page: 2,
       loading: true
     }
   },
-  computed: {
-    ...mapState('names', [
-      'names'
-    ])
-  },
-  async mounted () {
-    this.loading = true
-    await this.loadMore()
-    this.loading = false
-  },
+  computed: mapState('names', ['names']),
   methods: {
     async loadMore () {
       await this.$store.dispatch('names/getNames', { 'page': this.page, 'limit': 10 })

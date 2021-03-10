@@ -94,11 +94,6 @@ export const actions = {
         root: true
       })
     }
-  },
-  nuxtServerInit ({ dispatch }, context) {
-    return (
-      dispatch('getLatestGenerations', 10)
-    )
   }
 }
 
