@@ -79,7 +79,7 @@ import { transformTxType } from '../../store/utils'
 import decodeBase64 from '../../plugins/filters/decodeBase64'
 
 export default {
-  name: 'OracleResponseTx',
+  name: 'OracleRespondTx',
   components: {
     LabelType,
     AppDefinition,
