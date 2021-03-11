@@ -13,7 +13,10 @@
           :data="item"
         />
       </List>
-      <LoadMoreButton @update="loadMore" />
+      <LoadMoreButton
+        v-if="nextPageUrl"
+        @update="getMore"
+      />
     </div>
     <div v-if="loading">
       Loading....
@@ -29,7 +32,7 @@ import List from '../../components/list'
 import Name from '../../partials/name'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'AppNames',
@@ -40,21 +43,15 @@ export default {
     LoadMoreButton
   },
   async asyncData ({ store }) {
-    await store.dispatch('names/getNames', { page: 1, limit: 10 })
+    await store.dispatch('names/getLatest', { page: 1, limit: 10 })
     return { loading: false }
   },
   data () {
     return {
-      page: 2,
       loading: true
     }
   },
-  computed: mapState('names', ['names']),
-  methods: {
-    async loadMore () {
-      await this.$store.dispatch('names/getNames', { 'page': this.page, 'limit': 10 })
-      this.page += 1
-    }
-  }
+  computed: mapState('names', ['names', 'nextPageUrl']),
+  methods: mapActions('names', ['getMore'])
 }
 </script>

@@ -24,7 +24,7 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatestTransactions: async function ({ state, rootGetters: { middleware }, commit }, { limit }) {
+  getLatest: async function ({ state, rootGetters: { middleware }, commit }, { limit }) {
     try {
       const page = state.lastPage + 1
       const transactions = await middleware.getTxBackward({ page, limit })

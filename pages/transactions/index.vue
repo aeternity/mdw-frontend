@@ -83,7 +83,7 @@ export default {
     },
     async getAllTx () {
       const tx = await this.$store.dispatch(
-        'transactions/getLatestTransactions',
+        'transactions/getLatest',
         { limit: 10 }
       )
       tx.forEach(element => {

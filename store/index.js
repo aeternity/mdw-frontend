@@ -144,7 +144,7 @@ function processWsData (data, commit, dispatch) {
       commit('transactions/setTransactions', [data])
       dispatch('generations/updateTx', data)
     } else if (data.beneficiary) {
-      commit('generations/setGenerations', [data])
+      commit('generations/addGenerations', [data])
       if (state.height < data.height) {
         commit('setHeight', data.height, {
           root: true
