@@ -18,9 +18,19 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getActiveNameAuctions: async function ({ rootGetters: { middleware }, commit }, { page, limit, sort, length }) {
+  searchNames: async function ({ rootGetters: { middleware }, commit }, id) {
     try {
-      const auctions = await middleware.getAllAuctions({ page, limit, sort, length: length > 0 ? length : undefined })
+      const name = await middleware.getNameById(id)
+      return [name]
+    } catch (e) {
+      console.log(e)
+      commit('catchError', 'Error', { root: true })
+      return []
+    }
+  },
+  getActiveNameAuctions: async function ({ rootGetters: { middleware }, commit }, { page, limit, by, length }) {
+    try {
+      const auctions = await middleware.getAllAuctions({ page, limit, by, length: length > 0 ? length : undefined })
       return auctions.data
     } catch (e) {
       console.log(e)

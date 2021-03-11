@@ -17,22 +17,6 @@
         @input="processInput"
       />
     </div>
-    <div class="auction-slider">
-      <client-only>
-        Name Length: {{ length || 'All' }}
-        <vue-slider
-          ref="slider"
-          v-model="length"
-          :min="0"
-          :max="12"
-          :marks="true"
-          :data="auctionMarks"
-          :tooltip="'focus'"
-          :clickable="true"
-          @change="processInput"
-        />
-      </client-only>
-    </div>
     <div class="auction-error-messages">
       <div v-if="!loading && auctions.length > 0">
         <List>
@@ -71,7 +55,7 @@ export default {
     Multiselect
   },
   async asyncData ({ store }) {
-    const auctions = await store.dispatch('names/getActiveNameAuctions', { 'page': 1, 'limit': 10, sort: 'expiration', length: 0 })
+    const auctions = await store.dispatch('names/getActiveNameAuctions', { 'page': 1, 'limit': 10, by: 'expiration', length: 0 })
     return { auctions, page: 2, loading: false }
   },
   data () {
@@ -82,8 +66,7 @@ export default {
       auctionMarks: ['All', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       options: [
         { name: 'Expiring Soon', value: 'expiration' },
-        { name: 'Name', value: 'name' },
-        { name: 'Max Bid', value: 'max_bid' }
+        { name: 'Name', value: 'name' }
       ],
       sortby: { name: 'Expiring Soon', value: 'expiration' },
       length: 0
@@ -96,23 +79,17 @@ export default {
   },
   methods: {
     async loadMore () {
-      const auctions = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, sort: this.sortby.value, length: this.actualLength })
+      const auctions = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
       this.auctions = [...this.auctions, ...auctions]
       this.page += 1
     },
     async processInput () {
       this.loading = true
       this.page = 1
-      this.auctions = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, sort: this.sortby.value, length: this.actualLength })
+      this.auctions = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
       this.page += 1
       this.loading = false
     }
   }
 }
 </script>
-
-<style lang="scss">
-.auction-error-messages {
-  margin-top: 2em;
-}
-</style>

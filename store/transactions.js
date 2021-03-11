@@ -44,9 +44,9 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTransactionByHash: async function ({ rootGetters: { middleware }, commit }, hash) {
+  getTransactionById: async function ({ rootGetters: { middleware }, commit }, id) {
     try {
-      const tx = await middleware.getTxByHash(hash)
+      const tx = await middleware[id.startsWith('th_') ? 'getTxByHash' : 'getTxByIndex'](id)
       commit('setTransactions', [tx])
       return tx
     } catch (e) {

@@ -2,18 +2,17 @@
   <div class="name">
     <div class="container-first">
       <div class="container-first-inner">
-        <!--<nuxt-link :to="`/transactions/${data.info.claimant}`">-->
-        <!--TODO: claimant?-->
-        <LabelType
-          title="Name"
-          fill="green"
-        />
-        <!--</nuxt-link> -->
-        <!--<nuxt-link :to="`/transactions/${data.info.claimant}`"> -->
-        <div class="name-value">
-          {{ data.name }}
-        </div>
-        <!--</nuxt-link>-->
+        <nuxt-link :to="`/transactions/${data.info.claims[0]}`">
+          <LabelType
+            title="Name"
+            fill="green"
+          />
+        </nuxt-link>
+        <nuxt-link :to="`/transactions/${data.info.claims[0]}`">
+          <div class="name-value">
+            {{ data.name }}
+          </div>
+        </nuxt-link>
       </div>
       <div class="container-first-inner">
         <Account
