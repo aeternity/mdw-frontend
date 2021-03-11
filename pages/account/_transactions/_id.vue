@@ -60,7 +60,7 @@ export default {
         value = query.txtype
       }
     }
-    const tx = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page: 1, limit: 10, txtype: value })
+    const tx = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page: 1, limit: 10, type: value })
     const transactions = []
     tx.forEach(element => {
       element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
@@ -83,8 +83,8 @@ export default {
   },
   methods: {
     async loadMore () {
-      const txtype = this.value === 'All' ? null : this.value
-      const tx = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, txtype })
+      const type = this.value === 'All' ? null : this.value
+      const tx = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, type })
       tx.forEach(element => {
         element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
         this.transactions.push(element)

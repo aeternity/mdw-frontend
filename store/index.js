@@ -9,7 +9,6 @@ export const state = () => ({
   swaggerHub: process.env.swaggerHub,
   enableFaucet: process.env.enableFaucet,
   faucetApi: process.env.faucetAPI,
-  error: '',
   height: 0,
   status: {},
   ws: null,
@@ -56,21 +55,6 @@ export const mutations = {
     state.nodeUrl = nodeUrl
   },
   /**
-   * catchError
-   * @param state
-   * @param error
-   */
-  catchError (state, error) {
-    state.error = error
-  },
-  /**
-   * clearError
-   * @param state
-   */
-  clearError (state) {
-    state.error = ''
-  },
-  /**
    * setHeight mutates the
    * state property height
    * @param {Object} state
@@ -91,22 +75,18 @@ export const mutations = {
 }
 
 export const actions = {
-  async height ({ rootGetters: { middleware }, commit }) {
+  async callMiddlewareFunction ({ rootGetters: { middleware }, commit }, { functionName, args }) {
     try {
-      const { mdwHeight: height } = await middleware.getStatus()
-      commit('setHeight', height)
-      return height
+      return middleware[functionName](args)
     } catch (e) {
-      commit('catchError', 'Error', { root: true })
+      console.log(e)
+      return null
     }
   },
-  async status ({ rootGetters: { middleware }, commit }) {
-    try {
-      const status = await middleware.getStatus()
-      commit('setStatus', status)
-    } catch (e) {
-      commit('catchError', 'Error', { root: true })
-    }
+  async height ({ dispatch, commit }) {
+    const height = (await dispatch('callMiddlewareFunction', { functionName: 'getStatus' }))?.mdwHeight
+    if (height) commit('setHeight', height)
+    return height
   },
   setupWebSocket ({ state, commit, dispatch }) {
     if (process.client && !state.wsConnected) {
@@ -115,7 +95,7 @@ export const actions = {
         handleWsOpen(state.ws, commit, dispatch)
       }
       state.ws.onerror = e => {
-        commit('catchError', e)
+        console.log(e)
         commit('setWsConnectionStatus', false)
         handleWsOpen(state.ws, commit, dispatch)
       }

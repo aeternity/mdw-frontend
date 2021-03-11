@@ -6,7 +6,6 @@ export const actions = {
       const acc = await fetchJson(`${nodeUrl.slice(0, -4)}/v2/accounts/${account}`)
       return acc
     } catch (e) {
-      commit('catchError', 'Error', { root: true })
       const basicError = {
         id: account,
         balance: 0,
@@ -24,9 +23,6 @@ export const actions = {
       const acc = await fetchJson(`${faucetApi}/${account}`)
       return acc.data
     } catch (e) {
-      commit('catchError', 'Error', {
-        root: true
-      })
       const basicError = {
         id: account,
         balance: 0,

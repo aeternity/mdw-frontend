@@ -24,43 +24,23 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatestTransactions: async function ({ state, rootGetters: { middleware }, commit }, { limit }) {
-    try {
-      const page = state.lastPage + 1
-      const transactions = await middleware.getTxBackward({ page, limit })
-      commit('setTransactions', transactions.data)
-      commit('setLastPage', page)
-      return transactions.data
-    } catch (e) {
-      commit('catchError', 'Error', { root: true })
-    }
+  getLatestTransactions: async function ({ state, dispatch, commit }, { limit }) {
+    const page = state.lastPage + 1
+    const transactions = await dispatch('callMiddlewareFunction', { functionName: 'getTxBackward', args: { page, limit } }, { root: true })
+    commit('setTransactions', transactions?.data)
+    if (transactions) commit('setLastPage', page)
+    return transactions?.data
   },
-  getTxByType: async function ({ rootGetters: { middleware }, commit }, { page, limit, type }) {
-    try {
-      const transactions = await middleware.getTxBackward({ page, limit, type })
-      return transactions.data
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-    }
+  getTxByType: async function ({ dispatch }, args) {
+    return (await dispatch('callMiddlewareFunction', { functionName: 'getTxBackward', args }, { root: true }))?.data
   },
-  getTransactionById: async function ({ rootGetters: { middleware }, commit }, id) {
-    try {
-      const tx = await middleware[id.startsWith('th_') ? 'getTxByHash' : 'getTxByIndex'](id)
-      commit('setTransactions', [tx])
-      return tx
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-    }
+  getTransactionById: async function ({ dispatch, commit }, id) {
+    const functionName = id.startsWith('th_') ? 'getTxByHash' : 'getTxByIndex'
+    const transaction = await dispatch('callMiddlewareFunction', { functionName, args: id }, { root: true })
+    commit('setTransactions', transaction ? [transaction] : [])
+    return transaction
   },
-  getTransactionByAccount: async function ({ rootGetters: { middleware }, commit }, { account, limit, page, txtype }) {
-    try {
-      const tx = await middleware.getTxBackward({ account, limit, page, type: txtype || undefined })
-      return tx.data
-    } catch (e) {
-      console.log(e)
-      commit('catchError', 'Error', { root: true })
-    }
+  getTransactionByAccount: async function ({ dispatch }, { type = undefined, ...args }) {
+    return (await dispatch('callMiddlewareFunction', { functionName: 'getTxBackward', args: { type, ...args } }, { root: true }))?.data
   }
 }
