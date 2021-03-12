@@ -34,7 +34,7 @@ export default {
 
 .app-header {
   background-color: #D3DCE6;
-  min-height: 30vh;
+  min-height: 15rem;
   margin-bottom: -7.75rem;
 
   &-content {
