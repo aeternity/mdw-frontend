@@ -63,8 +63,8 @@ export default {
         message: `Requested height is greater than the current height. Current Height is ${height}`,
         statusCode: 400
       })
-    } else if (store.generations && store.generations.generations[current]) {
-      generation = store.generations.generations[current]
+    } else if (store.state.generations.generations?.[current]) {
+      generation = store.state.generations.generations[current]
     } else {
       const generations = await store.dispatch('generations/getGenerationByRange', { start: current - 1, end: current + 1 })
       generation = generations.find(g => g.height === current)

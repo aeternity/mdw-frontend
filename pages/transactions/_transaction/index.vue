@@ -36,9 +36,7 @@ export default {
     let txDetails = null
     let generation = null
     let height = null
-    if (store.transactions) {
-      txDetails = store.transactions.transactions[txDetails]
-    }
+    txDetails = store.state.transactions.transactions?.[txDetails]
     if (!txDetails) {
       txDetails = await store.dispatch('transactions/getTransactionById', transaction)
     }
@@ -51,13 +49,11 @@ export default {
     if (txDetails.tx.type === 'GAMetaTx') {
       txDetails = transformMetaTx(txDetails)
     }
-    if (store.generations) {
-      generation = store.generations.generations[txDetails.blockHeight]
-    }
+    generation = store.state.generations.generations?.[txDetails.blockHeight]
     if (!generation) {
       generation = (await store.dispatch('generations/getGenerationByRange', { start: (txDetails.blockHeight - 1), end: (txDetails.blockHeight + 1) }))[txDetails.blockHeight]
     }
-    if (!store.height) {
+    if (!store.state.height) {
       height = await store.dispatch('height')
     }
     return { transaction: txDetails, generation, height, loading: false }
