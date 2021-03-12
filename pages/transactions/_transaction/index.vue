@@ -36,7 +36,7 @@ export default {
     let txDetails = null
     let generation = null
     let height = null
-    txDetails = store.state.transactions.transactions?.[txDetails]
+    txDetails = store.state.transactions.transactions?.[transaction]
     if (!txDetails) {
       txDetails = await store.dispatch('transactions/getTransactionById', transaction)
     }
