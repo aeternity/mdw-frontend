@@ -58,7 +58,7 @@ export default {
     }
     const current = Math.abs(Number(params.generation))
     const height = await store.dispatch('height')
-    if (current > height) {
+    if (current > height && !store.state.generations.generations?.[current]) {
       return error({
         message: `Requested height is greater than the current height. Current Height is ${height}`,
         statusCode: 400
