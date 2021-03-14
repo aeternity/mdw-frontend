@@ -1,8 +1,7 @@
 <template>
   <div class="app-main-nav">
-    <div class="app-main-nav-logo">
-      <Logo fill="primary" />
-    </div>
+    <Logo />
+
     <div class="app-main-nav-mobile">
       <AppNavAccordion icon="search">
         <div class="mobile-search">
@@ -86,16 +85,14 @@ export default {
   @import "~@aeternity/aepp-components-3/src/styles/placeholders/typography";
 
   .app-main-nav {
-    min-height: 3rem;
     display: flex;
-    position: relative;
     background-color: #001833;
     color: #FFFFFF;
     padding: .8rem;
     justify-content: space-between;
+
     @media (min-width: 769px) {
       flex-direction: column;
-      justify-content: space-between;
       padding-left: 1rem;
       min-width: 12rem;
       width: 20%;
@@ -104,8 +101,13 @@ export default {
       bottom: 0;
       left: 0;
     }
+
     @media (min-width: 1040px) {
       width: 15%;
+    }
+
+    .logo {
+      margin-right: auto;
     }
   }
   .app-main-nav-mobile {
@@ -113,10 +115,6 @@ export default {
     @media (min-width: 769px) {
       display: none;
     }
-  }
-  .app-main-nav-logo{
-    width: 100%;
-    margin-right: auto;
   }
   .mobile-search {
     padding: 1.5rem;
