@@ -13,45 +13,42 @@
     </AppNavAccordion>
 
     <AppNavAccordion>
-      <AppNav>
-        <AppNavLink
-          to="/"
-          :exact="true"
-        >
-          Dashboard
-        </AppNavLink>
-        <AppNavLink to="/generations">
-          Generations
-        </AppNavLink>
-        <AppNavLink to="/transactions">
-          Transactions
-        </AppNavLink>
-        <AppNavLink to="/contracts">
-          Contracts
-        </AppNavLink>
-        <AppNavLink to="/names">
-          Names
-        </AppNavLink>
-        <AppNavLink to="/auctions">
-          Name Auctions
-        </AppNavLink>
-        <AppNavLink to="/oracles">
-          Oracles
-        </AppNavLink>
-        <AppNavLink
-          :to="this.$store.state.swaggerHub"
-          :external="true"
-          external-value="Swagger Hub"
-        >
-          Swagger Hub
-        </AppNavLink>
-        <AppNavLink
-          v-if="isFaucetActive"
-          to="/faucet"
-        >
-          Faucet
-        </AppNavLink>
-      </AppNav>
+      <AppNavLink
+        to="/"
+        exact
+      >
+        Dashboard
+      </AppNavLink>
+      <AppNavLink to="/generations">
+        Generations
+      </AppNavLink>
+      <AppNavLink to="/transactions">
+        Transactions
+      </AppNavLink>
+      <AppNavLink to="/contracts">
+        Contracts
+      </AppNavLink>
+      <AppNavLink to="/names">
+        Names
+      </AppNavLink>
+      <AppNavLink to="/auctions">
+        Name Auctions
+      </AppNavLink>
+      <AppNavLink to="/oracles">
+        Oracles
+      </AppNavLink>
+      <AppNavLink
+        :to="this.$store.state.swaggerHub"
+        external
+      >
+        Swagger Hub
+      </AppNavLink>
+      <AppNavLink
+        v-if="isFaucetActive"
+        to="/faucet"
+      >
+        Faucet
+      </AppNavLink>
     </AppNavAccordion>
   </div>
 </template>
@@ -60,14 +57,12 @@
 import Logo from '../components/logo'
 import AppNavAccordion from '../components/appNavAccordion'
 import SearchBar from '../components/searchBar'
-import AppNav from '../components/appNav'
 import AppNavLink from '../components/appNavLink'
 
 export default {
   name: 'AppMainNav',
   components: {
     AppNavAccordion,
-    AppNav,
     AppNavLink,
     SearchBar,
     Logo
