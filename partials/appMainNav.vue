@@ -2,16 +2,16 @@
   <div class="app-main-nav">
     <Logo />
 
-    <div class="app-main-nav-mobile">
-      <AppNavAccordion icon="search">
-        <div class="mobile-search">
-          <SearchBar />
-          <p class="mobile-search-info">
-            Search by account, height, tx, oracle, contract
-          </p>
-        </div>
-      </AppNavAccordion>
-    </div>
+    <AppNavAccordion
+      icon="search"
+      class="mobile-search"
+    >
+      <SearchBar />
+      <p>
+        Search by account, height, tx, oracle, contract
+      </p>
+    </AppNavAccordion>
+
     <AppNavAccordion>
       <AppNav>
         <AppNavLink
@@ -109,19 +109,21 @@ export default {
     .logo {
       margin-right: auto;
     }
-  }
-  .app-main-nav-mobile {
-    display: flex;
-    @media (min-width: 769px) {
-      display: none;
-    }
-  }
-  .mobile-search {
-    padding: 1.5rem;
-    &-info{
-      @extend %face-sans-s;
-      margin-top: 1rem;
-      color: $color-neutral-negative-1;
+
+    .mobile-search {
+      @media (min-width: 769px) {
+        display: none;
+      }
+
+      * {
+        margin: 1.5rem;
+      }
+
+      p {
+        @extend %face-sans-s;
+        margin-top: -.5rem;
+        color: $color-neutral-negative-1;
+      }
     }
   }
 </style>
