@@ -41,6 +41,11 @@ export default {
   data () {
     return { openMenu: false }
   },
+  watch: {
+    $route () {
+      this.openMenu = false
+    }
+  },
   methods: {
     toggleNav () {
       this.openMenu = !this.openMenu
