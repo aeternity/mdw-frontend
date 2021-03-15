@@ -11,7 +11,7 @@
 import SpendTx from './txListType/spendTx.vue'
 import OracleRegisterTx from './txListType/oracleRegisterTx.vue'
 import OracleExtendTx from './txListType/oracleExtendTx.vue'
-import OracleResponseTx from './txListType/oracleResponseTx.vue'
+import OracleRespondTx from './txListType/oracleRespondTx.vue'
 import OracleQueryTx from './txListType/oracleQueryTx.vue'
 import NameClaimTx from './txListType/nameClaimTx.vue'
 import NamePreclaimTx from './txListType/namePreclaimTx.vue'
@@ -28,7 +28,7 @@ export default {
     SpendTx,
     OracleRegisterTx,
     OracleExtendTx,
-    OracleResponseTx,
+    OracleRespondTx,
     OracleQueryTx,
     NameClaimTx,
     NamePreclaimTx,
