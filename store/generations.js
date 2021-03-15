@@ -21,14 +21,14 @@ export const mutations = {
   setNextPageUrl (state, nextPageUrl) {
     state.nextPageUrl = nextPageUrl
   },
-  setMicroBlockGen (state, mb) {
+  addMicroBlockGen (state, mb) {
     const height = state.hashToHeight[mb.prevKeyHash]
     if (!mb.transactions) {
       mb.transactions = {}
     }
     state.generations[height]['microBlocks'][mb.hash] = mb
   },
-  setTxGen (state, tx) {
+  addTxGen (state, tx) {
     state.generations[tx.blockHeight]['microBlocks'][tx.blockHash]['transactions'][tx.hash] = tx
   }
 }
@@ -76,7 +76,7 @@ export const actions = {
       if (!state.hashToHeight[mb.prevKeyHash]) {
         await dispatch('getGenerationByHash', mb.prevKeyHash)
       } else {
-        commit('setMicroBlockGen', mb)
+        commit('addMicroBlockGen', mb)
       }
     } catch (e) {
       console.log(e)
@@ -92,9 +92,9 @@ export const actions = {
       }
       if (!state.generations[tx.blockHeight]['microBlocks'][tx.blockHash]) {
         const generation = (await middleware.getBlocks(`${tx.blockHeight}`)).data[0]
-        commit('setMicroBlockGen', Object.values(generation.microBlocks).find(mb => mb.hash === tx.blockHash))
+        commit('addMicroBlockGen', Object.values(generation.microBlocks).find(mb => mb.hash === tx.blockHash))
       }
-      commit('setTxGen', tx)
+      commit('addTxGen', tx)
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', {

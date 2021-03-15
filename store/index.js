@@ -141,7 +141,7 @@ function processWsData (data, commit, dispatch) {
   if (data.includes('payload')) {
     data = camelcaseKeysDeep(JSON.parse(data).payload)
     if (data.tx) {
-      commit('transactions/setTransactions', [data])
+      commit('transactions/addTransactions', [data])
       dispatch('generations/updateTx', data)
     } else if (data.beneficiary) {
       commit('generations/addGenerations', [data])
