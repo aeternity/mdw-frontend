@@ -64,7 +64,6 @@ export default {
   @import "~@aeternity/aepp-components-3/src/styles/placeholders/typography";
   .search-bar {
     position: relative;
-    width: 100%;
     display: flex;
     flex-direction: row;
     background-color: #FFFFFF;

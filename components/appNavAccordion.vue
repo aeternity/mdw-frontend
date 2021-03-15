@@ -19,7 +19,9 @@
       >
         <AppIcon name="close" />
       </button>
-      <slot />
+      <div>
+        <slot />
+      </div>
     </div>
   </div>
 </template>
@@ -38,6 +40,11 @@ export default {
   },
   data () {
     return { openMenu: false }
+  },
+  watch: {
+    $route () {
+      this.openMenu = false
+    }
   },
   methods: {
     toggleNav () {
@@ -83,25 +90,22 @@ export default {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      margin: auto 0;
       position: fixed;
-      top: 0;
+      top: -100vh;
       left: 0;
-      overflow: hidden;
       height: 100vh;
       width: 100%;
       z-index: 10;
       font-size: 1.7rem;
       background-color: $color-neutral-minimum;
       opacity: 0;
-      transform: translateY(-200%);
-      transition: all .3s ease-in-out;
+      transition: .3s;
+      transition-property: opacity, top;
       }
     }
     .open .app-nav-accordion-content {
-        transform: translateY(-0%);
+        top: 0;
         opacity: 1;
-        z-index: 10;
     }
 
 </style>
