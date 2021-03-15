@@ -60,6 +60,11 @@ export const initMiddleware = () => {
           }
         ]
       }
+    },
+    '/blocks/backward': {
+      get: {
+        operationId: 'getGenerationsBackward'
+      }
     }
   }
 
@@ -72,6 +77,10 @@ export const initMiddleware = () => {
   swg.Swagger = { defaults: {} }
 
   return camelcaseKeysDeep(swg.api)
+}
+
+export const fetchMiddleware = async (path) => {
+  return camelcaseKeysDeep(await fetchJson(`${process.env.middlewareURL}/${path}`))
 }
 
 // replacement for lodash times function in vanilla ES5

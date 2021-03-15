@@ -1,13 +1,14 @@
 import Vue from 'vue'
+import { fetchMiddleware } from './utils'
 
 export const state = () => ({
   generations: {},
   hashToHeight: {},
-  lastFetchedGen: 0
+  nextPageUrl: ''
 })
 
 export const mutations = {
-  setGenerations (state, generations) {
+  addGenerations (state, generations) {
     for (let i of Object.keys(generations)) {
       const generation = generations[i]
       if (!generation.microBlocks) {
@@ -17,8 +18,8 @@ export const mutations = {
       Vue.set(state.generations, generation.height, generation)
     }
   },
-  setLastFetched (state, last) {
-    state.lastFetchedGen = last
+  setNextPageUrl (state, nextPageUrl) {
+    state.nextPageUrl = nextPageUrl
   },
   setMicroBlockGen (state, mb) {
     const height = state.hashToHeight[mb.prevKeyHash]
@@ -33,20 +34,26 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatestGenerations: async function ({ state, rootState: { height }, commit, dispatch }, maxBlocks) {
+  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }) {
     try {
-      const range = calculateBlocksToFetch(height, state.lastFetchedGen, maxBlocks)
-      return await dispatch('getGenerationByRange', range)
+      if (nextPageUrl) return
+      const generations = await middleware.getGenerationsBackward()
+      commit('addGenerations', generations.data)
+      commit('setNextPageUrl', generations.next)
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
     }
   },
+  getMore: async function ({ state: { nextPageUrl }, commit }) {
+    const generations = await fetchMiddleware(nextPageUrl)
+    commit('addGenerations', generations.data)
+    commit('setNextPageUrl', generations.next)
+  },
   getGenerationByRange: async function ({ rootGetters: { middleware }, commit }, { start, end }) {
     try {
       const generations = await middleware.getBlocks(`${start}-${end}`)
-      commit('setGenerations', generations.data)
-      commit('setLastFetched', start)
+      commit('addGenerations', generations.data)
       return generations.data
     } catch (e) {
       console.log(e)
@@ -95,17 +102,4 @@ export const actions = {
       })
     }
   }
-}
-
-function calculateBlocksToFetch (height, lastFetchedGen, maxBlocks) {
-  let start = 0
-  let end = 0
-  if (!lastFetchedGen) {
-    start = height - maxBlocks
-    end = height
-  } else {
-    start = lastFetchedGen - maxBlocks - 1
-    end = lastFetchedGen - 1
-  }
-  return { start, end }
 }

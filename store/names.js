@@ -1,22 +1,32 @@
+import { fetchMiddleware } from './utils'
+
 export const state = () => ({
-  names: []
+  names: [],
+  nextPageUrl: ''
 })
 
 export const mutations = {
-  setNames (state, names) {
-    state.names = [...state.names, ...names]
+  addNames (state, names) {
+    state.names = [...state.names, ...names.data]
+    state.nextPageUrl = names.next
   }
 }
 
 export const actions = {
-  getNames: async function ({ rootGetters: { middleware }, commit }, { page, limit }) {
+  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { page, limit }) {
     try {
+      if (nextPageUrl) return
       const names = await middleware.getAllNames({ page, limit })
-      commit('setNames', names.data)
+      commit('addNames', names)
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
     }
+  },
+  getMore: async function ({ state: { nextPageUrl }, commit }) {
+    if (!nextPageUrl) return
+    const names = await fetchMiddleware(nextPageUrl)
+    commit('addNames', names)
   },
   searchNames: async function ({ rootGetters: { middleware }, commit }, id) {
     try {

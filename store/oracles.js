@@ -1,25 +1,31 @@
-import Vue from 'vue'
+import { fetchMiddleware } from './utils'
 
 export const state = () => ({
-  oracles: {}
+  oracles: [],
+  nextPageUrl: ''
 })
 
 export const mutations = {
-  setOracles (state, oracles) {
-    for (let oracle of oracles) {
-      Vue.set(state.oracles, oracle.oracle, oracle)
-    }
+  addOracles (state, oracles) {
+    state.oracles = [...state.oracles, ...oracles.data]
+    state.nextPageUrl = oracles.next
   }
 }
 
 export const actions = {
-  getOracles: async function ({ rootGetters: { middleware }, commit }, { page, limit }) {
+  getLatest: async function ({ rootGetters: { middleware }, commit }) {
     try {
-      const oracles = await middleware.getActiveOracles({ page, limit })
-      commit('setOracles', oracles.data)
+      if (state.nextPageUrl) return
+      const oracles = await middleware.getActiveOracles()
+      commit('addOracles', oracles)
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
     }
+  },
+  getMore: async function ({ state: { nextPageUrl }, commit }) {
+    if (!nextPageUrl) return
+    const oracles = await fetchMiddleware(nextPageUrl)
+    commit('addOracles', oracles)
   }
 }

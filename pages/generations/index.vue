@@ -14,18 +14,19 @@
         :to="`/generations/${generation.height}`"
         class="generation-link"
       >
-        <Generation
-          :data="generation"
-        />
+        <Generation :data="generation" />
       </nuxt-link>
     </List>
-    <LoadMoreButton @update="loadMoreGen" />
+    <LoadMoreButton
+      v-if="nextPageUrl"
+      @update="getMore"
+    />
   </div>
 </template>
 
 <script>
 
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import List from '../../components/list'
 import Generation from '../../partials/generation'
 import PageHeader from '../../components/PageHeader'
@@ -40,20 +41,10 @@ export default {
     LoadMoreButton
   },
   async asyncData ({ store }) {
-    await store.dispatch('height')
-    await store.dispatch('generations/getLatestGenerations', 10)
+    await store.dispatch('generations/getLatest')
   },
-  data () {
-    return {
-      limitGen: 10
-    }
-  },
-  computed: mapState('generations', ['generations']),
-  methods: {
-    loadMoreGen () {
-      this.$store.dispatch('generations/getLatestGenerations', this.limitGen)
-    }
-  }
+  computed: mapState('generations', ['generations', 'nextPageUrl']),
+  methods: mapActions('generations', ['getMore'])
 }
 </script>
 
