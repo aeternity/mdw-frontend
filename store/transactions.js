@@ -7,7 +7,7 @@ export const state = () => ({
 })
 
 export const mutations = {
-  setTransactions (state, transactions) {
+  addTransactions (state, transactions) {
     for (let i = 0; i < transactions.length; i++) {
       let transaction = transactions[i]
       if (transaction.tx.type === 'GAMetaTx') {
@@ -28,7 +28,7 @@ export const actions = {
     try {
       const page = state.lastPage + 1
       const transactions = await middleware.getTxBackward({ page, limit })
-      commit('setTransactions', transactions.data)
+      commit('addTransactions', transactions.data)
       commit('setLastPage', page)
       return transactions.data
     } catch (e) {
@@ -47,7 +47,7 @@ export const actions = {
   getTransactionById: async function ({ rootGetters: { middleware }, commit }, id) {
     try {
       const tx = await middleware[id.startsWith('th_') ? 'getTxByHash' : 'getTxByIndex'](id)
-      commit('setTransactions', [tx])
+      commit('addTransactions', [tx])
       return tx
     } catch (e) {
       console.log(e)

@@ -6,7 +6,7 @@ export const state = () => ({
 })
 
 export const mutations = {
-  setContracts (state, contracts) {
+  addContracts (state, contracts) {
     state.contracts.push(...contracts.data)
     state.nextPageUrl = contracts.next
   }
@@ -17,7 +17,7 @@ export const actions = {
     try {
       if (state.nextPageUrl) return
       const contracts = await middleware.getTxBackward({ typeGroup: 'contract' })
-      commit('setContracts', contracts)
+      commit('addContracts', contracts)
       return contracts.data
     } catch (e) {
       console.log(e)
@@ -27,7 +27,7 @@ export const actions = {
   },
   getMore: async function ({ state: { nextPageUrl }, commit }) {
     const contracts = await fetchMiddleware(nextPageUrl)
-    commit('setContracts', contracts)
+    commit('addContracts', contracts)
   },
 
   getContractCreateTx: async function ({ rootGetters: { middleware }, commit }, { contract, page, limit }) {
