@@ -1,6 +1,6 @@
 {
   "name": "aeternal-frontend",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "frontend for aeternal",
   "author": "Shubhendu Shekhar",
   "repository": {
@@ -28,8 +28,7 @@
     "normalize-scss": "7.0.1",
     "nuxt": "2.15.0",
     "vue": "2.6.12",
-    "vue-multiselect": "2.1.6",
-    "vue-slider-component": "3.2.11"
+    "vue-multiselect": "2.1.6"
   },
   "devDependencies": {
     "@vue/eslint-config-standard": "4.0.0",

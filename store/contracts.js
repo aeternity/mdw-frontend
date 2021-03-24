@@ -1,28 +1,33 @@
-import Vue from 'vue'
+import { fetchMiddleware } from './utils'
 
 export const state = () => ({
-  contracts: []
+  contracts: [],
+  nextPageUrl: ''
 })
 
 export const mutations = {
-  setContracts (state, contracts) {
-    for (let contract of contracts) {
-      Vue.set(state.contracts, contract.hash, contract)
-    }
+  addContracts (state, contracts) {
+    state.contracts.push(...contracts.data)
+    state.nextPageUrl = contracts.next
   }
 }
 
 export const actions = {
-  getContracts: async function ({ rootGetters: { middleware }, commit }, { page, limit }) {
+  getLatest: async function ({ rootGetters: { middleware }, state, commit }) {
     try {
-      const contracts = await middleware.getTxBackward({ typeGroup: 'contract', page, limit })
-      commit('setContracts', contracts.data)
+      if (state.nextPageUrl) return
+      const contracts = await middleware.getTxBackward({ typeGroup: 'contract' })
+      commit('addContracts', contracts)
       return contracts.data
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
       return []
     }
+  },
+  getMore: async function ({ state: { nextPageUrl }, commit }) {
+    const contracts = await fetchMiddleware(nextPageUrl)
+    commit('addContracts', contracts)
   },
 
   getContractCreateTx: async function ({ rootGetters: { middleware }, commit }, { contract, page, limit }) {

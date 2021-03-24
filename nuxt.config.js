@@ -5,7 +5,7 @@ module.exports = {
   ** Headers of the page
   */
   head: {
-    title: 'æternal',
+    title: 'æternity Explorer',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -47,8 +47,7 @@ module.exports = {
   */
   plugins: [
     { src: '~/plugins/directives/copyToClipboard.js' },
-    { src: '~/plugins/directives/removeSpacesOnCopy.js' },
-    { src: '~/plugins/directives/vueSliderComponent.js', mode: 'client' }
+    { src: '~/plugins/directives/removeSpacesOnCopy.js' }
   ],
   /*
     ** Router config

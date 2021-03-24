@@ -7,26 +7,27 @@
       :has-crumbs="true"
       :page="{to: '/generations', name: 'Generations'}"
     />
-    <Generations>
+    <List>
       <nuxt-link
         v-for="(generation, number) in Object.values(generations).reverse()"
         :key="number"
         :to="`/generations/${generation.height}`"
         class="generation-link"
       >
-        <Generation
-          :data="generation"
-        />
+        <Generation :data="generation" />
       </nuxt-link>
-    </Generations>
-    <LoadMoreButton @update="loadMoreGen" />
+    </List>
+    <LoadMoreButton
+      v-if="nextPageUrl"
+      @update="getMore"
+    />
   </div>
 </template>
 
 <script>
 
-import { mapState } from 'vuex'
-import Generations from '../../partials/generations'
+import { mapState, mapActions } from 'vuex'
+import List from '../../components/list'
 import Generation from '../../partials/generation'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
@@ -34,32 +35,16 @@ import LoadMoreButton from '../../components/loadMoreButton'
 export default {
   name: 'AppGenerations',
   components: {
-    Generations,
+    List,
     Generation,
     PageHeader,
     LoadMoreButton
   },
-  data () {
-    return {
-      limitGen: 10
-    }
+  async asyncData ({ store }) {
+    await store.dispatch('generations/getLatest')
   },
-  computed: {
-    ...mapState('generations', [
-      'generations'
-    ])
-  },
-  async mounted () {
-    if (!Object.keys(this.$store.state.generations.generations).length) {
-      await this.$store.dispatch('height')
-      this.$store.dispatch('generations/getLatestGenerations', 10)
-    }
-  },
-  methods: {
-    loadMoreGen () {
-      this.$store.dispatch('generations/getLatestGenerations', this.limitGen)
-    }
-  }
+  computed: mapState('generations', ['generations', 'nextPageUrl']),
+  methods: mapActions('generations', ['getMore'])
 }
 </script>
 

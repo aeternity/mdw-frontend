@@ -9,14 +9,14 @@
           :is-main="false"
           title="Generations"
         />
-        <Generations>
+        <List>
           <Generation
             v-for="(generation, number) in generations.slice(0,5)"
             :key="number"
             class="generation-link"
             :data="generation"
           />
-        </Generations>
+        </List>
       </div>
       <div
         class="transactions-wrapper"
@@ -25,21 +25,20 @@
           :is-main="false"
           title="Transactions"
         />
-        <TxList>
+        <List>
           <TXListItem
             v-for="(transaction, index) in transactions.reverse().slice(0,5)"
             :key="index"
             :data="transaction"
           />
-        </TxList>
+        </List>
       </div>
     </client-only>
   </div>
 </template>
 <script>
-import Generations from '../partials/generations'
 import Generation from '../partials/generation'
-import TxList from '../partials/txList'
+import List from '../components/list'
 import TXListItem from '../partials/txListItem'
 import PageHeader from '../components/PageHeader'
 import { mapState } from 'vuex'
@@ -47,9 +46,8 @@ import { mapState } from 'vuex'
 export default {
   name: 'AppDashboard',
   components: {
-    Generations,
     Generation,
-    TxList,
+    List,
     TXListItem,
     PageHeader
   },
@@ -69,12 +67,11 @@ export default {
   async mounted () {
     this.$store.dispatch('setupWebSocket')
     if (!Object.keys(this.$store.state.generations.generations).length) {
-      await this.$store.dispatch('height')
-      this.$store.dispatch('generations/getLatestGenerations', 10)
+      this.$store.dispatch('generations/getLatest')
     }
     if (!Object.keys(this.$store.state.transactions.transactions).length) {
       await this.$store.dispatch('height')
-      this.$store.dispatch('transactions/getLatestTransactions', { limit: 10 })
+      this.$store.dispatch('transactions/getLatest', { limit: 10 })
     }
   }
 }

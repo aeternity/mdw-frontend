@@ -5,61 +5,53 @@
       :has-crumbs="true"
       :page="{to: '/oracles', name: 'Oracles'}"
     />
-    <div v-if="Object.keys(oracles).length">
-      <OracleList>
+    <div v-if="oracles.length">
+      <List>
         <Oracle
-          v-for="(item, index) of Object.values(oracles)"
+          v-for="(item, index) of oracles"
           :key="index"
           :data="item"
         />
-      </OracleList>
-      <LoadMoreButton @update="loadMore" />
+      </List>
+      <LoadMoreButton
+        v-if="nextPageUrl"
+        @update="getMore"
+      />
     </div>
     <div v-if="loading">
       Loading....
     </div>
-    <div v-if="!loading && Object.values(oracles).length == 0">
+    <div v-if="!loading && oracles.length == 0">
       Nothing to see here right now....
     </div>
   </div>
 </template>
 
 <script>
-import OracleList from '../../partials/oracleList'
+import { mapState, mapActions } from 'vuex'
+import List from '../../components/list'
 import Oracle from '../../partials/oracle'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
-import { mapState } from 'vuex'
 
 export default {
   name: 'AppOracles',
   components: {
-    OracleList,
+    List,
     Oracle,
     PageHeader,
     LoadMoreButton
   },
+  async asyncData ({ store }) {
+    await store.dispatch('oracles/getLatest')
+    return { loading: false }
+  },
   data () {
     return {
-      page: 1,
       loading: true
     }
   },
-  computed: {
-    ...mapState('oracles', [
-      'oracles'
-    ])
-  },
-  async mounted () {
-    this.loading = true
-    await this.loadMore()
-    this.loading = false
-  },
-  methods: {
-    async loadMore () {
-      await this.$store.dispatch('oracles/getOracles', { 'page': this.page, 'limit': 10 })
-      this.page += 1
-    }
-  }
+  computed: mapState('oracles', ['oracles', 'nextPageUrl']),
+  methods: mapActions('oracles', ['getMore'])
 }
 </script>

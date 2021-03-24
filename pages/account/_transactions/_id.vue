@@ -16,14 +16,14 @@
       />
     </div>
     <div v-if="transactions.length > 0">
-      <TxList>
+      <List>
         <TXListItem
           v-for="(tx, index) of transactions"
           :key="index"
           :data="tx"
           :address="`${$route.params.id}`"
         />
-      </TxList>
+      </List>
       <LoadMoreButton @update="loadMore" />
     </div>
     <div v-if="loading">
@@ -37,7 +37,7 @@
 
 <script>
 
-import TxList from '../../../partials/txList'
+import List from '../../../components/list'
 import TXListItem from '../../../partials/txListItem'
 import PageHeader from '../../../components/PageHeader'
 import LoadMoreButton from '../../../components/loadMoreButton'
@@ -47,7 +47,7 @@ import { transformMetaTx } from '../../../store/utils'
 export default {
   name: 'AccountTransactions',
   components: {
-    TxList,
+    List,
     TXListItem,
     PageHeader,
     LoadMoreButton,

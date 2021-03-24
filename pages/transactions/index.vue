@@ -16,13 +16,13 @@
       />
     </div>
     <div v-if="Object.keys(transactions).length > 0">
-      <TxList>
+      <List>
         <TXListItem
           v-for="(item, index) in Object.values(transactions)"
           :key="index"
           :data="item"
         />
-      </TxList>
+      </List>
       <LoadMoreButton @update="loadmore" />
     </div>
     <div v-if="loading">
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import TxList from '../../partials/txList'
+import List from '../../components/list'
 import TXListItem from '../../partials/txListItem'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
@@ -45,34 +45,32 @@ import { transformMetaTx } from '../../store/utils'
 export default {
   name: 'AppTransactions',
   components: {
-    TxList,
+    List,
     TXListItem,
     PageHeader,
     LoadMoreButton,
     Multiselect
   },
+  async asyncData ({ store, route }) {
+    const type = route.query?.txtype || undefined
+    const transactions = await store.dispatch('transactions/getTxByType', {
+      page: 1,
+      limit: 10,
+      type
+    })
+    transactions.forEach(element => {
+      element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
+    })
+    return { transactions, loading: false }
+  },
   data () {
     return {
-      typePage: 1,
+      typePage: 2,
       loading: true,
       value: 'All',
       transactions: {},
       options: this.$store.state.filterOptions
     }
-  },
-  async mounted () {
-    if (this.$route.query.txtype && this.options.indexOf(this.$route.query.txtype) > 0) {
-      this.value = this.$route.query.txtype
-      await this.getTxByType()
-    } else {
-      if (!Object.keys(this.$store.state.transactions.transactions).length) {
-        await this.$store.dispatch('height')
-        await this.getAllTx()
-      } else {
-        this.transactions = this.$store.state.transactions.transactions
-      }
-    }
-    this.loading = false
   },
   methods: {
     async loadmore () {
@@ -85,7 +83,7 @@ export default {
     },
     async getAllTx () {
       const tx = await this.$store.dispatch(
-        'transactions/getLatestTransactions',
+        'transactions/getLatest',
         { limit: 10 }
       )
       tx.forEach(element => {

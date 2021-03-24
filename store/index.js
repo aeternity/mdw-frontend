@@ -124,13 +124,6 @@ export const actions = {
         handleWsOpen(state.ws, commit, dispatch)
       }
     }
-  },
-  async nuxtServerInit ({ commit, dispatch }, { context }) {
-    await dispatch('height')
-    await Promise.all([
-      dispatch('generations/nuxtServerInit', context),
-      dispatch('transactions/nuxtServerInit', context)
-    ])
   }
 }
 
@@ -148,10 +141,10 @@ function processWsData (data, commit, dispatch) {
   if (data.includes('payload')) {
     data = camelcaseKeysDeep(JSON.parse(data).payload)
     if (data.tx) {
-      commit('transactions/setTransactions', [data])
+      commit('transactions/addTransactions', [data])
       dispatch('generations/updateTx', data)
     } else if (data.beneficiary) {
-      commit('generations/setGenerations', [data])
+      commit('generations/addGenerations', [data])
       if (state.height < data.height) {
         commit('setHeight', data.height, {
           root: true

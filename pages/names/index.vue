@@ -6,14 +6,17 @@
       :page="{to: '/names', name: 'Names'}"
     />
     <div v-if="!loading && names.length > 0">
-      <NameList>
+      <List>
         <Name
           v-for="(item, index) of names"
           :key="index"
           :data="item"
         />
-      </NameList>
-      <LoadMoreButton @update="loadMore" />
+      </List>
+      <LoadMoreButton
+        v-if="nextPageUrl"
+        @update="getMore"
+      />
     </div>
     <div v-if="loading">
       Loading....
@@ -25,41 +28,30 @@
 </template>
 
 <script>
-import NameList from '../../partials/nameList'
+import List from '../../components/list'
 import Name from '../../partials/name'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'AppNames',
   components: {
-    NameList,
+    List,
     Name,
     PageHeader,
     LoadMoreButton
   },
+  async asyncData ({ store }) {
+    await store.dispatch('names/getLatest', { page: 1, limit: 10 })
+    return { loading: false }
+  },
   data () {
     return {
-      page: 1,
       loading: true
     }
   },
-  computed: {
-    ...mapState('names', [
-      'names'
-    ])
-  },
-  async mounted () {
-    this.loading = true
-    await this.loadMore()
-    this.loading = false
-  },
-  methods: {
-    async loadMore () {
-      await this.$store.dispatch('names/getNames', { 'page': this.page, 'limit': 10 })
-      this.page += 1
-    }
-  }
+  computed: mapState('names', ['names', 'nextPageUrl']),
+  methods: mapActions('names', ['getMore'])
 }
 </script>

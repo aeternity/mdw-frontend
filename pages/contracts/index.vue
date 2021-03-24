@@ -5,62 +5,54 @@
       :has-crumbs="true"
       :page="{to: '/contracts', name: 'Contracts'}"
     />
-    <div v-if="Object.values(contracts).length">
-      <ContractList>
+    <div v-if="contracts.length">
+      <List>
         <Contract
-          v-for="(item, index) in Object.values(contracts)"
+          v-for="(item, index) in contracts"
           :key="index"
           :data="item"
         />
-      </ContractList>
-      <LoadMoreButton @update="loadMore" />
+      </List>
+      <LoadMoreButton
+        v-if="nextPageUrl"
+        @update="getMore"
+      />
     </div>
     <div v-if="loading">
       Loading....
     </div>
-    <div v-if="!loading && Object.values(contracts).length == 0">
+    <div v-if="!loading && contracts.length == 0">
       Nothing to see here right now....
     </div>
   </div>
 </template>
 
 <script>
-
-import ContractList from '../../partials/contractList'
+import { mapState, mapActions } from 'vuex'
+import List from '../../components/list'
 import Contract from '../../partials/contract'
 import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
-import { mapState } from 'vuex'
 
 export default {
   name: 'AppContracts',
   components: {
-    ContractList,
+    List,
     Contract,
     PageHeader,
     LoadMoreButton
   },
+  async asyncData ({ store }) {
+    await store.dispatch('contracts/getLatest')
+    return { loading: false }
+  },
   data () {
     return {
-      page: 1,
+      page: 2,
       loading: true
     }
   },
-  computed: {
-    ...mapState('contracts', [
-      'contracts'
-    ])
-  },
-  async mounted () {
-    this.loading = true
-    await this.loadMore()
-    this.loading = false
-  },
-  methods: {
-    async loadMore () {
-      await this.$store.dispatch('contracts/getContracts', { 'page': this.page, 'limit': 10 })
-      this.page += 1
-    }
-  }
+  computed: mapState('contracts', ['contracts', 'nextPageUrl']),
+  methods: mapActions('contracts', ['getMore'])
 }
 </script>

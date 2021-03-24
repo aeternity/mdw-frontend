@@ -7,7 +7,7 @@ export const state = () => ({
 })
 
 export const mutations = {
-  setTransactions (state, transactions) {
+  addTransactions (state, transactions) {
     for (let i = 0; i < transactions.length; i++) {
       let transaction = transactions[i]
       if (transaction.tx.type === 'GAMetaTx') {
@@ -24,11 +24,11 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatestTransactions: async function ({ state, rootGetters: { middleware }, commit }, { limit }) {
+  getLatest: async function ({ state, rootGetters: { middleware }, commit }, { limit }) {
     try {
       const page = state.lastPage + 1
       const transactions = await middleware.getTxBackward({ page, limit })
-      commit('setTransactions', transactions.data)
+      commit('addTransactions', transactions.data)
       commit('setLastPage', page)
       return transactions.data
     } catch (e) {
@@ -44,10 +44,10 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTransactionByHash: async function ({ rootGetters: { middleware }, commit }, hash) {
+  getTransactionById: async function ({ rootGetters: { middleware }, commit }, id) {
     try {
-      const tx = await middleware.getTxByHash(hash)
-      commit('setTransactions', [tx])
+      const tx = await middleware[id.startsWith('th_') ? 'getTxByHash' : 'getTxByIndex'](id)
+      commit('addTransactions', [tx])
       return tx
     } catch (e) {
       console.log(e)
@@ -62,10 +62,5 @@ export const actions = {
       console.log(e)
       commit('catchError', 'Error', { root: true })
     }
-  },
-  nuxtServerInit ({ dispatch }, context) {
-    return (
-      dispatch('getLatestTransactions', { limit: 10 })
-    )
   }
 }
