@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@aeternity/aepp-components-3": "3.0.0-alpha.9",
-    "@aeternity/aepp-sdk": "^7.7.0",
+    "@aeternity/aepp-sdk": "^8.1.0",
     "@download/blockies": "1.0.3",
     "@nuxtjs/svg-sprite": "0.5.2",
     "bignumber.js": "9.0.1",
