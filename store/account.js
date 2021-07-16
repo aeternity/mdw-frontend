@@ -13,7 +13,7 @@ export const actions = {
         error: 'Unable to fetch account details'
       }
       if (e.response.status === 500) {
-        basicError.error = 'Account not found'
+        basicError.error = 'Account not found. If you transfered AE to the account just recently, please give the network some time to sync and recheck again in a few seconds.'
       }
       return basicError
     }

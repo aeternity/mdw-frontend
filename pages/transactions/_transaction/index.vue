@@ -42,7 +42,7 @@ export default {
     }
     if (!txDetails) {
       return error({
-        message: `Transaction not found`,
+        message: `Transaction not found. If you have sent it only a short time ago, please give the network some time to sync and recheck again in a few seconds.`,
         statusCode: 400
       })
     }
