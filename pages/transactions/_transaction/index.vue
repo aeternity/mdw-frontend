@@ -56,6 +56,9 @@ export default {
     if (!store.state.height) {
       height = await store.dispatch('height')
     }
+    if (txDetails.tx.contractId) {
+      txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
+    }
     return { transaction: txDetails, generation, height, loading: false }
   },
   data () {
