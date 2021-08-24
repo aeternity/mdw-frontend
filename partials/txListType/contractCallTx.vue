@@ -40,7 +40,7 @@
         <AppDefinition
           title="gas"
         >
-          <FormatAeUnit :value="transaction.tx.gas" />
+          {{ transaction.tx.gas }}
         </AppDefinition>
         <AppDefinition
           v-if="transaction.tx.gasPrice"
