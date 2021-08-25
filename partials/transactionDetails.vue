@@ -299,7 +299,7 @@ import AppDefinition from '../components/appDefinition'
 import AppPanel from '../components/appPanel'
 import FormatAddress from '../components/formatAddress'
 import TxlistItem from './txListItem'
-import decodeBase64 from '../plugins/filters/decodeBase64'
+import { decodeBase64Check } from '../plugins/filters/decodeBase64'
 
 export default {
   name: 'TransactionDetails',
@@ -322,7 +322,7 @@ export default {
   computed: {
     payload () {
       if (this.data.tx.payload) {
-        return decodeBase64(this.data.tx.payload.substring(3))
+        return decodeBase64Check(this.data.tx.payload.substring(3))
       }
       return ''
     }
