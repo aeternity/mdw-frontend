@@ -55,7 +55,8 @@ export default {
 
 <style scoped lang="scss">
 @import '~@aeternity/aepp-components-3/src/styles/variables/colors';
-.transaction {
+.contract-call ::v-deep .transaction,
+.transaction ::v-deep {
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -69,12 +70,9 @@ export default {
     border-radius: 0;
     box-shadow: none;
     margin-bottom: 0;
-    &:not(:last-child) {
-      border-bottom: 2px solid $color-neutral-positive-2;
-    }
   }
 
-  /deep/ .transaction-main-info {
+  .transaction-main-info {
     display: flex;
     margin-bottom: 0.6rem;
     flex-direction: row;
@@ -112,7 +110,7 @@ export default {
     }
   }
 
-  /deep/ .transaction-type-info {
+  .transaction-type-info {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -154,6 +152,14 @@ export default {
         word-break: keep-all;
       }
     }
+  }
+}
+
+@media (min-width: 550px) {
+  .contract-call ::v-deep .transaction:not(:last-child),
+  .contract-call:not(:last-child) ::v-deep .transaction,
+  .transaction:not(:last-child) {
+    border-bottom: 2px solid $color-neutral-positive-2;
   }
 }
 </style>
