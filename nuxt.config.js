@@ -70,7 +70,7 @@ module.exports = {
     /*
     ** You can extend webpack config here
     */
-    transpile: ['@aeternity/aepp-sdk/es/utils/swagger'],
+    transpile: ['@aeternity/aepp-sdk/es/utils/swagger', '@aeternity/aepp-sdk/es/utils/crypto'],
 
     postcss: {
       plugins: {
