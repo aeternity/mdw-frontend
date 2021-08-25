@@ -38,7 +38,6 @@ module.exports = {
     middlewareURL: process.env.NUXT_APP_NODE_URL || 'https://mainnet.aeternity.io/mdw',
     middlewareWS: process.env.NUXT_APP_NODE_WS || 'wss://mainnet.aeternity.io/mdw/websocket',
     networkName: process.env.NUXT_APP_NETWORK_NAME || 'MAIN NET',
-    swaggerHub: process.env.NUXT_APP_SWAGGER_HUB || 'https://app.swaggerhub.com/apis/sshekhar/aeternal/1.0',
     enableFaucet: process.env.NUXT_APP_ENABLE_FAUCET || false,
     faucetAPI: process.env.NUXT_APP_FAUCET_API || 'https://testnet.faucet.aepps.com/account'
   },
