@@ -42,7 +42,7 @@ export default {
     }
     if (!txDetails) {
       return error({
-        message: `Transaction not found`,
+        message: `Transaction not found. If you have sent it only a short time ago, please give the network some time to sync and recheck again in a few seconds.`,
         statusCode: 400
       })
     }
@@ -55,6 +55,9 @@ export default {
     }
     if (!store.state.height) {
       height = await store.dispatch('height')
+    }
+    if (txDetails.tx.contractId) {
+      txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
     }
     return { transaction: txDetails, generation, height, loading: false }
   },

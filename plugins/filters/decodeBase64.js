@@ -1,3 +1,7 @@
+import { decodeBase64Check } from '@aeternity/aepp-sdk/es/utils/crypto'
+
+export { decodeBase64Check }
+
 export default function decodeBase64 (payload) {
   try {
     if (process.server) {

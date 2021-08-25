@@ -22,6 +22,8 @@
     <div v-if="!loading && transactions.length == 0">
       Contract not found.
       Please check the contract address and try again.
+      <br>
+      If you deployed the contract just a short time ago, please give the network some time to sync and recheck again in a few seconds.
     </div>
   </div>
 </template>

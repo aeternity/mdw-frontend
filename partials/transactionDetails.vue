@@ -49,7 +49,7 @@
             </AppTableCell>
           </AppTableRow>
           <AppTableRow
-            v-if="data.callinfo && data.callinfo.return_type"
+            v-if="data.callinfo && data.callinfo.returnType"
             extend
           >
             <AppTableCell extend>
@@ -57,12 +57,12 @@
                 type="list"
                 title="Return Type"
               >
-                {{ data.callinfo.return_type }}
+                {{ data.callinfo.returnType }}
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>
           <AppTableRow
-            v-if="data.callinfo && data.callinfo.return_value"
+            v-if="data.callinfo && data.callinfo.returnValue"
             extend
           >
             <AppTableCell extend>
@@ -70,7 +70,7 @@
                 type="list"
                 title="Return Value"
               >
-                {{ data.callinfo.return_value }}
+                {{ data.callinfo.returnValue }}
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>
@@ -158,7 +158,7 @@
             </AppTableCell>
           </AppTableRow>
           <AppTableRow
-            v-if="data.ga_id"
+            v-if="data.gaId"
             extend
           >
             <AppTableCell extend>
@@ -166,7 +166,7 @@
                 type="list"
                 title="ga id"
               >
-                {{ data.ga_id }}
+                {{ data.gaId }}
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>
@@ -197,7 +197,7 @@
             </AppTableCell>
           </AppTableRow>
           <AppTableRow
-            v-if="data.auth_data"
+            v-if="data.authData"
             extend
           >
             <AppTableCell extend>
@@ -205,12 +205,12 @@
                 type="list"
                 title="Auth Data"
               >
-                {{ data.auth_data }}
+                {{ data.authData }}
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>
           <AppTableRow
-            v-if="data.tx.auth_fun"
+            v-if="data.tx.authFun"
             extend
           >
             <AppTableCell extend>
@@ -218,12 +218,12 @@
                 type="list"
                 title="Auth Function"
               >
-                {{ data.tx.auth_fun }}
+                {{ data.tx.authFun }}
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>
           <AppTableRow
-            v-if="data.tx.call_data"
+            v-if="data.tx.callData"
             extend
           >
             <AppTableCell extend>
@@ -231,7 +231,7 @@
                 type="list"
                 title="Call Data"
               >
-                {{ data.tx.call_data }}
+                {{ data.tx.callData }}
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>
@@ -299,7 +299,7 @@ import AppDefinition from '../components/appDefinition'
 import AppPanel from '../components/appPanel'
 import FormatAddress from '../components/formatAddress'
 import TxlistItem from './txListItem'
-import decodeBase64 from '../plugins/filters/decodeBase64'
+import { decodeBase64Check } from '../plugins/filters/decodeBase64'
 
 export default {
   name: 'TransactionDetails',
@@ -322,7 +322,7 @@ export default {
   computed: {
     payload () {
       if (this.data.tx.payload) {
-        return decodeBase64(this.data.tx.payload.substring(3))
+        return decodeBase64Check(this.data.tx.payload.substring(3))
       }
       return ''
     }

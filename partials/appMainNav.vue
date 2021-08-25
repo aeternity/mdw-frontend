@@ -38,12 +38,6 @@
         Oracles
       </AppNavLink>
       <AppNavLink
-        :to="this.$store.state.swaggerHub"
-        external
-      >
-        Swagger Hub
-      </AppNavLink>
-      <AppNavLink
         v-if="isFaucetActive"
         to="/faucet"
       >

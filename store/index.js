@@ -6,7 +6,6 @@ export const state = () => ({
   nodeUrl: process.env.middlewareURL,
   wsUrl: process.env.middlewareWS,
   networkName: process.env.networkName,
-  swaggerHub: process.env.swaggerHub,
   enableFaucet: process.env.enableFaucet,
   faucetApi: process.env.faucetAPI,
   error: '',
