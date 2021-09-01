@@ -5,6 +5,7 @@
       :has-crumbs="true"
       :page="{to: `/account/transactions/${$route.params.id}`, name: `${$route.params.id}`}"
     />
+    <AccountDetails :account="accountDetails" />
     <div class="filter">
       <multiselect
         v-model="value"
@@ -43,6 +44,7 @@ import PageHeader from '../../../components/PageHeader'
 import LoadMoreButton from '../../../components/loadMoreButton'
 import Multiselect from 'vue-multiselect'
 import { transformMetaTx } from '../../../store/utils'
+import AccountDetails from '../../../partials/accountDetails.vue'
 
 export default {
   name: 'AccountTransactions',
@@ -51,7 +53,8 @@ export default {
     TXListItem,
     PageHeader,
     LoadMoreButton,
-    Multiselect
+    Multiselect,
+    AccountDetails
   },
   async asyncData ({ store, params, query }) {
     let value = null
@@ -66,14 +69,16 @@ export default {
       element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
       transactions.push(element)
     })
+    const accountDetails = await store.dispatch('account/getAccountDetails', params.id)
     value = value || 'All'
-    return { address: params.id, transactions, page: 2, value, loading: false }
+    return { address: params.id, transactions, page: 2, value, loading: false, accountDetails }
   },
   data () {
     return {
       account: {
         id: this.$route.params.id
       },
+      accountDetails: {},
       transactions: [],
       page: 1,
       loading: true,
