@@ -93,10 +93,14 @@ export default {
     async loadMore () {
       const txtype = this.value === 'All' ? null : this.value
       const tx = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, txtype })
-      tx.forEach(element => {
-        element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
-        this.transactions.push(element)
-      })
+      const transformed = tx.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+
+      this.transactions = await Promise.all(transformed.map(async (txDetails) => {
+        if (txDetails.tx.contractId && txDetails.tx.callerId) {
+          txDetails.tokenInfo = await this.$store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
+        }
+        return txDetails
+      }))
       this.page += 1
     },
     async processInput () {
