@@ -109,7 +109,7 @@
       <div class="transaction-type-info">
         <div class="transaction-type-info-item">
           <AppDefinition title="Amount">
-            {{ `${formatToken(transaction.tokenInfo.amount, transaction.tokenInfo.decimals)} ${transaction.tokenInfo.symbol}` }}
+            {{ transaction.tokenInfo.amount | formatToken(transaction.tokenInfo.decimals, transaction.tokenInfo.symbol) }}
           </AppDefinition>
         </div>
       </div>
@@ -117,13 +117,13 @@
   </div>
 </template>
 <script>
-import BigNumber from 'bignumber.js'
 import AppDefinition from '../../components/appDefinition'
 import FormatAeUnit from '../../components/formatAeUnit'
 import AccountGroup from '../../components/accountGroup'
 import Account from '../../components/account'
 import LabelType from '../../components/labelType'
 import timestampToUTC from '../../plugins/filters/timestampToUTC'
+import formatToken from '../../plugins/filters/formatToken'
 import { transformTxType } from '../../store/utils'
 
 export default {
@@ -137,17 +137,13 @@ export default {
   },
   filters: {
     timestampToUTC,
-    transformTxType
+    transformTxType,
+    formatToken
   },
   props: {
     transaction: {
       type: Object,
       required: true
-    }
-  },
-  methods: {
-    formatToken (amount, decimals) {
-      return new BigNumber(amount).shiftedBy(-decimals).toString()
     }
   }
 }
