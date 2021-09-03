@@ -34,5 +34,16 @@ export const actions = {
       console.log(e)
       return {}
     }
+  },
+  getAex9Transactions: async function ({ state: { tokens }, dispatch }, { address, incoming = false }) {
+    let allTokens = tokens
+    if (!tokens.length) {
+      allTokens = await dispatch('getAllTokens')
+    }
+    const transactions = await fetchMiddleware(`aex9/transfers/${incoming ? 'to' : 'from'}/${address}`)
+    return transactions.map(tx => {
+      const token = allTokens.find(t => t.contractId === tx.contractId)
+      return { tx: { ...tx, type: incoming ? 'Aex9ReceivedTx' : 'Aex9SentTx' }, token }
+    })
   }
 }
