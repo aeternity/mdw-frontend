@@ -1,6 +1,12 @@
 const pkg = require('./package')
 
 module.exports = {
+  target: 'static',
+  ssr: false,
+  generate: {
+    exclude: [/^\/.+/],
+    crawler: false
+  },
   /*
   ** Headers of the page
   */
