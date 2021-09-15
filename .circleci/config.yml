@@ -45,8 +45,6 @@ jobs:
       - run:
           name: Build and push Docker image to DockerHub
           command: |
-            echo $DOCKER_PASS
-            echo $DOCKER_USER
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker build -t ${DOCKERHUB_REPO:?} -t ${DOCKERHUB_REPO:?}:latest -f nginx.Dockerfile .
             docker push ${DOCKERHUB_REPO:?}
