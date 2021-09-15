@@ -35,7 +35,7 @@ jobs:
   docker_push_tag:
     executor: docker_builder
     environment:
-      DOCKERHUB_REPO: aeternity/aeternal-frontend
+      DOCKERHUB_REPO: aeternity/mdw-frontend
     steps:
       - checkout
       - setup_remote_docker:
@@ -45,6 +45,8 @@ jobs:
       - run:
           name: Build and push Docker image to DockerHub
           command: |
+            echo $DOCKER_PASS
+            echo $DOCKER_USER
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker build -t ${DOCKERHUB_REPO:?} -t ${DOCKERHUB_REPO:?}:latest -f nginx.Dockerfile .
             docker push ${DOCKERHUB_REPO:?}
