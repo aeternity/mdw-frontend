@@ -31,19 +31,6 @@ jobs:
           root: ~/app
           paths:
             - dist
-
-  docker_build:
-    executor: docker_builder
-    environment:
-      DOCKERHUB_REPO: aeternity/aeternal-frontend
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: Build and push Docker image to DockerHub
-          command: |
-            docker build -t test123 -f nginx.Dockerfile .
   
   docker_push_tag:
     executor: docker_builder
