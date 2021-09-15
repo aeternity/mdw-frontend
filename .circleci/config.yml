@@ -35,7 +35,7 @@ jobs:
   docker_push_tag:
     executor: docker_builder
     environment:
-      DOCKERHUB_REPO: aeternity/mdw-frontend
+      DOCKERHUB_REPO: aeternitybot/mdw-frontend
     steps:
       - checkout
       - setup_remote_docker:
