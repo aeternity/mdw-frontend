@@ -31,7 +31,6 @@ jobs:
           root: ~/app
           paths:
             - dist
-  
   docker_push_tag:
     executor: docker_builder
     environment:
@@ -54,13 +53,6 @@ workflows:
   version: 2
   build_push:
     jobs:
-      - build:
-          NUXT_APP_NODE_URL: "https://mainnet.aeternity.io/mdw"
-          NUXT_APP_NODE_WS: "wss://mainnet.aeternity.io/mdw/websocket"
-          NUXT_APP_NETWORK_NAME: "MAIN NET"
-          filters:
-            tags:
-              only: /^v.*$/
       - docker_push_tag:
           context: ae-dockerhub
           requires:
@@ -68,5 +60,12 @@ workflows:
           filters:
             branches:
               ignore: /.*/
+            tags:
+              only: /^v.*$/
+      - build:
+          NUXT_APP_NODE_URL: "https://mainnet.aeternity.io/mdw"
+          NUXT_APP_NODE_WS: "wss://mainnet.aeternity.io/mdw/websocket"
+          NUXT_APP_NETWORK_NAME: "MAIN NET"
+          filters:
             tags:
               only: /^v.*$/
