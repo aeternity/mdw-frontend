@@ -28,7 +28,7 @@ jobs:
           name: Generate
           command: NUXT_APP_NODE_URL="<< parameters.NUXT_APP_NODE_URL >>" NUXT_APP_NODE_WS="<< parameters.NUXT_APP_NODE_WS >>" NUXT_APP_NETWORK_NAME="<< parameters.NUXT_APP_NETWORK_NAME >>" npm run generate
       - persist_to_workspace:
-          root: ~/
+          root: ~/app
           paths:
             - dist
 
@@ -54,7 +54,7 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - attach_workspace:
-          at: ~/
+          at: ~/app
       - run:
           name: Build and push Docker image to DockerHub
           command: |
