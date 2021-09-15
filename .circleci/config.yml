@@ -28,9 +28,9 @@ jobs:
           name: Generate
           command: NUXT_APP_NODE_URL="<< parameters.NUXT_APP_NODE_URL >>" NUXT_APP_NODE_WS="<< parameters.NUXT_APP_NODE_WS >>" NUXT_APP_NETWORK_NAME="<< parameters.NUXT_APP_NETWORK_NAME >>" npm run generate
       - persist_to_workspace:
-          root: /tmp/workspace
+          root: ~/
           paths:
-            - ./dist
+            - dist
 
   docker_build:
     executor: docker_builder
@@ -54,12 +54,12 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - attach_workspace:
-          at: /tmp/workspace
+          at: ~/
       - run:
           name: Build and push Docker image to DockerHub
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} -t ${DOCKERHUB_REPO:?}:latest .
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} -t ${DOCKERHUB_REPO:?}:latest -f nginx.Dockerfile .
             docker push ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?}
             docker push ${DOCKERHUB_REPO:?}:latest
 
@@ -74,7 +74,7 @@ workflows:
           filters:
             tags:
               only: /^v.*$/
-      - docker_build:
+      - docker_push_tag:
           context: ae-dockerhub
           requires:
             - build
@@ -83,4 +83,3 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*$/
-      
