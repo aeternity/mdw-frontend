@@ -18,6 +18,10 @@ jobs:
         type: string
       NUXT_APP_NETWORK_NAME:
         type: string
+      NUXT_APP_FAUCET_API:
+        type: string
+      NUXT_APP_ENABLE_FAUCET:
+        type: string
     executor: node
     steps:
       - checkout
@@ -26,7 +30,7 @@ jobs:
           command: npm install
       - run:
           name: Generate
-          command: NUXT_APP_NODE_URL="<< parameters.NUXT_APP_NODE_URL >>" NUXT_APP_NODE_WS="<< parameters.NUXT_APP_NODE_WS >>" NUXT_APP_NETWORK_NAME="<< parameters.NUXT_APP_NETWORK_NAME >>" npm run generate
+          command: NUXT_APP_ENABLE_FAUCET="<< parameters.NUXT_APP_ENABLE_FAUCET >>" NUXT_APP_FAUCET_API="<< parameters.NUXT_APP_FAUCET_API >>" NUXT_APP_NODE_URL="<< parameters.NUXT_APP_NODE_URL >>" NUXT_APP_NODE_WS="<< parameters.NUXT_APP_NODE_WS >>" NUXT_APP_NETWORK_NAME="<< parameters.NUXT_APP_NETWORK_NAME >>" npm run generate
       - persist_to_workspace:
           root: .
           paths:
@@ -56,15 +60,31 @@ workflows:
   version: 2
   build_push:
     jobs:
-      - build:
+      - build_mainnet:
           NUXT_APP_NODE_URL: "https://mainnet.aeternity.io/mdw"
           NUXT_APP_NODE_WS: "wss://mainnet.aeternity.io/mdw/websocket"
           NUXT_APP_NETWORK_NAME: "MAIN NET"
+          NUXT_APP_ENABLE_FAUCET: "false"
+          NUXT_APP_FAUCET_API: "https://testnet.faucet.aepps.com/account"
           filters:
             tags:
               only: /^v.*$/
-      - docker_push_tag:
+      - docker_push_tag_mainnet:
           BUILD_VERSION: "mainnet"
           context: ae-dockerhub
           requires:
-            - build
+            - build_mainnet
+      - build_testnet:
+          NUXT_APP_NODE_URL: "https://testnet.aeternity.io/mdw"
+          NUXT_APP_NODE_WS: "wss://testnet.aeternity.io/mdw/websocket"
+          NUXT_APP_NETWORK_NAME: "TEST NET"
+          NUXT_APP_ENABLE_FAUCET: "false"
+          NUXT_APP_FAUCET_API: "https://testnet.faucet.aepps.com/account"
+          filters:
+            tags:
+              only: /^v.*$/
+      - docker_push_tag_testnet:
+          BUILD_VERSION: "testnet"
+          context: ae-dockerhub
+          requires:
+            - build_testnet
