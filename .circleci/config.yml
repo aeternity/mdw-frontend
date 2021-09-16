@@ -46,8 +46,7 @@ jobs:
           name: Build and push Docker image to DockerHub
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker build -t ${DOCKERHUB_REPO:?} -t ${DOCKERHUB_REPO:?}:latest -f nginx.Dockerfile .
-            docker push ${DOCKERHUB_REPO:?}
+            docker build -t ${DOCKERHUB_REPO:?}-<< parameters.BUILD_VERSION >>:latest -f nginx.Dockerfile .
             docker push ${DOCKERHUB_REPO:?}:latest
 
 workflows:
@@ -58,6 +57,7 @@ workflows:
           NUXT_APP_NODE_URL: "https://mainnet.aeternity.io/mdw"
           NUXT_APP_NODE_WS: "wss://mainnet.aeternity.io/mdw/websocket"
           NUXT_APP_NETWORK_NAME: "MAIN NET"
+          BUILD_VERSION: "mainnet"
           filters:
             tags:
               only: /^v.*$/
