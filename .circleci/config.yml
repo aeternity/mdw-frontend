@@ -50,7 +50,7 @@ jobs:
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker build -t ${DOCKERHUB_REPO:?}-<< parameters.BUILD_VERSION >>:latest -f nginx.Dockerfile .
-            docker push ${DOCKERHUB_REPO:?}:latest
+            docker push ${DOCKERHUB_REPO:?}-<< parameters.BUILD_VERSION >>:latest
 
 workflows:
   version: 2
