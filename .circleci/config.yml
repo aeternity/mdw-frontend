@@ -52,6 +52,9 @@ jobs:
 workflows:
   version: 2
   build_push:
+    parameters:
+      BUILD_VERSION:
+        type: string
     jobs:
       - build:
           NUXT_APP_NODE_URL: "https://mainnet.aeternity.io/mdw"
