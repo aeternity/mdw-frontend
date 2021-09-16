@@ -10,19 +10,25 @@ executors:
       - image: circleci/buildpack-deps:bionic
         user: root
 
+references:
+  nuxt_parameters: &nuxt_parameters
+    NUXT_APP_NODE_URL:
+        type: string
+    NUXT_APP_NODE_WS:
+      type: string
+    NUXT_APP_NETWORK_NAME:
+      type: string
+    NUXT_APP_FAUCET_API:
+      type: string
+    NUXT_APP_ENABLE_FAUCET:
+      type: string
+  docker_parameters: &docker_parameters
+    DOCKERHUB_REPO:
+        type: string
+  
 commands:
   npm_build:
-    parameters:
-      NUXT_APP_NODE_URL:
-        type: string
-      NUXT_APP_NODE_WS:
-        type: string
-      NUXT_APP_NETWORK_NAME:
-        type: string
-      NUXT_APP_FAUCET_API:
-        type: string
-      NUXT_APP_ENABLE_FAUCET:
-        type: string
+    parameters: *nuxt_parameters
     steps:
       - checkout
       - run:
@@ -37,9 +43,7 @@ commands:
             - .
 
   docker_build:
-    parameters:
-      DOCKERHUB_REPO:
-        type: string
+    parameters: *docker_parameters 
     steps:
       - checkout
       - setup_remote_docker:
@@ -55,17 +59,7 @@ commands:
 
 jobs:
   build:
-    parameters:
-      NUXT_APP_NODE_URL:
-        type: string
-      NUXT_APP_NODE_WS:
-        type: string
-      NUXT_APP_NETWORK_NAME:
-        type: string
-      NUXT_APP_FAUCET_API:
-        type: string
-      NUXT_APP_ENABLE_FAUCET:
-        type: string
+    parameters: *nuxt_parameters
     executor: node
     steps:
       - npm_build:
@@ -77,9 +71,7 @@ jobs:
           
   docker_push_tag:
     executor: docker_builder
-    parameters:
-      DOCKERHUB_REPO:
-        type: string
+    parameters: *docker_parameters
     steps:
       - docker_build:
           DOCKERHUB_REPO: << parameters.DOCKERHUB_REPO >>
