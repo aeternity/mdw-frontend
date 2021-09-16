@@ -36,6 +36,9 @@ jobs:
     executor: docker_builder
     environment:
       DOCKERHUB_REPO: aeternitybot/mdw-frontend
+    parameters:
+      BUILD_VERSION:
+        type: string
     steps:
       - checkout
       - setup_remote_docker:
@@ -52,9 +55,6 @@ jobs:
 workflows:
   version: 2
   build_push:
-    parameters:
-      BUILD_VERSION:
-        type: string
     jobs:
       - build:
           NUXT_APP_NODE_URL: "https://mainnet.aeternity.io/mdw"
