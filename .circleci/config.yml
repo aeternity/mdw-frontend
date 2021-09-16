@@ -35,8 +35,26 @@ commands:
           root: .
           paths:
             - .
+
+  docker_build:
+    parameters:
+      DOCKERHUB_REPO:
+        type: string
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build and push Docker image to DockerHub
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker build -t ${DOCKERHUB_REPO:?}:latest -f nginx.Dockerfile .
+            docker push ${DOCKERHUB_REPO:?}:latest
+
 jobs:
-  build_mainnet:
+  build:
     parameters:
       NUXT_APP_NODE_URL:
         type: string
@@ -50,33 +68,28 @@ jobs:
         type: string
     executor: node
     steps:
-      - npm_build
+      - npm_build:
+          NUXT_APP_NODE_URL: << parameters.NUXT_APP_NODE_URL >>
+          NUXT_APP_NODE_WS: << parameters.NUXT_APP_NODE_WS >>
+          NUXT_APP_NETWORK_NAME: << parameters.NUXT_APP_NETWORK_NAME >> 
+          NUXT_APP_FAUCET_API: << parameters.NUXT_APP_FAUCET_API >>
+          NUXT_APP_ENABLE_FAUCET: << parameters.NUXT_APP_ENABLE_FAUCET >>
           
   docker_push_tag:
     executor: docker_builder
-    environment:
-      DOCKERHUB_REPO: aeternitybot/mdw-frontend
     parameters:
-      BUILD_VERSION:
+      DOCKERHUB_REPO:
         type: string
     steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - attach_workspace:
-          at: .
-      - run:
-          name: Build and push Docker image to DockerHub
-          command: |
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker build -t ${DOCKERHUB_REPO:?}-<< parameters.BUILD_VERSION >>:latest -f nginx.Dockerfile .
-            docker push ${DOCKERHUB_REPO:?}-<< parameters.BUILD_VERSION >>:latest
+      - docker_build:
+          DOCKERHUB_REPO: << parameters.DOCKERHUB_REPO >>
 
 workflows:
   version: 2
   build_push:
     jobs:
-      - build_mainnet:
+      - build:
+          name: build_mainnet
           NUXT_APP_NODE_URL: "https://mainnet.aeternity.io/mdw"
           NUXT_APP_NODE_WS: "wss://mainnet.aeternity.io/mdw/websocket"
           NUXT_APP_NETWORK_NAME: "MAIN NET"
@@ -85,3 +98,25 @@ workflows:
           filters:
             tags:
               only: /^v.*$/
+      - docker_push_tag:
+          name: docker_push_tag_mainnet
+          DOCKERHUB_REPO: "aeternity/mdw-frontend-mainnet"
+          context: ae-dockerhub
+          requires:
+            - build_mainnet
+      - build:
+          name: build_testnet
+          NUXT_APP_NODE_URL: "https://testnet.aeternity.io/mdw"
+          NUXT_APP_NODE_WS: "wss://testnet.aeternity.io/mdw/websocket"
+          NUXT_APP_NETWORK_NAME: "TEST NET"
+          NUXT_APP_ENABLE_FAUCET: "false"
+          NUXT_APP_FAUCET_API: "https://testnet.faucet.aepps.com/account"
+          filters:
+            tags:
+              only: /^v.*$/
+      - docker_push_tag:
+          name: docker_push_tag_testnet
+          DOCKERHUB_REPO: "aeternity/mdw-frontend-testnet"
+          context: ae-dockerhub
+          requires:
+            - build_testnet
