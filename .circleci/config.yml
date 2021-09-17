@@ -58,7 +58,6 @@ commands:
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker build -t << parameters.DOCKERHUB_REPO >>:${CIRCLE_TAG:-master}-<< parameters.VERSION_TAG >> -f nginx.Dockerfile .
             docker push << parameters.DOCKERHUB_REPO >>:${CIRCLE_TAG:-master}-<< parameters.VERSION_TAG >>
-
 jobs:
   build:
     parameters: *nuxt_parameters
@@ -100,6 +99,11 @@ workflows:
           context: ae-dockerhub
           requires:
             - build_mainnet
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*$/
       - build:
           name: build_testnet
           NUXT_APP_NODE_URL: "https://testnet.aeternity.io/mdw"
@@ -117,4 +121,8 @@ workflows:
           context: ae-dockerhub
           requires:
             - build_testnet
-
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*$/
