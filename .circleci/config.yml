@@ -100,11 +100,6 @@ workflows:
           context: ae-dockerhub
           requires:
             - build_mainnet
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*$/
       - build:
           name: build_testnet
           NUXT_APP_NODE_URL: "https://testnet.aeternity.io/mdw"
@@ -122,9 +117,4 @@ workflows:
           context: ae-dockerhub
           requires:
             - build_testnet
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*$/
 
