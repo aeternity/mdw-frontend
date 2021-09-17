@@ -25,6 +25,8 @@ references:
   docker_parameters: &docker_parameters
     DOCKERHUB_REPO:
         type: string
+    VERSION_TAG:
+        type: string
   
 commands:
   npm_build:
@@ -43,7 +45,7 @@ commands:
             - .
 
   docker_build:
-    parameters: *docker_parameters 
+    parameters: *docker_parameters
     steps:
       - checkout
       - setup_remote_docker:
@@ -54,8 +56,8 @@ commands:
           name: Build and push Docker image to DockerHub
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker build -t << parameters.DOCKERHUB_REPO >>:latest -f nginx.Dockerfile .
-            docker push << parameters.DOCKERHUB_REPO >>:latest
+            docker build -t << parameters.DOCKERHUB_REPO >>:<< parameters.VERSION_TAG >> -f nginx.Dockerfile .
+            docker push << parameters.DOCKERHUB_REPO >>:<< parameters.VERSION_TAG >>
 
 jobs:
   build:
@@ -92,7 +94,8 @@ workflows:
               only: /^v.*$/
       - docker_push_tag:
           name: docker_push_tag_mainnet
-          DOCKERHUB_REPO: "aeternity/mdw-frontend-mainnet"
+          DOCKERHUB_REPO: "aeternity/mdw-frontend"
+          VERSION_TAG: "mainnet"
           context: ae-dockerhub
           requires:
             - build_mainnet
@@ -108,7 +111,8 @@ workflows:
               only: /^v.*$/
       - docker_push_tag:
           name: docker_push_tag_testnet
-          DOCKERHUB_REPO: "aeternity/mdw-frontend-testnet"
+          DOCKERHUB_REPO: "aeternity/mdw-frontend"
+          VERSION_TAG: "testnet"
           context: ae-dockerhub
           requires:
             - build_testnet
