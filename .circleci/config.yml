@@ -34,7 +34,13 @@ commands:
           name: Build and push Docker image to DockerHub
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker build -t << parameters.DOCKERHUB_REPO >>:${CIRCLE_TAG:-master}-<< parameters.VERSION_TAG >> --build-arg NUXT_APP_ENABLE_FAUCET="<< parameters.NUXT_APP_FAUCET_API >>" --build-arg NUXT_APP_NODE_URL="<< parameters.NUXT_APP_NODE_URL >>" --build-arg NUXT_APP_NODE_WS="<< parameters.NUXT_APP_NODE_WS >>" --build-arg NUXT_APP_NETWORK_NAME="<< parameters.NUXT_APP_NETWORK_NAME >>" --build-arg NUXT_APP_ENABLE_FAUCET="<< parameters.NUXT_APP_ENABLE_FAUCET >>" --build-arg NUXT_APP_FAUCET_API="<< parameters.NUXT_APP_FAUCET_API >>" -f nginx.Dockerfile .
+            docker build -t << parameters.DOCKERHUB_REPO >>:${CIRCLE_TAG:-master}-<< parameters.VERSION_TAG >> \
+            --build-arg NUXT_APP_ENABLE_FAUCET="<< parameters.NUXT_APP_FAUCET_API >>" \
+            --build-arg NUXT_APP_NODE_URL="<< parameters.NUXT_APP_NODE_URL >>" \
+            --build-arg NUXT_APP_NODE_WS="<< parameters.NUXT_APP_NODE_WS >>" \
+            --build-arg NUXT_APP_NETWORK_NAME="<< parameters.NUXT_APP_NETWORK_NAME >>" \
+            --build-arg NUXT_APP_ENABLE_FAUCET="<< parameters.NUXT_APP_ENABLE_FAUCET >>" |
+            --build-arg NUXT_APP_FAUCET_API="<< parameters.NUXT_APP_FAUCET_API >>" -f nginx.Dockerfile .
             docker push << parameters.DOCKERHUB_REPO >>:${CIRCLE_TAG:-master}-<< parameters.VERSION_TAG >>
 jobs:          
   docker_push_tag:
