@@ -51,9 +51,11 @@ export default {
     }
     generation = store.state.generations.generations?.[txDetails.blockHeight]
     if (!generation) {
-      generation = (await store.dispatch('generations/getGenerationByRange', { start: (txDetails.blockHeight - 1), end: (txDetails.blockHeight + 1) }))[txDetails.blockHeight]
+      generation = (await store.dispatch('generations/getGenerationByRange', { start: (txDetails.blockHeight - 1), end: (txDetails.blockHeight + 1) }))
+        .find(g => g.height === txDetails.blockHeight)
     }
-    if (!store.state.height) {
+    height = store.state.height
+    if (!height) {
       height = await store.dispatch('height')
     }
     if (txDetails.tx.contractId) {
