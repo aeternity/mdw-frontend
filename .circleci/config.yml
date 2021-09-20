@@ -92,7 +92,7 @@ workflows:
           filters:
             branches:
               only:
-                - test-circleci
+                - master
             tags:
               only: /^v.*$/
       - docker_push_tag:
