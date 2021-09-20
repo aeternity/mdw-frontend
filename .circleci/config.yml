@@ -92,7 +92,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - test-circleci
             tags:
               only: /^v.*$/
       - docker_push_tag:
@@ -105,7 +105,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - test-circleci
             tags:
               only: /^v.*$/
       - build:
@@ -118,7 +118,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - test-circleci
             tags:
               only: /^v.*$/
       - docker_push_tag:
@@ -131,6 +131,6 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - test-circleci
             tags:
               only: /^v.*$/
