@@ -3,13 +3,14 @@ GIT_DESCR = $(shell git describe --always)
 OUTPUTFOLDER = dist
 # docker image
 DOCKER_REGISTRY = 166568770115.dkr.ecr.eu-central-1.amazonaws.com/aeternity
-DOCKER_IMAGE = aeternal-frontend
+DOCKER_IMAGE = aeternitybot/mdw-frontend
 DOCKER_TAG = $(shell git describe --always)
 K8S_NAMESPACE=mainnet
-NODE_URL=https://testnet.aeternal.io
-NODE_WS=wss://testnet.aeternal.io/websocket
-NETWORK_NAME=TEST NET
-ENABLE_FAUCET=true
+NUXT_APP_NODE_URL="https://mainnet.aeternity.io/mdw"
+NUXT_APP_NODE_WS="wss://mainnet.aeternity.io/mdw/websocket"
+NUXT_APP_NETWORK_NAME="MAIN NET"
+NUXT_APP_ENABLE_FAUCET="false"
+NUXT_APP_FAUCET_API="https://testnet.faucet.aepps.com/account"
 
 .PHONY: list
 list:
@@ -27,8 +28,8 @@ build:
 
 docker-build:
 	@echo build image
-	docker build -t $(DOCKER_IMAGE) --build-arg ENABLE_FAUCET=$(ENABLE_FAUCET) --build-arg NODE_URL=$(NODE_URL) --build-arg NODE_WS=$(NODE_WS) --build-arg NETWORK_NAME='$(NETWORK_NAME)' -f Dockerfile .
 	@echo done
+	docker build -t $(DOCKER_IMAGE) --build-arg NUXT_APP_ENABLE_FAUCET=$(NUXT_APP_ENABLE_FAUCET) --build-arg NUXT_APP_NODE_URL=$(NUXT_APP_NODE_URL) --build-arg NUXT_APP_NODE_WS=$(NUXT_APP_NODE_WS) --build-arg NUXT_APP_NETWORK_NAME=$(NUXT_APP_NETWORK_NAME) --build-arg NUXT_APP_ENABLE_FAUCET=${NUXT_APP_ENABLE_FAUCET} --build-arg NUXT_APP_FAUCET_API=${NUXT_APP_FAUCET_API} -f nginx.Dockerfile.local .
 
 docker-push:
 	@echo push image

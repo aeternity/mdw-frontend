@@ -1,0 +1,94 @@
+version: 2.1
+
+executors:
+  docker_builder:
+    docker:
+      - image: circleci/buildpack-deps:bionic
+        user: root
+
+references:
+  docker_parameters: &docker_parameters
+    NUXT_APP_NODE_URL:
+        type: string
+    NUXT_APP_NODE_WS:
+      type: string
+    NUXT_APP_NETWORK_NAME:
+      type: string
+    NUXT_APP_FAUCET_API:
+      type: string
+    NUXT_APP_ENABLE_FAUCET:
+      type: string
+    DOCKERHUB_REPO:
+        type: string
+    VERSION_TAG:
+        type: string
+  
+commands:
+  docker_build:
+    parameters: *docker_parameters
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Build and push Docker image to DockerHub
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker build -t << parameters.DOCKERHUB_REPO >>:${CIRCLE_TAG:-master}-<< parameters.VERSION_TAG >> \
+            --build-arg NUXT_APP_ENABLE_FAUCET="<< parameters.NUXT_APP_FAUCET_API >>" \
+            --build-arg NUXT_APP_NODE_URL="<< parameters.NUXT_APP_NODE_URL >>" \
+            --build-arg NUXT_APP_NODE_WS="<< parameters.NUXT_APP_NODE_WS >>" \
+            --build-arg NUXT_APP_NETWORK_NAME="<< parameters.NUXT_APP_NETWORK_NAME >>" \
+            --build-arg NUXT_APP_ENABLE_FAUCET="<< parameters.NUXT_APP_ENABLE_FAUCET >>" |
+            --build-arg NUXT_APP_FAUCET_API="<< parameters.NUXT_APP_FAUCET_API >>" -f nginx.Dockerfile .
+            docker push << parameters.DOCKERHUB_REPO >>:${CIRCLE_TAG:-master}-<< parameters.VERSION_TAG >>
+jobs:          
+  docker_push_tag:
+    executor: docker_builder
+    parameters: *docker_parameters
+    steps:
+      - docker_build:
+          DOCKERHUB_REPO: << parameters.DOCKERHUB_REPO >>
+          VERSION_TAG: << parameters.VERSION_TAG >>
+          NUXT_APP_NODE_URL: << parameters.NUXT_APP_NODE_URL >>
+          NUXT_APP_NODE_WS: << parameters.NUXT_APP_NODE_WS >>
+          NUXT_APP_NETWORK_NAME: << parameters.NUXT_APP_NETWORK_NAME >> 
+          NUXT_APP_FAUCET_API: << parameters.NUXT_APP_FAUCET_API >>
+          NUXT_APP_ENABLE_FAUCET: << parameters.NUXT_APP_ENABLE_FAUCET >>
+
+workflows:
+  version: 2
+  build_push:
+    jobs:
+      - docker_push_tag:
+          name: docker_push_tag_mainnet
+          DOCKERHUB_REPO: "aeternity/mdw-frontend"
+          VERSION_TAG: "mainnet"
+          NUXT_APP_NODE_URL: "https://mainnet.aeternity.io/mdw"
+          NUXT_APP_NODE_WS: "wss://mainnet.aeternity.io/mdw/websocket"
+          NUXT_APP_NETWORK_NAME: "MAIN NET"
+          NUXT_APP_ENABLE_FAUCET: "false"
+          NUXT_APP_FAUCET_API: "https://testnet.faucet.aepps.com/account"
+          context: ae-dockerhub
+          filters:
+            branches:
+              only:
+                - master
+            tags:
+              only: /^v.*$/
+      - docker_push_tag:
+          name: docker_push_tag_testnet
+          DOCKERHUB_REPO: "aeternity/mdw-frontend"
+          VERSION_TAG: "testnet"
+          NUXT_APP_NODE_URL: "https://testnet.aeternity.io/mdw"
+          NUXT_APP_NODE_WS: "wss://testnet.aeternity.io/mdw/websocket"
+          NUXT_APP_NETWORK_NAME: "TEST NET"
+          NUXT_APP_ENABLE_FAUCET: "false"
+          NUXT_APP_FAUCET_API: "https://testnet.faucet.aepps.com/account"
+          context: ae-dockerhub
+          filters:
+            branches:
+              only:
+                - master
+            tags:
+              only: /^v.*$/
