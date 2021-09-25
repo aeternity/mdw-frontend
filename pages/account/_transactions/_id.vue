@@ -104,12 +104,14 @@ export default {
         const tx = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, txtype })
         const transformed = tx.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
 
-        this.transactions = await Promise.all(transformed.map(async (txDetails) => {
+        const result = await Promise.all(transformed.map(async (txDetails) => {
           if (txDetails.tx.contractId && txDetails.tx.callerId) {
             txDetails.tokenInfo = await this.$store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
           }
           return txDetails
         }))
+
+        this.transactions = [...this.transactions, ...result]
         this.page += 1
       }
     },
