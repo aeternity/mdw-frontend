@@ -69,7 +69,7 @@ export default {
       loading: true,
       value: 'All',
       transactions: {},
-      options: this.$store.state.filterOptions
+      options: this.$store.state.filterOptions.filter(option => option !== 'aex9_sent' && option !== 'aex9_received')
     }
   },
   methods: {
