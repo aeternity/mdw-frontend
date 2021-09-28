@@ -64,13 +64,15 @@ export default {
         value = query.txtype
       }
     }
+    await store.dispatch('tokens/getAllTokens')
+    await store.dispatch('tokens/getAex9Transfers', { address: params.id })
+
     if (value === 'aex9_sent' || value === 'aex9_received') {
       const aex9Transactions = await store.dispatch('tokens/getAex9Transactions', { address: params.id, incoming: false })
-      console.log(aex9Transactions)
+      transactions = aex9Transactions
     } else {
       const tx = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page: 1, limit: 10, txtype: value })
       const transformed = tx.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
-
       transactions = await Promise.all(transformed.map(async (txDetails) => {
         if (txDetails.tx.contractId && txDetails.tx.callerId) {
           txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
@@ -103,7 +105,6 @@ export default {
       } else {
         const tx = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, txtype })
         const transformed = tx.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
-
         const result = await Promise.all(transformed.map(async (txDetails) => {
           if (txDetails.tx.contractId && txDetails.tx.callerId) {
             txDetails.tokenInfo = await this.$store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
