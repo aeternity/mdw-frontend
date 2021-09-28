@@ -58,17 +58,28 @@ export default {
   },
   async asyncData ({ store, params, query }) {
     let value = null
+    let transactions = []
     if (query.txtype) {
       if (store.state.filterOptions.indexOf(query.txtype) > 0) {
         value = query.txtype
       }
     }
-    const tx = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page: 1, limit: 10, txtype: value })
-    const transactions = []
-    tx.forEach(element => {
-      element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
-      transactions.push(element)
-    })
+    await store.dispatch('tokens/getAllTokens')
+    await store.dispatch('tokens/getAex9Transfers', { address: params.id })
+
+    if (value === 'aex9_sent' || value === 'aex9_received') {
+      const aex9Transactions = await store.dispatch('tokens/getAex9Transactions', { address: params.id, incoming: false })
+      transactions = aex9Transactions
+    } else {
+      const tx = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page: 1, limit: 10, txtype: value })
+      const transformed = tx.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+      transactions = await Promise.all(transformed.map(async (txDetails) => {
+        if (txDetails.tx.contractId && txDetails.tx.callerId) {
+          txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
+        }
+        return txDetails
+      }))
+    }
     const accountDetails = await store.dispatch('account/getAccountDetails', params.id)
     value = value || 'All'
     return { address: params.id, transactions, page: 2, value, loading: false, accountDetails }
@@ -89,12 +100,21 @@ export default {
   methods: {
     async loadMore () {
       const txtype = this.value === 'All' ? null : this.value
-      const tx = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, txtype })
-      tx.forEach(element => {
-        element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
-        this.transactions.push(element)
-      })
-      this.page += 1
+      if (this.value === 'aex9_sent' || this.value === 'aex9_received') {
+        this.transactions = await this.$store.dispatch('tokens/getAex9Transactions', { address: this.account.id, incoming: this.value === 'aex9_received' })
+      } else {
+        const tx = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, txtype })
+        const transformed = tx.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+        const result = await Promise.all(transformed.map(async (txDetails) => {
+          if (txDetails.tx.contractId && txDetails.tx.callerId) {
+            txDetails.tokenInfo = await this.$store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
+          }
+          return txDetails
+        }))
+
+        this.transactions = [...this.transactions, ...result]
+        this.page += 1
+      }
     },
     async processInput () {
       this.loading = true
