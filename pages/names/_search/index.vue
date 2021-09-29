@@ -7,7 +7,8 @@
     />
     <div v-if="!loading && names.length > 0">
       <List>
-        <Name
+        <component
+          :is="item.status === 'name'? 'Name' : 'NameAuction'"
           v-for="(item, index) of names"
           :key="index"
           :data="item"
@@ -26,6 +27,7 @@
 <script>
 import List from '../../../components/list'
 import Name from '../../../partials/name'
+import NameAuction from '../../../partials/nameAuction'
 import PageHeader from '../../../components/PageHeader'
 
 export default {
@@ -33,6 +35,7 @@ export default {
   components: {
     List,
     Name,
+    NameAuction,
     PageHeader
   },
   async asyncData ({ store, params }) {
