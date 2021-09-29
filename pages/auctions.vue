@@ -26,9 +26,12 @@
             :data="item"
           />
         </List>
-        <LoadMoreButton @update="loadMore" />
+        <LoadMoreButton
+          :loading="loadingMore"
+          @update="loadMore"
+        />
       </div>
-      <div v-if="loading">
+      <div v-if="loading || loadingMore">
         Loading....
       </div>
       <div v-if="!loading && auctions.length == 0">
@@ -62,6 +65,7 @@ export default {
     return {
       page: 1,
       loading: true,
+      loadingMore: false,
       auctions: [],
       auctionMarks: ['All', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       options: [
@@ -79,9 +83,11 @@ export default {
   },
   methods: {
     async loadMore () {
+      this.loadingMore = true
       const auctions = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
       this.auctions = [...this.auctions, ...auctions]
       this.page += 1
+      this.loadingMore = false
     },
     async processInput () {
       this.loading = true

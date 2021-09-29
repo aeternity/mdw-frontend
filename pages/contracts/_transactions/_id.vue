@@ -14,9 +14,12 @@
         :key="tx.hash"
         :data="tx"
       />
-      <LoadMoreButton @update="loadMore" />
+      <LoadMoreButton
+        :loading="loadingMore"
+        @update="loadMore"
+      />
     </div>
-    <div v-if="loading">
+    <div v-if="loading || loadingMore">
       Loading....
     </div>
     <div v-if="!loading && transactions.length == 0">
@@ -55,14 +58,17 @@ export default {
       contract: '',
       transactions: [],
       loading: true,
+      loadingMore: false,
       page: 1
     }
   },
   methods: {
     async loadMore () {
+      this.loadingMore = true
       const transactions = await this.$store.dispatch('contracts/getContractCalls', { contract: this.contract, page: this.page, limit: 10 })
       this.transactions = [...this.transactions, ...transactions]
       this.page += 1
+      this.loadingMore = false
     }
   }
 }

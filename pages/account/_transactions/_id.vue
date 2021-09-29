@@ -25,7 +25,10 @@
           :address="`${$route.params.id}`"
         />
       </List>
-      <LoadMoreButton @update="loadMore" />
+      <LoadMoreButton
+        :loading="loading"
+        @update="loadMore"
+      />
     </div>
     <div v-if="loading">
       Loading....
@@ -99,6 +102,7 @@ export default {
   },
   methods: {
     async loadMore () {
+      this.loading = true
       const txtype = this.value === 'All' ? null : this.value
       if (this.value === 'aex9_sent' || this.value === 'aex9_received') {
         this.transactions = await this.$store.dispatch('tokens/getAex9Transactions', { address: this.account.id, incoming: this.value === 'aex9_received' })
@@ -115,6 +119,7 @@ export default {
         this.transactions = [...this.transactions, ...result]
         this.page += 1
       }
+      this.loading = false
     },
     async processInput () {
       this.loading = true

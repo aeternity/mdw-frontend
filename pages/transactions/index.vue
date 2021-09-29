@@ -23,7 +23,10 @@
           :data="item"
         />
       </List>
-      <LoadMoreButton @update="loadmore" />
+      <LoadMoreButton
+        :loading="loading"
+        @update="loadmore"
+      />
     </div>
     <div v-if="loading">
       Loading....
@@ -74,11 +77,13 @@ export default {
   },
   methods: {
     async loadmore () {
+      this.loading = true
       if (this.value === 'All') {
         await this.getAllTx()
       } else {
         await this.getTxByType()
       }
+      this.loading = false
       this.$route.query.txtype = this.value
     },
     async getAllTx () {

@@ -16,7 +16,10 @@
           :data="item"
         />
       </List>
-      <LoadMoreButton @update="loadMore" />
+      <LoadMoreButton
+        :loading="loading"
+        @update="loadMore"
+      />
     </div>
     <div v-else>
       Nothing to see here right now....
@@ -47,12 +50,15 @@ export default {
     return {
       oracleId: null,
       queries: [],
-      page: 1
+      page: 1,
+      loading: false
     }
   },
   methods: {
     async loadMore () {
+      this.loading = true
       const queries = await this.$store.dispatch('oracles/getAllQueries', { oracleId: this.oracleId, 'page': this.page, 'limit': 10 })
+      this.loading = false
       this.queries = [...this.queries, ...queries]
       this.page += 1
     }
