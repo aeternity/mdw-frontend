@@ -57,13 +57,18 @@ export default {
   },
   async asyncData ({ store, route }) {
     const type = route.query?.txtype || undefined
-    const { data, next } = await store.dispatch('transactions/getTxByType', {
+    let transactions = {}
+    const { data, next } = type ? await store.dispatch('transactions/getTxByType', {
       page: 1,
       limit: 10,
       type
-    })
+    }) : await store.dispatch(
+      'transactions/getLatest',
+      { limit: 10, resetPage: true }
+    )
     data.forEach(element => {
       element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
+      transactions = { ...transactions, [element.hash]: element }
     })
     return { transactions: data, loading: false, nextPage: !!next }
   },
@@ -114,7 +119,7 @@ export default {
     },
     async processInput () {
       if (this.value === 'All') {
-        this.tranasction = {}
+        this.transactions = {}
         this.transactions = this.$store.state.transactions.transactions
       } else {
         this.loading = true
