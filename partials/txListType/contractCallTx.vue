@@ -48,6 +48,17 @@
           >
             <FormatAeUnit :value="transaction.tx.gasPrice" />
           </AppDefinition>
+          <AppDefinition
+            v-if="transaction.tx.returnType"
+            title="status"
+          >
+            <span
+              class="status"
+              :class="{ok: transaction.tx.returnType === 'ok', revert: transaction.tx.returnType !== 'ok'}"
+            >
+              {{ transaction.tx.returnType }}
+            </span>
+          </AppDefinition>
         </div>
         <div class="transaction-type-info-item">
           <AppDefinition
@@ -78,7 +89,7 @@
       </div>
     </div>
     <div
-      v-if="transaction.tokenInfo"
+      v-if="transaction.tokenInfo && transaction.tx.returnType === 'ok'"
       class="transaction"
     >
       <div class="transaction-main-info">
@@ -150,6 +161,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "~@aeternity/aepp-components-3/src/styles/variables/colors";
+.status {
+  text-transform: uppercase;
+  &.ok {
+    color: $color-alternative;
+  }
+  &.revert {
+    color: $color-red;
+  }
+}
 .contract-call.transfer {
   border-left: 2px #14CCB7 solid;
 
