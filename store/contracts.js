@@ -43,7 +43,7 @@ export const actions = {
   getContractCalls: async function ({ rootGetters: { middleware }, commit }, { contract, page, limit }) {
     try {
       const contractCalls = await middleware.getTxBackward({ type: 'contract_call', page, limit, contract })
-      return contractCalls.data
+      return contractCalls
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })

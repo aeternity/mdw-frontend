@@ -27,6 +27,7 @@
           />
         </List>
         <LoadMoreButton
+          v-if="nextPage"
           :loading="loadingMore"
           @update="loadMore"
         />
@@ -58,8 +59,8 @@ export default {
     Multiselect
   },
   async asyncData ({ store }) {
-    const auctions = await store.dispatch('names/getActiveNameAuctions', { 'page': 1, 'limit': 10, by: 'expiration', length: 0 })
-    return { auctions, page: 2, loading: false }
+    const { data, next } = await store.dispatch('names/getActiveNameAuctions', { 'page': 1, 'limit': 10, by: 'expiration', length: 0 })
+    return { auctions: data, page: 2, loading: false, nextPage: !!next }
   },
   data () {
     return {
@@ -73,7 +74,8 @@ export default {
         { name: 'Name', value: 'name' }
       ],
       sortby: { name: 'Expiring Soon', value: 'expiration' },
-      length: 0
+      length: 0,
+      nextPage: false
     }
   },
   computed: {
@@ -84,15 +86,18 @@ export default {
   methods: {
     async loadMore () {
       this.loadingMore = true
-      const auctions = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
-      this.auctions = [...this.auctions, ...auctions]
+      const { data, next } = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
+      this.auctions = [...this.auctions, ...data]
+      this.nextPage = !!next
       this.page += 1
       this.loadingMore = false
     },
     async processInput () {
       this.loading = true
       this.page = 1
-      this.auctions = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
+      const { data, next } = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
+      this.auctions = data
+      this.nextPage = !!next
       this.page += 1
       this.loading = false
     }

@@ -26,6 +26,7 @@
         />
       </List>
       <LoadMoreButton
+        v-if="nextPage"
         :loading="loading"
         @update="loadMore"
       />
@@ -62,6 +63,7 @@ export default {
   async asyncData ({ store, params, query }) {
     let value = null
     let transactions = []
+    let nextPage = false
     if (query.txtype) {
       if (store.state.filterOptions.indexOf(query.txtype) > 0) {
         value = query.txtype
@@ -74,18 +76,19 @@ export default {
       const aex9Transactions = await store.dispatch('tokens/getAex9Transactions', { address: params.id, incoming: false })
       transactions = aex9Transactions
     } else {
-      const tx = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page: 1, limit: 10, txtype: value })
-      const transformed = tx.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+      const { data, next } = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page: 1, limit: 10, txtype: value })
+      const transformed = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
       transactions = await Promise.all(transformed.map(async (txDetails) => {
         if (txDetails.tx.contractId && txDetails.tx.callerId) {
           txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
         }
         return txDetails
       }))
+      nextPage = !!next
     }
     const accountDetails = await store.dispatch('account/getAccountDetails', params.id)
     value = value || 'All'
-    return { address: params.id, transactions, page: 2, value, loading: false, accountDetails }
+    return { address: params.id, transactions, page: 2, value, loading: false, accountDetails, nextPage }
   },
   data () {
     return {
@@ -97,7 +100,8 @@ export default {
       page: 1,
       loading: true,
       value: 'All',
-      options: this.$store.state.filterOptions
+      options: this.$store.state.filterOptions,
+      nextPage: false
     }
   },
   methods: {
@@ -107,8 +111,8 @@ export default {
       if (this.value === 'aex9_sent' || this.value === 'aex9_received') {
         this.transactions = await this.$store.dispatch('tokens/getAex9Transactions', { address: this.account.id, incoming: this.value === 'aex9_received' })
       } else {
-        const tx = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, txtype })
-        const transformed = tx.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+        const { data, next } = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, txtype })
+        const transformed = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
         const result = await Promise.all(transformed.map(async (txDetails) => {
           if (txDetails.tx.contractId && txDetails.tx.callerId) {
             txDetails.tokenInfo = await this.$store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
@@ -117,6 +121,7 @@ export default {
         }))
 
         this.transactions = [...this.transactions, ...result]
+        this.nextPage = !!next
         this.page += 1
       }
       this.loading = false
@@ -125,6 +130,7 @@ export default {
       this.loading = true
       this.page = 1
       this.transactions = []
+      this.nextPage = false
       await this.loadMore()
       this.loading = false
     }
