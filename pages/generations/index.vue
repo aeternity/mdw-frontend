@@ -19,7 +19,8 @@
     </List>
     <LoadMoreButton
       v-if="nextPageUrl"
-      @update="getMore"
+      :loading="loading"
+      @update="loadMore"
     />
   </div>
 </template>
@@ -43,8 +44,20 @@ export default {
   async asyncData ({ store }) {
     await store.dispatch('generations/getLatest')
   },
+  data () {
+    return {
+      loading: false
+    }
+  },
   computed: mapState('generations', ['generations', 'nextPageUrl']),
-  methods: mapActions('generations', ['getMore'])
+  methods: {
+    ...mapActions('generations', ['getMore']),
+    async loadMore () {
+      this.loading = true
+      await this.getMore()
+      this.loading = false
+    }
+  }
 }
 </script>
 

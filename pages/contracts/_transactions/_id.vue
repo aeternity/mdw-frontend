@@ -14,9 +14,13 @@
         :key="tx.hash"
         :data="tx"
       />
-      <LoadMoreButton @update="loadMore" />
+      <LoadMoreButton
+        v-if="nextPage"
+        :loading="loadingMore"
+        @update="loadMore"
+      />
     </div>
-    <div v-if="loading">
+    <div v-if="loading || loadingMore">
       Loading....
     </div>
     <div v-if="!loading && transactions.length == 0">
@@ -43,26 +47,31 @@ export default {
   },
   async asyncData ({ store, params }) {
     let createTransactions = await store.dispatch('contracts/getContractCreateTx', { contract: params.id, page: 1, limit: 10 })
-    const calls = await store.dispatch('contracts/getContractCalls', { contract: params.id, page: 1, limit: 10 })
+    const { data, next } = await store.dispatch('contracts/getContractCalls', { contract: params.id, page: 1, limit: 10 })
     let transactions = []
-    if (createTransactions && calls) {
-      transactions = [...createTransactions, ...calls]
+    if (createTransactions && data) {
+      transactions = [...createTransactions, ...data]
     }
-    return { contract: params.id, transactions, loading: false, page: 2 }
+    return { contract: params.id, transactions, loading: false, page: 2, nextPage: !!next }
   },
   data () {
     return {
       contract: '',
       transactions: [],
       loading: true,
-      page: 1
+      loadingMore: false,
+      page: 1,
+      nextPage: false
     }
   },
   methods: {
     async loadMore () {
-      const transactions = await this.$store.dispatch('contracts/getContractCalls', { contract: this.contract, page: this.page, limit: 10 })
-      this.transactions = [...this.transactions, ...transactions]
+      this.loadingMore = true
+      const { data, next } = await this.$store.dispatch('contracts/getContractCalls', { contract: this.contract, page: this.page, limit: 10 })
+      this.transactions = [...this.transactions, ...data]
+      this.nextPage = !!next
       this.page += 1
+      this.loadingMore = false
     }
   }
 }

@@ -15,7 +15,8 @@
       </List>
       <LoadMoreButton
         v-if="nextPageUrl"
-        @update="getMore"
+        :loading="loading"
+        @update="loadMore"
       />
     </div>
     <div v-if="loading">
@@ -52,6 +53,12 @@ export default {
     }
   },
   computed: mapState('oracles', ['oracles', 'nextPageUrl']),
-  methods: mapActions('oracles', ['getMore'])
+  methods: {
+    ...mapActions('oracles', ['getMore']),
+    async loadMore () {
+      this.loading = true
+      await this.getMore()
+      this.loading = false
+    } }
 }
 </script>
