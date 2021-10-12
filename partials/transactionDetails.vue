@@ -23,71 +23,6 @@
             </AppTableCell>
           </AppTableRow>
           <AppTableRow
-            v-if="data.arguments"
-            extend
-          >
-            <AppTableCell extend>
-              <AppDefinition
-                type="list"
-                title="Arguments"
-              >
-                {{ data.arguments.arguments }}
-              </AppDefinition>
-            </AppTableCell>
-          </AppTableRow>
-          <AppTableRow
-            v-if="data.arguments"
-            extend
-          >
-            <AppTableCell extend>
-              <AppDefinition
-                type="list"
-                title="Method"
-              >
-                {{ data.arguments.function }}
-              </AppDefinition>
-            </AppTableCell>
-          </AppTableRow>
-          <AppTableRow
-            v-if="data.callinfo && data.callinfo.returnType"
-            extend
-          >
-            <AppTableCell extend>
-              <AppDefinition
-                type="list"
-                title="Return Type"
-              >
-                {{ data.callinfo.returnType }}
-              </AppDefinition>
-            </AppTableCell>
-          </AppTableRow>
-          <AppTableRow
-            v-if="data.callinfo && data.callinfo.returnValue"
-            extend
-          >
-            <AppTableCell extend>
-              <AppDefinition
-                type="list"
-                title="Return Value"
-              >
-                {{ data.callinfo.returnValue }}
-              </AppDefinition>
-            </AppTableCell>
-          </AppTableRow>
-          <AppTableRow
-            v-if="data.result"
-            extend
-          >
-            <AppTableCell extend>
-              <AppDefinition
-                type="list"
-                title="Return Value (Decoded)"
-              >
-                {{ data.result }}
-              </AppDefinition>
-            </AppTableCell>
-          </AppTableRow>
-          <AppTableRow
             v-if="data.callinfo && data.callinfo.log"
             extend
           >
@@ -284,6 +219,75 @@
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>
+          <AppTableRow
+            v-if="data.tx.function"
+            extend
+          >
+            <AppTableCell extend>
+              <AppDefinition
+                type="list"
+                title="Method"
+              >
+                {{ data.tx.function }}
+              </AppDefinition>
+            </AppTableCell>
+          </AppTableRow>
+          <AppTableRow
+            v-if="data.tx.arguments"
+            extend
+          >
+            <AppTableCell extend>
+              <AppDefinition
+                type="list"
+                title="Arguments"
+              >
+                <p
+                  v-for="({type, value}, index) in data.tx.arguments"
+                  :key="index"
+                  class="argument"
+                >
+                  {{ type }}: <span>{{ value }}</span>
+                </p>
+              </AppDefinition>
+            </AppTableCell>
+          </AppTableRow>
+          <AppTableRow
+            v-if="data.tx && data.tx.return"
+            extend
+          >
+            <AppTableCell extend>
+              <AppDefinition
+                type="list"
+                title="Return"
+              >
+                <p
+                  v-if="typeof data.tx.return === 'string'"
+                  class="argument"
+                >
+                  {{ data.tx.return }}
+                </p>
+                <p
+                  v-else
+                  class="argument"
+                >
+                  {{ data.tx.return.value && data.tx.return.type + ': ' }}<span>{{ data.tx.return.value ? data.tx.return.value : '–' }}</span>
+                </p>
+              </AppDefinition>
+            </AppTableCell>
+          </AppTableRow>
+          <AppTableRow
+            v-if="data.result"
+            extend
+          >
+            <AppTableCell extend>
+              <AppDefinition
+                type="list"
+                title="Return Value (Decoded)"
+              >
+                {{ data.result }}
+              </AppDefinition>
+            </AppTableCell>
+          </AppTableRow>
         </AppTableBody>
       </AppTable>
     </AppPanel>
@@ -331,6 +335,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
+  .argument {
+    margin: 0;
+    span {
+      font-weight: 700;
+    }
+  }
   .transaction-details {
     margin-bottom: 2rem;
   }

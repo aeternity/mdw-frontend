@@ -38,9 +38,14 @@
             </nuxt-link>
           </AppDefinition>
           <AppDefinition
-            title="gas"
+            title="gas limit"
           >
             {{ transaction.tx.gas }}
+          </AppDefinition>
+          <AppDefinition
+            title="gas used"
+          >
+            {{ transaction.tx.gasUsed }}
           </AppDefinition>
           <AppDefinition
             v-if="transaction.tx.gasPrice"
@@ -50,7 +55,7 @@
           </AppDefinition>
           <AppDefinition
             v-if="transaction.tx.returnType"
-            title="status"
+            title="result"
           >
             <span
               class="status"
@@ -71,6 +76,12 @@
             title="tx fee"
           >
             <FormatAeUnit :value="transaction.tx.fee" />
+          </AppDefinition>
+          <AppDefinition
+            v-if="transaction.tx.fee"
+            title="total cost"
+          >
+            <FormatAeUnit :value="transaction.tx.gasUsed * transaction.tx.gasPrice + transaction.tx.fee" />
           </AppDefinition>
           <AppDefinition
             v-if="transaction.tx.nonce"
