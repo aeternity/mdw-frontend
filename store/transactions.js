@@ -30,7 +30,7 @@ export const actions = {
       const transactions = await middleware.getTxBackward({ page, limit })
       commit('addTransactions', transactions.data)
       commit('setLastPage', page)
-      return transactions.data
+      return transactions
     } catch (e) {
       commit('catchError', 'Error', { root: true })
     }
@@ -38,7 +38,7 @@ export const actions = {
   getTxByType: async function ({ rootGetters: { middleware }, commit }, { page, limit, type }) {
     try {
       const transactions = await middleware.getTxBackward({ page, limit, type })
-      return transactions.data
+      return transactions
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
@@ -57,7 +57,7 @@ export const actions = {
   getTransactionByAccount: async function ({ rootGetters: { middleware }, commit }, { account, limit, page, txtype }) {
     try {
       const tx = await middleware.getTxBackward({ account, limit, page, type: txtype || undefined })
-      return tx.data
+      return tx
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })

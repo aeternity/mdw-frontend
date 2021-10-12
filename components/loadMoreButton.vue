@@ -4,6 +4,8 @@
       face="round"
       fill="neutral"
       extend
+      :disabled="loading"
+      :class="{loading}"
       @click.native="loadMore()"
     >
       Load More
@@ -17,6 +19,9 @@ export default {
   name: 'LoadMoreButton',
   components: {
     AppButton
+  },
+  props: {
+    loading: Boolean
   },
   methods: {
     loadMore () {
@@ -40,6 +45,11 @@ export default {
       top: 50%;
       border-bottom: 2px solid $color-neutral-positive-2;
       transform: translateY(-50%);
+    }
+
+    .loading {
+      background: #efefef;
+      cursor: wait;
     }
   }
 </style>

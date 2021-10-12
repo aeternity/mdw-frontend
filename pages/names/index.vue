@@ -15,10 +15,11 @@
       </List>
       <LoadMoreButton
         v-if="nextPageUrl"
-        @update="getMore"
+        :loading="loadingMore"
+        @update="loadMore"
       />
     </div>
-    <div v-if="loading">
+    <div v-if="loading || loadingMore">
       Loading....
     </div>
     <div v-if="!loading && names.length == 0">
@@ -48,10 +49,17 @@ export default {
   },
   data () {
     return {
-      loading: true
+      loading: true,
+      loadingMore: false
     }
   },
   computed: mapState('names', ['names', 'nextPageUrl']),
-  methods: mapActions('names', ['getMore'])
+  methods: {
+    ...mapActions('names', ['getMore']),
+    async loadMore () {
+      this.loadingMore = true
+      await this.getMore()
+      this.loadingMore = false
+    } }
 }
 </script>

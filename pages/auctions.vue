@@ -26,9 +26,13 @@
             :data="item"
           />
         </List>
-        <LoadMoreButton @update="loadMore" />
+        <LoadMoreButton
+          v-if="nextPage"
+          :loading="loadingMore"
+          @update="loadMore"
+        />
       </div>
-      <div v-if="loading">
+      <div v-if="loading || loadingMore">
         Loading....
       </div>
       <div v-if="!loading && auctions.length == 0">
@@ -55,13 +59,14 @@ export default {
     Multiselect
   },
   async asyncData ({ store }) {
-    const auctions = await store.dispatch('names/getActiveNameAuctions', { 'page': 1, 'limit': 10, by: 'expiration', length: 0 })
-    return { auctions, page: 2, loading: false }
+    const { data, next } = await store.dispatch('names/getActiveNameAuctions', { 'page': 1, 'limit': 10, by: 'expiration', length: 0 })
+    return { auctions: data, page: 2, loading: false, nextPage: !!next }
   },
   data () {
     return {
       page: 1,
       loading: true,
+      loadingMore: false,
       auctions: [],
       auctionMarks: ['All', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       options: [
@@ -69,7 +74,8 @@ export default {
         { name: 'Name', value: 'name' }
       ],
       sortby: { name: 'Expiring Soon', value: 'expiration' },
-      length: 0
+      length: 0,
+      nextPage: false
     }
   },
   computed: {
@@ -79,14 +85,19 @@ export default {
   },
   methods: {
     async loadMore () {
-      const auctions = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
-      this.auctions = [...this.auctions, ...auctions]
+      this.loadingMore = true
+      const { data, next } = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
+      this.auctions = [...this.auctions, ...data]
+      this.nextPage = !!next
       this.page += 1
+      this.loadingMore = false
     },
     async processInput () {
       this.loading = true
       this.page = 1
-      this.auctions = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
+      const { data, next } = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
+      this.auctions = data
+      this.nextPage = !!next
       this.page += 1
       this.loading = false
     }

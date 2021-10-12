@@ -29,7 +29,9 @@ export const state = () => ({
     'ga_attach',
     'ga_meta',
     'contract_call',
-    'contract_create'
+    'contract_create',
+    'aex9_sent',
+    'aex9_received'
   ]
 })
 

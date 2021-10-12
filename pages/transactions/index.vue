@@ -23,7 +23,11 @@
           :data="item"
         />
       </List>
-      <LoadMoreButton @update="loadmore" />
+      <LoadMoreButton
+        v-if="nextPage"
+        :loading="loading"
+        @update="loadmore"
+      />
     </div>
     <div v-if="loading">
       Loading....
@@ -53,15 +57,15 @@ export default {
   },
   async asyncData ({ store, route }) {
     const type = route.query?.txtype || undefined
-    const transactions = await store.dispatch('transactions/getTxByType', {
+    const { data, next } = await store.dispatch('transactions/getTxByType', {
       page: 1,
       limit: 10,
       type
     })
-    transactions.forEach(element => {
+    data.forEach(element => {
       element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
     })
-    return { transactions, loading: false }
+    return { transactions: data, loading: false, nextPage: !!next }
   },
   data () {
     return {
@@ -69,38 +73,43 @@ export default {
       loading: true,
       value: 'All',
       transactions: {},
-      options: this.$store.state.filterOptions
+      options: this.$store.state.filterOptions.filter(option => option !== 'aex9_sent' && option !== 'aex9_received'),
+      nextPage: false
     }
   },
   methods: {
     async loadmore () {
+      this.loading = true
       if (this.value === 'All') {
         await this.getAllTx()
       } else {
         await this.getTxByType()
       }
+      this.loading = false
       this.$route.query.txtype = this.value
     },
     async getAllTx () {
-      const tx = await this.$store.dispatch(
+      const { data, next } = await this.$store.dispatch(
         'transactions/getLatest',
         { limit: 10 }
       )
-      tx.forEach(element => {
+      data.forEach(element => {
         element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
         this.transactions = { ...this.transactions, [element.hash]: element }
       })
+      this.nextPage = !!next
     },
     async getTxByType () {
-      const tx = await this.$store.dispatch('transactions/getTxByType', {
+      const { data, next } = await this.$store.dispatch('transactions/getTxByType', {
         page: this.typePage,
         limit: 10,
         type: this.value
       })
-      tx.forEach(element => {
+      data.forEach(element => {
         element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
         this.transactions = { ...this.transactions, [element.hash]: element }
       })
+      this.nextPage = !!next
       this.typePage += 1
     },
     async processInput () {

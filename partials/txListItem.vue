@@ -21,6 +21,8 @@ import NameRevokeTx from './txListType/nameRevokeTx.vue'
 import ContractCallTx from './txListType/contractCallTx.vue'
 import ContractCreateTx from './txListType/contractCreateTx.vue'
 import GAAttachTx from './txListType/gaAttachTx.vue'
+import Aex9ReceivedTx from './txListType/aex9ReceivedTx.vue'
+import Aex9SentTx from './txListType/aex9SentTx.vue'
 
 export default {
   name: 'TXListItem',
@@ -37,7 +39,9 @@ export default {
     NameUpdateTx,
     ContractCallTx,
     ContractCreateTx,
-    GAAttachTx
+    GAAttachTx,
+    Aex9ReceivedTx,
+    Aex9SentTx
   },
   props: {
     data: {
