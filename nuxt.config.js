@@ -45,7 +45,8 @@ module.exports = {
     middlewareWS: process.env.NUXT_APP_NODE_WS || 'wss://mainnet.aeternity.io/mdw/websocket',
     networkName: process.env.NUXT_APP_NETWORK_NAME || 'MAIN NET',
     enableFaucet: process.env.NUXT_APP_ENABLE_FAUCET || false,
-    faucetAPI: process.env.NUXT_APP_FAUCET_API || 'https://testnet.faucet.aepps.com/account'
+    faucetAPI: process.env.NUXT_APP_FAUCET_API || 'https://testnet.faucet.aepps.com/account',
+    APIDocs: process.env.NUXT_APP_API_DOCS || 'https://github.com/aeternity/ae_mdw#http-endpoints'
   },
   /*
   ** Plugins to load before mounting the App

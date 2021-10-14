@@ -43,7 +43,27 @@
       >
         Faucet
       </AppNavLink>
+      <div class="footer mobile">
+        <a
+          :href="apiDocs"
+          target="_blank"
+        >
+          API docs
+        </a>
+        <br>
+        {{ mdwVersion }}
+      </div>
     </AppNavAccordion>
+    <div class="footer desktop">
+      <a
+        :href="apiDocs"
+        target="_blank"
+      >
+        API docs
+      </a>
+      <br>
+      {{ mdwVersion }}
+    </div>
   </div>
 </template>
 
@@ -64,7 +84,16 @@ export default {
   computed: {
     isFaucetActive () {
       return this.$store.state.enableFaucet
+    },
+    apiDocs () {
+      return this.$store.state.apiDocs
+    },
+    mdwVersion () {
+      return `v${this.$store.state.status.mdwVersion}`
     }
+  },
+  async mounted () {
+    await this.$store.dispatch('status')
   }
 }
 </script>
@@ -80,6 +109,10 @@ export default {
     padding: .8rem;
     justify-content: space-between;
 
+    .footer.desktop {
+      display: none;
+    }
+
     @media (min-width: 769px) {
       flex-direction: column;
       padding-left: 1rem;
@@ -89,6 +122,13 @@ export default {
       top: 0;
       bottom: 0;
       left: 0;
+
+      .footer.mobile {
+        display: none;
+      }
+      .footer.desktop {
+        display: inline-block;
+      }
     }
 
     @media (min-width: 1040px) {
@@ -112,6 +152,30 @@ export default {
         @extend %face-sans-s;
         margin-top: -.5rem;
         color: $color-neutral-negative-1;
+      }
+    }
+    .footer {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      padding: 1.5rem;
+      width: 100%;
+      font-size: 1.2rem;
+
+      &.desktop {
+        font-size: 0.9rem;
+      }
+
+      a {
+        color: #76818C;
+
+        &:hover {
+          color: $color-primary;
+        }
+      }
+
+      p {
+        margin: 0;
       }
     }
   }

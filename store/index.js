@@ -8,6 +8,7 @@ export const state = () => ({
   networkName: process.env.networkName,
   enableFaucet: process.env.enableFaucet,
   faucetApi: process.env.faucetAPI,
+  apiDocs: process.env.APIDocs,
   error: '',
   height: 0,
   status: {},
