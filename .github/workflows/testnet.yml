@@ -1,4 +1,4 @@
-name: Mdw Frontend Mainnet
+name: Mdw Frontend Testnet
 
 on:
   push:
@@ -29,10 +29,10 @@ jobs:
           context: .
           file: nginx.Dockerfile
           build-args: |
-            NUXT_APP_NODE_URL: "https://mainnet.aeternity.io/mdw"
-            NUXT_APP_NODE_WS: "wss://mainnet.aeternity.io/mdw/websocket"
-            NUXT_APP_NETWORK_NAME: "MAIN NET"
+            NUXT_APP_NODE_URL: "https://testnet.aeternity.io/mdw"
+            NUXT_APP_NODE_WS: "wss://testnet.aeternity.io/mdw/websocket"
+            NUXT_APP_NETWORK_NAME: "TEST NET"
             NUXT_APP_ENABLE_FAUCET: "false"
             NUXT_APP_FAUCET_API: "https://testnet.faucet.aepps.com/account"
           push: ${{ github.event_name != 'pull_request' }}
-          tags: mainnet
+          tags: testnet
