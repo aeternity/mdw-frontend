@@ -3,7 +3,7 @@ name: Mdw Frontend Mainnet
 on:
   push:
     branches: 
-      - feature/gh-actions-build
+      - master
     tags:
       - 'v*'
 
