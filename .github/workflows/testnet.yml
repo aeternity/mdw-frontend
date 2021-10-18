@@ -35,4 +35,4 @@ jobs:
             NUXT_APP_ENABLE_FAUCET: "false"
             NUXT_APP_FAUCET_API: "https://testnet.faucet.aepps.com/account"
           push: ${{ github.event_name != 'pull_request' }}
-          tags: testnet
+          tags: aeternity/mdw-frontend:testnet
