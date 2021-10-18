@@ -22,12 +22,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_PASS }}
-      
-       name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: aeternity/mdw-frontend
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
