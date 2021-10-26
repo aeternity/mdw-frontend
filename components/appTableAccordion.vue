@@ -26,6 +26,13 @@
     >
       {{ open ? 'hide details' : 'show details' }}
     </button>
+    <button
+      v-if="type === 'hide'"
+      class="app-table-accordion-button"
+      @click="toggle"
+    >
+      {{ open ? 'hide' : 'show' }}
+    </button>
   </div>
 </template>
 
@@ -42,7 +49,8 @@ export default {
       type: String,
       validator: value => [
         'top',
-        'bottom'
+        'bottom',
+        'hide'
       ].includes(value),
       default: 'top'
     }
