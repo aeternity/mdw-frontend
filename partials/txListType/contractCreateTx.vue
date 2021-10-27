@@ -12,12 +12,20 @@
         </nuxt-link>
       </div>
       <div class="transaction-main-info-inner accounts">
-        <Account
-          v-if="transaction.tx.ownerId"
-          :value="transaction.tx.ownerId"
-          title="owner"
-          icon
-        />
+        <AccountGroup>
+          <Account
+            v-if="transaction.tx.ownerId"
+            :value="transaction.tx.ownerId"
+            title="owner"
+            icon
+          />
+          <Account
+            v-if="transaction.tx.contractId"
+            :value="transaction.tx.contractId"
+            title="contract"
+            icon
+          />
+        </AccountGroup>
       </div>
     </div>
     <div class="transaction-type-info">
@@ -30,25 +38,59 @@
           </nuxt-link>
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.tx.abiVersion"
-          title="abi version"
+          title="deposit"
         >
-          {{ transaction.tx.abiVersion }}
+          <FormatAeUnit :value="transaction.tx.deposit" />
         </AppDefinition>
         <AppDefinition
-          v-if="transaction.tx.vmVersion"
-          title="vm version"
+          title="gas limit"
         >
-          {{ transaction.tx.vmVersion }}
+          {{ transaction.tx.gas }}
+        </AppDefinition>
+        <AppDefinition
+          v-if="transaction.tx.gasUsed"
+          title="gas used"
+        >
+          {{ transaction.tx.gasUsed }}
+        </AppDefinition>
+        <AppDefinition
+          v-if="transaction.tx.gasPrice"
+          title="gas price"
+        >
+          <FormatAeUnit :value="transaction.tx.gasPrice" />
+        </AppDefinition>
+        <AppDefinition
+          v-if="transaction.tx.returnType"
+          title="result"
+        >
+          <span
+            class="status"
+            :class="{ok: transaction.tx.returnType === 'ok', revert: transaction.tx.returnType !== 'ok'}"
+          >
+            {{ transaction.tx.returnType }}
+          </span>
         </AppDefinition>
       </div>
       <div class="transaction-type-info-item">
+        <AppDefinition
+          title="Amount"
+        >
+          <FormatAeUnit :value="transaction.tx.amount" />
+        </AppDefinition>
         <AppDefinition
           v-if="transaction.tx.fee"
           title="tx fee"
         >
           <FormatAeUnit
             :value="transaction.tx.fee"
+          />
+        </AppDefinition>
+        <AppDefinition
+          v-if="transaction.tx.fee && transaction.tx.gasUsed"
+          title="total cost"
+        >
+          <FormatAeUnit
+            :value="transaction.tx.gasUsed * transaction.tx.gasPrice + transaction.tx.deposit + transaction.tx.fee"
           />
         </AppDefinition>
         <AppDefinition
@@ -74,6 +116,7 @@ import Account from '../../components/account'
 import LabelType from '../../components/labelType'
 import timestampToUTC from '../../plugins/filters/timestampToUTC'
 import { transformTxType } from '../../store/utils'
+import AccountGroup from '../../components/accountGroup.vue'
 
 export default {
   name: 'ContractCreateTx',
@@ -81,7 +124,8 @@ export default {
     LabelType,
     AppDefinition,
     FormatAeUnit,
-    Account
+    Account,
+    AccountGroup
   },
   filters: {
     timestampToUTC,

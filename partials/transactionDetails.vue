@@ -177,9 +177,18 @@
             <AppTableCell extend>
               <AppDefinition
                 type="list"
-                title="Code"
+                title="Bytecode"
               >
-                {{ data.tx.code }}
+                <AppTableAccordion type="hide">
+                  {{ data.tx.code }}
+                  <div
+                    v-copy-to-clipboard="data.tx.code"
+                    v-remove-spaces-on-copy
+                    class="copy-to-clipboard"
+                  >
+                    Copy Bytecode to clipboard&nbsp;<AppIcon name="copy" />
+                  </div>
+                </AppTableAccordion>
               </AppDefinition>
             </AppTableCell>
           </AppTableRow>
@@ -301,6 +310,8 @@ import AppTableCell from '../components/appTableCell'
 import AppTableBody from '../components/appTableBody'
 import AppDefinition from '../components/appDefinition'
 import AppPanel from '../components/appPanel'
+import AppTableAccordion from '../components/appTableAccordion.vue'
+import AppIcon from '../components/appIcon.vue'
 import FormatAddress from '../components/formatAddress'
 import TxlistItem from './txListItem'
 import { decodeBase64Check } from '../plugins/filters/decodeBase64'
@@ -314,6 +325,8 @@ export default {
     AppTableBody,
     AppDefinition,
     AppPanel,
+    AppTableAccordion,
+    AppIcon,
     FormatAddress,
     TxlistItem
   },
@@ -335,6 +348,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
+  @import "~@aeternity/aepp-components-3/src/styles/variables/colors";
+  @import "~@aeternity/aepp-components-3/src/styles/placeholders/typography";
   .argument {
     margin: 0;
     span {
@@ -350,6 +365,35 @@ export default {
     @media (min-width: 550px) {
       flex-direction: row;
       align-items: center;
+    }
+  }
+    .copy-to-clipboard {
+    display: flex;
+    justify-content: center;
+    margin-top: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    &:hover {
+      text-decoration: underline;
+      color: #FF0D6A;
+    }
+    & .app-icon {
+      margin-left: .3rem;
+    }
+    &.v-copied-to-clipboard:before {
+      @extend %face-mono-base;
+      content: 'copied to clipboard';
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 500;
+      color: $color-neutral-negative-3;
+      background: rgba($color-neutral-positive-1, 0.9);
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
     }
   }
 </style>
