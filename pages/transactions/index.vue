@@ -55,8 +55,9 @@ export default {
     LoadMoreButton,
     Multiselect
   },
-  async asyncData ({ store, route }) {
-    const type = route.query?.txtype || undefined
+  async asyncData ({ store, query }) {
+    const options = store.state.filterOptions.filter(option => option !== 'aex9_sent' && option !== 'aex9_received')
+    const type = options.includes(query.txtype) ? query.txtype : null
     let transactions = {}
     const { data, next } = type ? await store.dispatch('transactions/getTxByType', {
       page: 1,
@@ -70,7 +71,7 @@ export default {
       element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
       transactions = { ...transactions, [element.hash]: element }
     })
-    return { transactions: data, loading: false, nextPage: !!next }
+    return { transactions: data, loading: false, nextPage: !!next, options, value: type || 'All' }
   },
   data () {
     return {
@@ -78,10 +79,11 @@ export default {
       loading: true,
       value: 'All',
       transactions: {},
-      options: this.$store.state.filterOptions.filter(option => option !== 'aex9_sent' && option !== 'aex9_received'),
+      options: [],
       nextPage: false
     }
   },
+  watchQuery: ['txtype'],
   methods: {
     async loadmore () {
       this.loading = true
@@ -118,16 +120,18 @@ export default {
       this.typePage += 1
     },
     async processInput () {
+      this.loading = true
       if (this.value === 'All') {
+        this.$router.push({ query: null })
         this.transactions = {}
-        this.transactions = this.$store.state.transactions.transactions
+        await this.getAllTx()
       } else {
-        this.loading = true
+        this.$router.push({ query: { txtype: this.value } })
         this.typePage = 1
         this.transactions = {}
         await this.loadmore()
-        this.loading = false
       }
+      this.loading = false
     }
   }
 }
