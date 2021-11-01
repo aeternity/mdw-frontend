@@ -64,5 +64,12 @@ export const actions = {
       commit('setTransfers', { address, incoming, transfers: addressTransfers })
     }
     return addressTransfers
+  },
+  getAccountBalance: async function ({ state: { tokens } }, { address }) {
+    const balance = await fetchMiddleware(`aex9/balances/account/${address}`)
+    return balance.map(b => {
+      const tokenInfo = tokens.find(t => t.contractId === b.contractId)
+      return { ...b, decimals: tokenInfo.decimals, symbol: tokenInfo.symbol, name: tokenInfo.name }
+    })
   }
 }
