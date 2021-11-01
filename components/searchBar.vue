@@ -49,7 +49,7 @@ export default {
         this.$router.push(`/contracts/transactions/${this.query}`)
         this.query = ''
       } else if (this.query.match(/^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$/)) {
-        this.$router.push(`/account/transactions/${this.query}`)
+        this.$router.push(`/account/${this.query}`)
         this.query = ''
       } else {
         this.$router.push(`/names/${this.query}`)

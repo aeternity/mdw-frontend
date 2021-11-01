@@ -32,7 +32,7 @@
         >
           <AppTableCell extend>
             <nuxt-link
-              :to="`/account/transactions/${account}`"
+              :to="`/account/${account}`"
             >
               <AppDefinition
                 type="list"
