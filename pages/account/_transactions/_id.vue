@@ -104,6 +104,7 @@ export default {
       nextPage: false
     }
   },
+  watchQuery: ['txtype'],
   methods: {
     async loadMore () {
       this.loading = true
@@ -128,6 +129,7 @@ export default {
     },
     async processInput () {
       this.loading = true
+      this.$router.push({ query: { txtype: this.value } })
       this.page = 1
       this.transactions = []
       this.nextPage = false
