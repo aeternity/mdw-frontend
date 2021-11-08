@@ -144,7 +144,7 @@ export default {
         return `/contracts/transactions/${this.value}`
       }
       if (this.value.match(/^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$/)) {
-        return `/account/transactions/${this.value}`
+        return `/account/${this.value}`
       }
       return ''
     }

@@ -29,6 +29,18 @@
       >
         {{ account['auth_fun'] }}
       </AppDefinition>
+      <AppDefinition
+        v-if="tokensBalance.length > 0"
+        title="tokens"
+      >
+        <p
+          v-for="(token, index) in tokensBalance"
+          :key="index"
+          class="token"
+        >
+          {{ token.amount | formatToken(token.decimals, token.symbol) }}
+        </p>
+      </AppDefinition>
     </div>
   </AppPanel>
 </template>
@@ -38,14 +50,18 @@ import Account from '../components/account.vue'
 import AppDefinition from '../components/appDefinition.vue'
 import AppPanel from '../components/appPanel.vue'
 import FormatAeUnit from '../components/formatAeUnit.vue'
+import formatToken from '../plugins/filters/formatToken'
+
 export default {
   name: 'AccountDetails',
   components: { AppDefinition,
     FormatAeUnit,
     Account,
     AppPanel },
+  filters: { formatToken },
   props: {
-    account: { type: Object, required: true } }
+    account: { type: Object, required: true },
+    tokensBalance: { type: Array, default: () => [] } }
 }
 </script>
 
@@ -70,6 +86,10 @@ export default {
   }
   .account-details-info {
     border-top: 2px solid #EDF3F7;
+
+    .token {
+      margin: 0;
+    }
 
     @media (min-width: 550px) {
       width: 40%;
