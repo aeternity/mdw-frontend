@@ -37,6 +37,9 @@
       <AppNavLink to="/oracles">
         Oracles
       </AppNavLink>
+      <AppNavLink to="/tokens">
+        Tokens
+      </AppNavLink>
       <AppNavLink
         v-if="isFaucetActive"
         to="/faucet"
