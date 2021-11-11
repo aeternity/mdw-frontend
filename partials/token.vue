@@ -2,13 +2,13 @@
   <div class="token">
     <div class="container-first">
       <div class="container-first-inner">
-        <nuxt-link :to="'/tokens'">
+        <nuxt-link :to="`/tokens/${data.contractId}`">
           <LabelType
             title="Token"
             fill="green"
           />
         </nuxt-link>
-        <nuxt-link :to="`/tokens`">
+        <nuxt-link :to="`/tokens/${data.contractId}`">
           <div class="name-value">
             {{ data.name }}
           </div>
@@ -28,9 +28,7 @@
           class="container-last-inner"
           title="Name"
         >
-          <nuxt-link
-            :to="'/tokens'"
-          >
+          <nuxt-link :to="`/tokens/${data.contractId}`">
             {{ data.name }}
           </nuxt-link>
         </AppDefinition>
@@ -38,9 +36,7 @@
           class="container-last-inner"
           title="Symbol"
         >
-          <nuxt-link
-            :to="'/tokens'"
-          >
+          <nuxt-link :to="`/tokens/${data.contractId}`">
             {{ data.symbol }}
           </nuxt-link>
         </AppDefinition>
