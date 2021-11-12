@@ -5,19 +5,25 @@
       :has-crumbs="true"
       :page="{to: '/tokens', name: 'Tokens'}"
     />
-    <div v-if="tokens.length">
+    <input
+      v-model="query"
+      class="search-token"
+      placeholder="Search for a token..."
+      @input="search"
+    >
+    <div v-if="tokensList.length && !$fetchState.pending">
       <List>
         <Token
-          v-for="(item, index) in tokens"
+          v-for="(item, index) in tokensList"
           :key="index"
           :data="item"
         />
       </List>
     </div>
-    <div v-if="loading">
+    <div v-if="$fetchState.pending">
       Loading....
     </div>
-    <div v-if="!loading && tokens.length == 0">
+    <div v-if="!$fetchState.pending && tokensList.length == 0">
       Nothing to see here right now....
     </div>
   </div>
@@ -33,16 +39,35 @@ import { mapState } from 'vuex'
 export default {
   name: 'AppTokens',
   components: { PageHeader, List, Token },
-  async asyncData ({ store }) {
-    await store.dispatch('tokens/getAllTokens')
-    return { loading: false }
-  },
   data: function () {
     return {
-      loading: false
+      query: '',
+      tokensList: []
     }
   },
-  computed: mapState('tokens', ['tokens'])
-
+  async fetch () {
+    this.tokensList = await this.$store.dispatch('tokens/getAllTokens')
+  },
+  computed: mapState('tokens', ['tokens']),
+  methods: {
+    search () {
+      this.tokensList = this.tokens.filter(token => token.name.toLowerCase().includes(this.query.toLowerCase()) || token.symbol.toLowerCase().includes(this.query.toLowerCase()))
+    }
+  }
 }
 </script>
+
+<style lang="scss" scoped>
+.search-token {
+  border-radius: .4rem;
+  border: 2px solid #D3DCE6;
+  padding: .6rem;
+  margin-bottom: .6rem;
+  min-width: 300px;
+  height: 3rem;
+
+  @media (max-width: 767px) {
+    width: 100%;
+  }
+}
+</style>

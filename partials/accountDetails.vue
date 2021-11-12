@@ -38,7 +38,9 @@
           :key="index"
           class="token"
         >
-          {{ token.amount | formatToken(token.decimals, token.symbol) }}
+          <nuxt-link :to="`/tokens/${token.contractId}`">
+            {{ token.amount | formatToken(token.decimals, token.symbol) }}
+          </nuxt-link>
         </p>
       </AppDefinition>
     </div>
