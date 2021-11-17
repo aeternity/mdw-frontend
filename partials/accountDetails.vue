@@ -33,15 +33,27 @@
         v-if="tokensBalance.length > 0"
         title="tokens"
       >
-        <p
-          v-for="(token, index) in tokensBalance"
-          :key="index"
-          class="token"
-        >
-          <nuxt-link :to="`/tokens/${token.contractId}`">
-            {{ token.amount | formatToken(token.decimals, token.symbol) }}
-          </nuxt-link>
-        </p>
+        <div class="show-zero">
+          <button
+            class="show-btn"
+            :class="{active: !showZeros}"
+            @click="showZeros = !showZeros"
+          >
+            <AppIcon name="check" />
+          </button>
+          Hide empty balances
+        </div>
+        <div class="tokens-balances">
+          <p
+            v-for="(token, index) in showZeros? tokensBalance : tokensWithBalance"
+            :key="index"
+            class="token"
+          >
+            <nuxt-link :to="`/tokens/${token.contractId}`">
+              {{ token.amount | formatToken(token.decimals, token.symbol) }}
+            </nuxt-link>
+          </p>
+        </div>
       </AppDefinition>
     </div>
   </AppPanel>
@@ -50,6 +62,7 @@
 <script>
 import Account from '../components/account.vue'
 import AppDefinition from '../components/appDefinition.vue'
+import AppIcon from '../components/appIcon.vue'
 import AppPanel from '../components/appPanel.vue'
 import FormatAeUnit from '../components/formatAeUnit.vue'
 import formatToken from '../plugins/filters/formatToken'
@@ -59,15 +72,29 @@ export default {
   components: { AppDefinition,
     FormatAeUnit,
     Account,
-    AppPanel },
+    AppPanel,
+    AppIcon
+  },
   filters: { formatToken },
   props: {
     account: { type: Object, required: true },
-    tokensBalance: { type: Array, default: () => [] } }
+    tokensBalance: { type: Array, default: () => [] } },
+  data () {
+    return {
+      showZeros: false
+    }
+  },
+  computed: {
+    tokensWithBalance () {
+      return this.tokensBalance.filter(t => t.amount)
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
+@import "~@aeternity/aepp-components-3/src/styles/variables/colors";
+
 .account-details {
   display: flex;
   flex-direction: column;
@@ -87,7 +114,40 @@ export default {
     }
   }
   .account-details-info {
-    border-top: 2px solid #EDF3F7;
+    border-top: 2px solid $color-neutral-positive-2;
+
+    .show-zero {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 0.2rem;
+      .show-btn {
+        border: none;
+        background: none;
+        padding: 0.1rem;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 50%;
+        color: rgba($color-black, 0.4);
+        background: rgba($color-black, 0.1);
+        cursor: pointer;
+        margin-right: .4rem;
+
+        .app-icon {
+          width: 1.2rem;
+          height: 1.2rem;
+        }
+
+        &.active {
+          color: rgba($color-primary, 0.4);
+          background: rgba($color-primary, 0.1);
+        }
+      }
+    }
+
+    .tokens-balances {
+      max-height: 220px;
+      overflow-y: auto;
+    }
 
     .token {
       margin: 0;
@@ -97,7 +157,7 @@ export default {
       width: 40%;
       flex-direction: row;
       border-top: none;
-      border-left: 2px solid #EDF3F7;
+      border-left: 2px solid $color-neutral-positive-2;
     }
     @media (min-width: 1600px) {
       width: 35%;
