@@ -63,7 +63,6 @@
             >
               From
             </th>
-            <th scope="col" />
             <th
               scope="col"
               class="address-col"
@@ -100,7 +99,6 @@
                   length="responsive"
                 />
               </td>
-              <td>→</td>
               <td>
                 <FormatAddress
                   :value="transaction.tx.arguments.find(a=>a.type === 'address').value"
@@ -175,7 +173,8 @@ export default {
     const tokenInfo = allTokens.find(t => t.contractId === token)
     const tokenBalances = await store.dispatch('tokens/getTokenBalances', token)
     const { data, next } = await store.dispatch('contracts/getContractCalls', { contract: token, page: 1, limit: 25 })
-    return { token, tokenInfo, tokenBalances, transactions: data, loading: false, page: 2, nextPage: !!next }
+    const transactions = data.filter(({ tx }) => tx.function === 'transfer' || tx.function === 'mint')
+    return { token, tokenInfo, tokenBalances, transactions, loading: false, page: 2, nextPage: !!next }
   },
   data () {
     return {
@@ -241,6 +240,7 @@ export default {
   table {
     width: 100%;
     margin-top: 1em;
+    border-collapse: collapse;
 
     tr:hover {
       background-color: #fff;
@@ -249,6 +249,10 @@ export default {
     th {
       text-align: left;
       background-color: #fff;
+      font-weight: 700;
+      border-bottom: 2px solid $color-neutral-positive-2;
+      padding: .6rem 0 .6rem .5rem;
+      font-size: 16px;
 
       &.address-col {
         min-width: 120px;
@@ -257,6 +261,20 @@ export default {
         min-width: 90px;
       }
 
+      &:not(:first-child) {
+        border-left: 2px solid $color-neutral-positive-2;
+      }
+
+    }
+    tr {
+      border-bottom: 1px solid $color-neutral-positive-2;
+    }
+    td {
+      @extend %face-mono-s;
+      font-size: 14px;
+      &:not(:first-child) {
+        border-left: 1px solid $color-neutral-positive-2;
+      }
     }
     .function {
       white-space: nowrap;
