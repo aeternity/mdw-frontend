@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { fetchMiddleware } from './utils'
+import { fetchMiddleware, fetchJson } from './utils'
 
 export const state = () => ({
   tokens: [],
@@ -32,44 +32,75 @@ export const actions = {
       return []
     }
   },
-  getTokenTransactionInfo: async function ({ state: { tokens }, dispatch }, { contractId, address, id }) {
+  getTokenTransactionInfo: async function (
+    { state: { tokens }, dispatch },
+    { contractId, address, id }
+  ) {
     let allTokens = tokens
     if (!tokens.length) {
       allTokens = await dispatch('getAllTokens')
     }
-    const token = allTokens.find(t => t.contractId === contractId)
+    const token = allTokens.find((t) => t.contractId === contractId)
     if (!token) return null
     try {
-      return { ...(await dispatch('getAex9Transfers', { address })).find(b => b.callTxi === id), ...token }
+      return {
+        ...(await dispatch('getAex9Transfers', { address })).find(
+          (b) => b.callTxi === id
+        ),
+        ...token
+      }
     } catch (e) {
       console.log(e)
       return {}
     }
   },
-  getAex9Transactions: async function ({ state: { tokens }, dispatch }, { address, incoming = false }) {
+  getAex9Transactions: async function (
+    { state: { tokens }, dispatch },
+    { address, incoming = false }
+  ) {
     let allTokens = tokens
     if (!tokens.length) {
       allTokens = await dispatch('getAllTokens')
     }
-    const transactions = await dispatch('getAex9Transfers', { address, incoming })
-    return transactions.map(tx => {
-      const token = allTokens.find(t => t.contractId === tx.contractId)
-      return { tx: { ...tx, type: incoming ? 'Aex9ReceivedTx' : 'Aex9SentTx' }, token }
+    const transactions = await dispatch('getAex9Transfers', {
+      address,
+      incoming
+    })
+    return transactions.map((tx) => {
+      const token = allTokens.find((t) => t.contractId === tx.contractId)
+      return {
+        tx: { ...tx, type: incoming ? 'Aex9ReceivedTx' : 'Aex9SentTx' },
+        token
+      }
     })
   },
-  getAex9Transfers: async function ({ state: { transfers }, commit }, { address, incoming = false }) {
+  getAex9Transfers: async function (
+    { state: { transfers }, commit },
+    { address, incoming = false }
+  ) {
     let addressTransfers = transfers[incoming ? 'to' : 'from'][address]
     if (!addressTransfers) {
-      addressTransfers = await fetchMiddleware(`aex9/transfers/${incoming ? 'to' : 'from'}/${address}`)
+      addressTransfers = await fetchMiddleware(
+        `aex9/transfers/${incoming ? 'to' : 'from'}/${address}`
+      )
       commit('setTransfers', { address, incoming, transfers: addressTransfers })
     }
     return addressTransfers
   },
   getAccountBalance: async function ({ state: { tokens } }, { address }) {
     const balance = await fetchMiddleware(`aex9/balances/account/${address}`)
-    return balance.map(b => {
-      const tokenInfo = tokens.find(t => t.contractId === b.contractId)
-      return { ...b, decimals: tokenInfo.decimals, symbol: tokenInfo.symbol, name: tokenInfo.name }
+    return balance.map((b) => {
+      const tokenInfo = tokens.find((t) => t.contractId === b.contractId)
+      return {
+        ...b,
+        decimals: tokenInfo.decimals,
+        symbol: tokenInfo.symbol,
+        name: tokenInfo.name
+      }
     })
+  },
+  getTokenBalances: async function ({ rootState: { nodeUrl } }, contractId) {
+    const tokenBalances = await fetchJson(`${nodeUrl}/aex9/balances/${contractId}`)
+    return Object.entries(tokenBalances.amounts)
   }
 }

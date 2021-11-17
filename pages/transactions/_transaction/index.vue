@@ -65,7 +65,7 @@ export default {
   },
   data () {
     return {
-      transation: {},
+      transaction: {},
       generation: {},
       height: 0,
       loading: true
