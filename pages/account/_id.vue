@@ -80,13 +80,15 @@ export default {
       transactions = aex9Transactions
     } else {
       const { data, next } = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page: 1, limit: 10, txtype: value })
-      const transformed = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
-      transactions = await Promise.all(transformed.map(async (txDetails) => {
-        if (txDetails.tx.contractId && txDetails.tx.callerId) {
-          txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
-        }
-        return txDetails
-      }))
+      if (data) {
+        const transformed = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+        transactions = await Promise.all(transformed.map(async (txDetails) => {
+          if (txDetails.tx.contractId && txDetails.tx.callerId) {
+            txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
+          }
+          return txDetails
+        }))
+      }
       nextPage = !!next
     }
     const accountDetails = await store.dispatch('account/getAccountDetails', params.id)
@@ -117,15 +119,16 @@ export default {
         this.transactions = await this.$store.dispatch('tokens/getAex9Transactions', { address: this.account.id, incoming: this.value === 'aex9_received' })
       } else {
         const { data, next } = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, txtype })
-        const transformed = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
-        const result = await Promise.all(transformed.map(async (txDetails) => {
-          if (txDetails.tx.contractId && txDetails.tx.callerId) {
-            txDetails.tokenInfo = await this.$store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
-          }
-          return txDetails
-        }))
-
-        this.transactions = [...this.transactions, ...result]
+        if (data) {
+          const transformed = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+          const result = await Promise.all(transformed.map(async (txDetails) => {
+            if (txDetails.tx.contractId && txDetails.tx.callerId) {
+              txDetails.tokenInfo = await this.$store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
+            }
+            return txDetails
+          }))
+          this.transactions = [...this.transactions, ...result]
+        }
         this.nextPage = !!next
         this.page += 1
       }

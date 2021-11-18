@@ -61,6 +61,7 @@ export const actions = {
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
+      return { data: null, next: false }
     }
   }
 }

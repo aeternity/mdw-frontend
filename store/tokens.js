@@ -89,6 +89,9 @@ export const actions = {
   },
   getAccountBalance: async function ({ state: { tokens } }, { address }) {
     const balance = await fetchMiddleware(`aex9/balances/account/${address}`)
+    if (balance.hasOwnProperty('error')) {
+      return []
+    }
     return balance.map((b) => {
       const tokenInfo = tokens.find((t) => t.contractId === b.contractId)
       return {

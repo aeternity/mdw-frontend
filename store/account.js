@@ -3,8 +3,17 @@ import { fetchJson } from './utils'
 export const actions = {
   getAccountDetails: async function ({ rootState: { nodeUrl }, commit }, account) {
     try {
-      const acc = await fetchJson(`${nodeUrl.slice(0, -4)}/v3/accounts/${account}`)
-      return acc
+      const acc = await fetch(`${nodeUrl.slice(0, -4)}/v3/accounts/${account}`)
+      if (!acc.ok) {
+        commit('catchError', 'Error', { root: true })
+        const basicError = {
+          id: account,
+          balance: 0,
+          error: 'Account not found'
+        }
+        return basicError
+      }
+      return acc.json()
     } catch (e) {
       commit('catchError', 'Error', { root: true })
       const basicError = {
