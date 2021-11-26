@@ -7,7 +7,22 @@
         title="Address"
         icon
       />
-      <AppDefinition title="Account type">
+      <AppDefinition
+        v-if="account.error"
+        title="Account type"
+      >
+        <div class="error">
+          unknown
+          <AppIcon name="info" />
+          <div class="tooltiptext">
+            The account has never been seen in the network.
+          </div>
+        </div>
+      </AppDefinition>
+      <AppDefinition
+        v-if="account.kind"
+        title="Account type"
+      >
         {{ account.kind }}
       </AppDefinition>
       <Account
@@ -93,7 +108,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "~@aeternity/aepp-components-3/src/styles/variables/colors";
+@import '~@aeternity/aepp-components-3/src/styles/variables/colors';
 
 .account-details {
   display: flex;
@@ -111,6 +126,37 @@ export default {
     }
       @media (min-width: 1600px) {
       width: 65%;
+    }
+    .error {
+      color: $color-red;
+      display: flex;
+      align-items: center;
+      position: relative;
+      .app-icon {
+        margin-left: 0.2rem;
+        cursor: pointer;
+      }
+
+      .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        word-break: unset;
+        background-color: $color-neutral;
+        font-size: 12px;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        position: absolute;
+        left: 101%;
+        top: -2px;
+        z-index: 1;
+      }
+
+      &:hover {
+        .tooltiptext {
+          visibility: visible;
+        }
+      }
     }
   }
   .account-details-info {
