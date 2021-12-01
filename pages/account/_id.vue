@@ -37,7 +37,7 @@
     <div v-if="loading">
       Loading....
     </div>
-    <div v-if="!loading &&transactions.length == 0">
+    <div v-if="!loading && transactions.length === 0">
       No matching transactions found for the selected type.
     </div>
   </div>
@@ -67,6 +67,7 @@ export default {
     let value = null
     let transactions = []
     let nextPage = false
+    let page = null
     if (query.txtype) {
       if (store.state.filterOptions.indexOf(query.txtype) > 0) {
         value = query.txtype
@@ -79,7 +80,8 @@ export default {
       const aex9Transactions = await store.dispatch('tokens/getAex9Transactions', { address: params.id, incoming: false })
       transactions = aex9Transactions
     } else {
-      const { data, next } = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page: 1, limit: 10, txtype: value })
+      const { data, next } = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page, limit: 10, txtype: value })
+      page = next
       if (data) {
         const transformed = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
         transactions = await Promise.all(transformed.map(async (txDetails) => {
@@ -94,7 +96,7 @@ export default {
     const accountDetails = await store.dispatch('account/getAccountDetails', params.id)
     const tokensBalance = await store.dispatch('tokens/getAccountBalance', { address: params.id })
     value = value || 'All'
-    return { address: params.id, transactions, page: 2, value, loading: false, accountDetails, nextPage, tokensBalance }
+    return { address: params.id, transactions, page, value, loading: false, accountDetails, nextPage, tokensBalance }
   },
   data () {
     return {
@@ -104,7 +106,7 @@ export default {
       accountDetails: {},
       tokensBalance: [],
       transactions: [],
-      page: 1,
+      page: null,
       loading: true,
       value: 'All',
       options: this.$store.state.filterOptions,
@@ -130,13 +132,13 @@ export default {
           this.transactions = [...this.transactions, ...result]
         }
         this.nextPage = !!next
-        this.page += 1
+        this.page = next
       }
       this.loading = false
     },
     async processInput () {
       this.loading = true
-      this.page = 1
+      this.page = null
       this.transactions = []
       this.nextPage = false
       await this.loadMore()

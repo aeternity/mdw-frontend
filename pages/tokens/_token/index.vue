@@ -172,9 +172,9 @@ export default {
     const allTokens = await store.dispatch('tokens/getAllTokens')
     const tokenInfo = allTokens.find(t => t.contractId === token)
     const tokenBalances = await store.dispatch('tokens/getTokenBalances', token)
-    const { data, next } = await store.dispatch('contracts/getContractCalls', { contract: token, page: 1, limit: 25 })
+    const { data, next } = await store.dispatch('contracts/getContractCalls', { contract: token, page: null, limit: 25 })
     const transactions = data.filter(({ tx }) => tx.function === 'transfer' || tx.function === 'mint')
-    return { token, tokenInfo, tokenBalances, transactions, loading: false, page: 2, nextPage: !!next }
+    return { token, tokenInfo, tokenBalances, transactions, loading: false, page: next, nextPage: !!next }
   },
   data () {
     return {
@@ -183,7 +183,7 @@ export default {
       tokenBalances: [],
       transactions: [],
       loading: true,
-      page: 1,
+      page: null,
       nextPage: false,
       show: 'transactions',
       options: ['transactions', 'holders']
@@ -200,7 +200,7 @@ export default {
       const { data, next } = await this.$store.dispatch('contracts/getContractCalls', { contract: this.token, page: this.page, limit: 25 })
       this.transactions = [...this.transactions, ...data]
       this.nextPage = !!next
-      this.page += 1
+      this.page = next
       this.loading = false
     }
   }

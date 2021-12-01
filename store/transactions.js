@@ -1,9 +1,8 @@
 import Vue from 'vue'
-import { transformMetaTx } from './utils'
+import { fetchMiddleware, transformMetaTx } from './utils'
 
 export const state = () => ({
-  transactions: {},
-  lastPage: 0
+  transactions: {}
 })
 
 export const mutations = {
@@ -17,19 +16,14 @@ export const mutations = {
         Vue.set(state.transactions, transaction.hash, transaction)
       }
     }
-  },
-  setLastPage (state, page) {
-    state.lastPage = page
   }
 }
 
 export const actions = {
-  getLatest: async function ({ state, rootGetters: { middleware }, commit }, { limit, resetPage = false }) {
+  getLatest: async function ({ state, rootGetters: { middleware }, commit }, { limit }) {
     try {
-      const page = resetPage ? 1 : state.lastPage + 1
-      const transactions = await middleware.getTxBackward({ page, limit })
+      const transactions = await middleware.getTxBackward({ limit })
       commit('addTransactions', transactions.data)
-      commit('setLastPage', page)
       return transactions
     } catch (e) {
       commit('catchError', 'Error', { root: true })
@@ -37,7 +31,12 @@ export const actions = {
   },
   getTxByType: async function ({ rootGetters: { middleware }, commit }, { page, limit, type }) {
     try {
-      const transactions = await middleware.getTxBackward({ page, limit, type })
+      if (page !== null) {
+        const res = await fetchMiddleware(page)
+        return res
+      }
+
+      const transactions = await middleware.getTxBackward({ limit, type })
       return transactions
     } catch (e) {
       console.log(e)
@@ -56,7 +55,12 @@ export const actions = {
   },
   getTransactionByAccount: async function ({ rootGetters: { middleware }, commit }, { account, limit, page, txtype }) {
     try {
-      const tx = await middleware.getTxBackward({ account, limit, page, type: txtype || undefined })
+      if (page !== null) {
+        const res = await fetchMiddleware(page)
+        return res
+      }
+
+      const tx = await middleware.getTxBackward({ account, limit, type: txtype || undefined })
       return tx
     } catch (e) {
       console.log(e)

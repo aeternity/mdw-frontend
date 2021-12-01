@@ -60,7 +60,7 @@ export default {
     const type = options.includes(query.txtype) ? query.txtype : null
     let transactions = {}
     const { data, next } = type ? await store.dispatch('transactions/getTxByType', {
-      page: 1,
+      page: null,
       limit: 10,
       type
     }) : await store.dispatch(
@@ -71,11 +71,11 @@ export default {
       element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
       transactions = { ...transactions, [element.hash]: element }
     })
-    return { transactions: data, loading: false, nextPage: !!next, options, value: type || 'All' }
+    return { transactions: data, loading: false, nextPage: !!next, options, page: next, value: type || 'All' }
   },
   data () {
     return {
-      typePage: 2,
+      page: null,
       loading: true,
       value: 'All',
       transactions: {},
@@ -108,7 +108,7 @@ export default {
     },
     async getTxByType () {
       const { data, next } = await this.$store.dispatch('transactions/getTxByType', {
-        page: this.typePage,
+        page: this.page,
         limit: 10,
         type: this.value
       })
@@ -117,7 +117,7 @@ export default {
         this.transactions = { ...this.transactions, [element.hash]: element }
       })
       this.nextPage = !!next
-      this.typePage += 1
+      this.page = next
     },
     async processInput () {
       this.loading = true
@@ -127,7 +127,7 @@ export default {
         await this.getAllTx()
       } else {
         this.$router.push({ query: { txtype: this.value } })
-        this.typePage = 1
+        this.page = null
         this.transactions = {}
         await this.loadmore()
       }

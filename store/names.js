@@ -13,10 +13,10 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { page, limit }) {
+  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { limit }) {
     try {
       if (nextPageUrl) return
-      const names = await middleware.getAllNames({ page, limit })
+      const names = await middleware.getAllNames({ limit })
       commit('addNames', names)
     } catch (e) {
       console.log(e)
@@ -40,7 +40,12 @@ export const actions = {
   },
   getActiveNameAuctions: async function ({ rootGetters: { middleware }, commit }, { page, limit, by, length }) {
     try {
-      const auctions = await middleware.getAllAuctions({ page, limit, by, length: length > 0 ? length : undefined })
+      if (page !== null) {
+        const res = await fetchMiddleware(page)
+        return res
+      }
+
+      const auctions = await middleware.getAllAuctions({ limit, by, length: length > 0 ? length : undefined })
       return auctions
     } catch (e) {
       console.log(e)

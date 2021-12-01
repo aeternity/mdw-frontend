@@ -22,7 +22,7 @@
     <div v-if="loading">
       Loading....
     </div>
-    <div v-if="!loading && oracles.length == 0">
+    <div v-if="!loading && oracles.length === 0">
       Nothing to see here right now....
     </div>
   </div>
