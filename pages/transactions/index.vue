@@ -15,10 +15,10 @@
         @input="processInput"
       />
     </div>
-    <div v-if="Object.keys(transactions).length > 0">
+    <div v-if="transactions.length > 0">
       <List>
         <TXListItem
-          v-for="(item, index) in Object.values(transactions)"
+          v-for="(item, index) in transactions"
           :key="index"
           :data="item"
         />
@@ -32,7 +32,7 @@
     <div v-if="loading">
       Loading....
     </div>
-    <div v-if="!loading && Object.keys(transactions).length == 0">
+    <div v-if="!loading && transactions.length == 0">
       No matching transactions found for the selected type.
     </div>
   </div>
@@ -58,20 +58,16 @@ export default {
   async asyncData ({ store, query }) {
     const options = store.state.filterOptions.filter(option => option !== 'aex9_sent' && option !== 'aex9_received')
     const type = options.includes(query.txtype) ? query.txtype : null
-    let transactions = {}
     const { data, next } = type ? await store.dispatch('transactions/getTxByType', {
       page: null,
       limit: 10,
       type
     }) : await store.dispatch(
       'transactions/getLatest',
-      { limit: 10, resetPage: true }
+      { limit: 10, page: null }
     )
-    data.forEach(element => {
-      element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
-      transactions = { ...transactions, [element.hash]: element }
-    })
-    return { transactions: data, loading: false, nextPage: !!next, options, page: next, value: type || 'All' }
+    const transactions = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+    return { transactions, loading: false, nextPage: !!next, options, page: next, value: type || 'All' }
   },
   data () {
     return {
@@ -100,10 +96,8 @@ export default {
         'transactions/getLatest',
         { limit: 10, page: this.page }
       )
-      data.forEach(element => {
-        element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
-        this.transactions = { ...this.transactions, [element.hash]: element }
-      })
+      const result = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+      this.transactions = [...this.transactions, ...result]
       this.nextPage = !!next
       this.page = next
     },
@@ -113,26 +107,16 @@ export default {
         limit: 10,
         type: this.value
       })
-      data.forEach(element => {
-        element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
-        this.transactions = { ...this.transactions, [element.hash]: element }
-      })
+      const result = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+      this.transactions = [...this.transactions, ...result]
       this.nextPage = !!next
       this.page = next
     },
     async processInput () {
-      this.loading = true
-      if (this.value === 'All') {
-        this.$router.push({ query: null })
-        this.transactions = {}
-        await this.getAllTx()
-      } else {
-        this.$router.push({ query: { txtype: this.value } })
-        this.page = null
-        this.transactions = {}
-        await this.loadmore()
-      }
-      this.loading = false
+      this.page = null
+      this.transactions = []
+      this.$router.push({ query: this.value === 'All' ? null : { txtype: this.value } })
+      await this.loadmore()
     }
   }
 }

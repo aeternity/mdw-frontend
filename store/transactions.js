@@ -7,7 +7,7 @@ export const state = () => ({
 export const mutations = {
   addTransactions (state, transactions) {
     const transformed = transactions.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
-    state.transactions = [...transactions, transformed]
+    state.transactions.push(...transformed)
   }
 }
 

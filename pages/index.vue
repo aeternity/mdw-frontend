@@ -27,7 +27,7 @@
         />
         <List>
           <TXListItem
-            v-for="(transaction, index) in transactions.reverse().slice(0,5)"
+            v-for="(transaction, index) in [...transactions].reverse().slice(0, 5)"
             :key="index"
             :data="transaction"
           />
@@ -58,20 +58,16 @@ export default {
         return Object.values(state.generations).reverse()
       }
     }),
-    ...mapState('transactions', {
-      transactions (state) {
-        return Object.values(state.transactions)
-      }
-    })
+    ...mapState('transactions', ['transactions'])
   },
   async mounted () {
     this.$store.dispatch('setupWebSocket')
     if (!Object.keys(this.$store.state.generations.generations).length) {
       this.$store.dispatch('generations/getLatest')
     }
-    if (!Object.keys(this.$store.state.transactions.transactions).length) {
+    if (!this.$store.state.transactions.transactions.length) {
       await this.$store.dispatch('height')
-      this.$store.dispatch('transactions/getLatest', { limit: 10 })
+      this.$store.dispatch('transactions/getLatest', { limit: 10, page: null })
     }
   }
 }
