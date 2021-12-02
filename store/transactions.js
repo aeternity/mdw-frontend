@@ -1,27 +1,24 @@
-import Vue from 'vue'
 import { fetchMiddleware, transformMetaTx } from './utils'
 
 export const state = () => ({
-  transactions: {}
+  transactions: []
 })
 
 export const mutations = {
   addTransactions (state, transactions) {
-    for (let i = 0; i < transactions.length; i++) {
-      let transaction = transactions[i]
-      if (transaction.tx.type === 'GAMetaTx') {
-        transaction = transformMetaTx(transaction)
-      }
-      if (!state.transactions.hasOwnProperty(transaction.hash)) {
-        Vue.set(state.transactions, transaction.hash, transaction)
-      }
-    }
+    const transformed = transactions.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+    state.transactions = [...transactions, transformed]
   }
 }
 
 export const actions = {
-  getLatest: async function ({ state, rootGetters: { middleware }, commit }, { limit }) {
+  getLatest: async function ({ state, rootGetters: { middleware }, commit }, { limit, page }) {
     try {
+      if (page !== null) {
+        const res = await fetchMiddleware(page)
+        commit('addTransactions', res.data)
+        return res
+      }
       const transactions = await middleware.getTxBackward({ limit })
       commit('addTransactions', transactions.data)
       return transactions

@@ -98,13 +98,14 @@ export default {
     async getAllTx () {
       const { data, next } = await this.$store.dispatch(
         'transactions/getLatest',
-        { limit: 10 }
+        { limit: 10, page: this.page }
       )
       data.forEach(element => {
         element = element.tx.type === 'GAMetaTx' ? transformMetaTx(element) : element
         this.transactions = { ...this.transactions, [element.hash]: element }
       })
       this.nextPage = !!next
+      this.page = next
     },
     async getTxByType () {
       const { data, next } = await this.$store.dispatch('transactions/getTxByType', {
