@@ -46,11 +46,16 @@ export default {
     }
   },
   async fetch () {
+    this.query = this.$route.query.search || ''
     this.tokensList = await this.$store.dispatch('tokens/getAllTokens')
+    if (this.query) {
+      this.search()
+    }
   },
   computed: mapState('tokens', ['tokens']),
   methods: {
     search () {
+      this.$router.push({ query: this.query ? { search: this.query } : null })
       this.tokensList = this.tokens.filter(token => token.name.toLowerCase().includes(this.query.toLowerCase()) || token.symbol.toLowerCase().includes(this.query.toLowerCase()))
     }
   }
