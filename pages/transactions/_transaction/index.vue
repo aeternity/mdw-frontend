@@ -10,6 +10,13 @@
       :status="loading"
       :data="transaction"
     />
+    <div v-if="$fetchState.pending">
+      Loading....
+    </div>
+    <FunctionCalls
+      v-if="functionCalls.length > 0"
+      :function-calls="functionCalls"
+    />
     <GenerationDetails
       v-if="generation && height"
       :data="generation"
@@ -22,6 +29,7 @@
 <script>
 import GenerationDetails from '../../../partials/generationDetails'
 import TransactionDetails from '../../../partials/transactionDetails'
+import FunctionCalls from '../../../partials/functionCalls'
 import PageHeader from '../../../components/PageHeader'
 import { transformMetaTx } from '../../../store/utils'
 
@@ -30,6 +38,7 @@ export default {
   components: {
     GenerationDetails,
     TransactionDetails,
+    FunctionCalls,
     PageHeader
   },
   async asyncData ({ store, params: { transaction }, error }) {
@@ -68,8 +77,12 @@ export default {
       transaction: {},
       generation: {},
       height: 0,
-      loading: true
+      loading: true,
+      functionCalls: []
     }
+  },
+  async fetch () {
+    this.functionCalls = await this.$store.dispatch('transactions/getTransactionFunctionCalls', this.transaction.txIndex)
   }
 }
 </script>

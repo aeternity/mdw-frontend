@@ -1,4 +1,4 @@
-import { fetchMiddleware, transformMetaTx } from './utils'
+import { transformMetaTx, fetchMiddleware } from './utils'
 
 export const state = () => ({
   transactions: []
@@ -64,5 +64,9 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
       return { data: null, next: false }
     }
+  },
+  getTransactionFunctionCalls: async function ({ state }, txi) {
+    const { data } = await fetchMiddleware(`contracts/calls/txi/${txi}`)
+    return data
   }
 }
