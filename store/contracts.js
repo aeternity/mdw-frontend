@@ -30,9 +30,9 @@ export const actions = {
     commit('addContracts', contracts)
   },
 
-  getContractCreateTx: async function ({ rootGetters: { middleware }, commit }, { contract, page, limit }) {
+  getContractCreateTx: async function ({ rootGetters: { middleware }, commit }, { contract, limit }) {
     try {
-      const contractTx = await middleware.getTxBackward({ type: 'contract_create', page, limit, contract })
+      const contractTx = await middleware.getTxBackward({ type: 'contract_create', limit, contract })
       return contractTx.data
     } catch (e) {
       console.log(e)
@@ -42,7 +42,12 @@ export const actions = {
   },
   getContractCalls: async function ({ rootGetters: { middleware }, commit }, { contract, page, limit }) {
     try {
-      const contractCalls = await middleware.getTxBackward({ type: 'contract_call', page, limit, contract })
+      if (page !== null) {
+        const res = await fetchMiddleware(page)
+        return res
+      }
+
+      const contractCalls = await middleware.getTxBackward({ type: 'contract_call', limit, contract })
       return contractCalls
     } catch (e) {
       console.log(e)

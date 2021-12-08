@@ -59,12 +59,12 @@ export default {
     Multiselect
   },
   async asyncData ({ store }) {
-    const { data, next } = await store.dispatch('names/getActiveNameAuctions', { 'page': 1, 'limit': 10, by: 'expiration', length: 0 })
-    return { auctions: data, page: 2, loading: false, nextPage: !!next }
+    const { data, next } = await store.dispatch('names/getActiveNameAuctions', { page: null, limit: 10, by: 'expiration', length: 0 })
+    return { auctions: data, page: next, loading: false, nextPage: !!next }
   },
   data () {
     return {
-      page: 1,
+      page: null,
       loading: true,
       loadingMore: false,
       auctions: [],
@@ -86,19 +86,19 @@ export default {
   methods: {
     async loadMore () {
       this.loadingMore = true
-      const { data, next } = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
+      const { data, next } = await this.$store.dispatch('names/getActiveNameAuctions', { page: this.page, limit: 10, by: this.sortby.value, length: this.actualLength })
       this.auctions = [...this.auctions, ...data]
       this.nextPage = !!next
-      this.page += 1
+      this.page = next
       this.loadingMore = false
     },
     async processInput () {
       this.loading = true
-      this.page = 1
-      const { data, next } = await this.$store.dispatch('names/getActiveNameAuctions', { 'page': this.page, 'limit': 10, by: this.sortby.value, length: this.actualLength })
+      this.page = null
+      const { data, next } = await this.$store.dispatch('names/getActiveNameAuctions', { page: this.page, limit: 10, by: this.sortby.value, length: this.actualLength })
       this.auctions = data
       this.nextPage = !!next
-      this.page += 1
+      this.page = next
       this.loading = false
     }
   }

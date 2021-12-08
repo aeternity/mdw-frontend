@@ -23,7 +23,7 @@
     <div v-if="loading || loadingMore">
       Loading....
     </div>
-    <div v-if="!loading && transactions.length == 0">
+    <div v-if="!loading && transactions.length === 0">
       Contract not found.
       Please check the contract address and try again.
       <br>
@@ -46,13 +46,13 @@ export default {
     PageHeader
   },
   async asyncData ({ store, params }) {
-    let createTransactions = await store.dispatch('contracts/getContractCreateTx', { contract: params.id, page: 1, limit: 10 })
-    const { data, next } = await store.dispatch('contracts/getContractCalls', { contract: params.id, page: 1, limit: 10 })
+    let createTransactions = await store.dispatch('contracts/getContractCreateTx', { contract: params.id, limit: 10 })
+    const { data, next } = await store.dispatch('contracts/getContractCalls', { contract: params.id, page: null, limit: 10 })
     let transactions = []
     if (createTransactions && data) {
       transactions = [...createTransactions, ...data]
     }
-    return { contract: params.id, transactions, loading: false, page: 2, nextPage: !!next }
+    return { contract: params.id, transactions, loading: false, page: next, nextPage: !!next }
   },
   data () {
     return {
@@ -60,7 +60,7 @@ export default {
       transactions: [],
       loading: true,
       loadingMore: false,
-      page: 1,
+      page: null,
       nextPage: false
     }
   },
@@ -70,7 +70,7 @@ export default {
       const { data, next } = await this.$store.dispatch('contracts/getContractCalls', { contract: this.contract, page: this.page, limit: 10 })
       this.transactions = [...this.transactions, ...data]
       this.nextPage = !!next
-      this.page += 1
+      this.page = next
       this.loadingMore = false
     }
   }

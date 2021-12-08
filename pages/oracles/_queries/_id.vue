@@ -43,24 +43,24 @@ export default {
     LoadMoreButton
   },
   async asyncData ({ store, params }) {
-    const queries = await store.dispatch('oracles/getAllQueries', { oracleId: params.id, 'page': 1, 'limit': 10 })
-    return { oracleId: params.id, queries, page: 2 }
+    const { data, next } = await store.dispatch('oracles/getAllQueries', { oracleId: params.id, page: null, limit: 10 })
+    return { oracleId: params.id, data, page: next }
   },
   data () {
     return {
       oracleId: null,
       queries: [],
-      page: 1,
+      page: null,
       loading: false
     }
   },
   methods: {
     async loadMore () {
       this.loading = true
-      const queries = await this.$store.dispatch('oracles/getAllQueries', { oracleId: this.oracleId, 'page': this.page, 'limit': 10 })
+      const { data, next } = await this.$store.dispatch('oracles/getAllQueries', { oracleId: this.oracleId, page: this.page, limit: 10 })
       this.loading = false
-      this.queries = [...this.queries, ...queries]
-      this.page += 1
+      this.queries = [...this.queries, ...data]
+      this.page = next
     }
   }
 }

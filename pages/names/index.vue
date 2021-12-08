@@ -44,7 +44,7 @@ export default {
     LoadMoreButton
   },
   async asyncData ({ store }) {
-    await store.dispatch('names/getLatest', { page: 1, limit: 10 })
+    await store.dispatch('names/getLatest', { limit: 10 })
     return { loading: false }
   },
   data () {
