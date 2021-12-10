@@ -142,19 +142,23 @@ function handleWsOpen (socket, commit, dispatch) {
 
 function processWsData (data, commit, dispatch) {
   if (data.includes('payload')) {
-    data = camelcaseKeysDeep(JSON.parse(data).payload)
-    if (data.tx) {
-      commit('transactions/addTransactions', [data])
-      dispatch('generations/updateTx', data)
-    } else if (data.beneficiary) {
-      commit('generations/addGenerations', [data])
-      if (state.height < data.height) {
-        commit('setHeight', data.height, {
-          root: true
-        })
+    const dataJson = JSON.parse(data)
+    const payload = camelcaseKeysDeep(dataJson.payload)
+
+    if (dataJson.source === 'mdw') {
+      if (payload.tx) {
+        commit('transactions/addTransactions', [payload])
+        dispatch('generations/updateTx', payload)
+      } else if (payload.beneficiary) {
+        commit('generations/addGenerations', [payload])
+        if (state.height < payload.height) {
+          commit('setHeight', payload.height, {
+            root: true
+          })
+        }
+      } else if (payload.pofHash) {
+        dispatch('generations/updateMicroBlock', payload)
       }
-    } else if (data.pofHash) {
-      dispatch('generations/updateMicroBlock', data)
     }
   }
 }
