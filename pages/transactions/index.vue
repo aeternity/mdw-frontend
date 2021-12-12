@@ -56,7 +56,7 @@ export default {
     Multiselect
   },
   async asyncData ({ store, query }) {
-    const options = store.state.filterOptions.filter(option => option !== 'aex9_sent' && option !== 'aex9_received')
+    const options = store.state.filterOptions.filter(option => option !== 'aex9_sent' && option !== 'aex9_received' && option !== 'internal_transfers')
     const type = options.includes(query.txtype) ? query.txtype : null
     const { data, next } = type ? await store.dispatch('transactions/getTxByType', {
       page: null,

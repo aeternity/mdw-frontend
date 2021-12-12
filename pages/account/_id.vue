@@ -51,7 +51,7 @@ import PageHeader from '../../components/PageHeader'
 import LoadMoreButton from '../../components/loadMoreButton'
 import Multiselect from 'vue-multiselect'
 import { transformMetaTx } from '../../store/utils'
-import AccountDetails from '../../partials/accountDetails.vue'
+import AccountDetails from '../../partials/accountDetails'
 
 export default {
   name: 'AccountTransactions',
@@ -79,6 +79,11 @@ export default {
     if (value === 'aex9_sent' || value === 'aex9_received') {
       const aex9Transactions = await store.dispatch('tokens/getAex9Transactions', { address: params.id, incoming: false })
       transactions = aex9Transactions
+    } else if (value === 'internal_transfers') {
+      const { data, next } = await this.$store.dispatch('transactions/getInternalTransactions', { account: params.id, page })
+      transactions = data
+      nextPage = !!next
+      page = next
     } else {
       const { data, next } = await store.dispatch('transactions/getTransactionByAccount', { account: params.id, page, limit: 10, txtype: value })
       page = next
@@ -119,6 +124,11 @@ export default {
       const txtype = this.value === 'All' ? null : this.value
       if (this.value === 'aex9_sent' || this.value === 'aex9_received') {
         this.transactions = await this.$store.dispatch('tokens/getAex9Transactions', { address: this.account.id, incoming: this.value === 'aex9_received' })
+      } else if (this.value === 'internal_transfers') {
+        const { data, next } = await this.$store.dispatch('transactions/getInternalTransactions', { account: this.account.id, page: this.page })
+        this.transactions = [...this.transactions, ...data]
+        this.nextPage = !!next
+        this.page = next
       } else {
         const { data, next } = await this.$store.dispatch('transactions/getTransactionByAccount', { account: this.account.id, page: this.page, limit: 10, txtype })
         if (data) {

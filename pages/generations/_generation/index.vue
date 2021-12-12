@@ -14,6 +14,18 @@
       :data="generation"
       :dynamic-data="height"
     />
+    <List v-if="internalTransfers.length >0">
+      <TXListItem
+        v-for="(item, index) in internalTransfers"
+        :key="index"
+        :data="item"
+      />
+    </List>
+    <LoadMoreButton
+      v-if="nextInternal"
+      :loading="loading"
+      @update="fetchInternalTransfers"
+    />
     <MicroBlocks>
       <MicroBlock
         v-for="(microBlock, number) in generation.microBlocks"
@@ -36,6 +48,8 @@ import GenerationDetails from '../../../partials/generationDetails'
 import MicroBlocks from '../../../partials/microBlocks'
 import MicroBlock from '../../../partials/microBlock'
 import PageHeader from '../../../components/PageHeader'
+import LoadMoreButton from '../../../components/loadMoreButton'
+import List from '../../../components/list'
 import TXListItem from '../../../partials/txListItem'
 import { transformMetaTx } from '../../../store/utils'
 
@@ -46,6 +60,8 @@ export default {
     GenerationDetails,
     MicroBlocks,
     MicroBlock,
+    LoadMoreButton,
+    List,
     TXListItem
   },
   async asyncData ({ store, params, error }) {
@@ -78,13 +94,32 @@ export default {
       height: 0,
       prev: '',
       next: '',
-      generation: null
+      generation: null,
+      internalTransfers: [],
+      nextInternal: null,
+      loading: false
     }
+  },
+  async fetch () {
+    await this.fetchInternalTransfers()
   },
   methods: {
     checkTxMeta (transaction) {
       return transaction.tx.type === 'GAMetaTx' ? transformMetaTx(transaction) : transaction
+    },
+    async fetchInternalTransfers () {
+      this.loading = true
+      const { data, next } = await this.$store.dispatch('transactions/getInternalTransactions', { gen: this.generation.height, page: this.nextInternal })
+      this.nextInternal = next
+      this.internalTransfers = [...this.internalTransfers, ...data]
+      this.loading = false
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.list {
+  margin-top: 2rem;
+}
+</style>
