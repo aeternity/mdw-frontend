@@ -6,13 +6,18 @@ export const state = () => ({
 
 export const mutations = {
   addTransactions (state, transactions) {
-    const transformed = transactions.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
+    const transformed = transactions.map((t) =>
+      t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t
+    )
     state.transactions.push(...transformed)
   }
 }
 
 export const actions = {
-  getLatest: async function ({ state, rootGetters: { middleware }, commit }, { limit, page }) {
+  getLatest: async function (
+    { state, rootGetters: { middleware }, commit },
+    { limit, page }
+  ) {
     try {
       if (page !== null) {
         const res = await fetchMiddleware(page)
@@ -26,7 +31,10 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTxByType: async function ({ rootGetters: { middleware }, commit }, { page, limit, type }) {
+  getTxByType: async function (
+    { rootGetters: { middleware }, commit },
+    { page, limit, type }
+  ) {
     try {
       if (page !== null) {
         const res = await fetchMiddleware(page)
@@ -40,7 +48,10 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTransactionById: async function ({ rootGetters: { middleware }, commit }, id) {
+  getTransactionById: async function (
+    { rootGetters: { middleware }, commit },
+    id
+  ) {
     try {
       const tx = await middleware[id.startsWith('th_') ? 'getTxByHash' : 'getTxByIndex'](id)
       commit('addTransactions', [tx])
@@ -50,14 +61,21 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getTransactionByAccount: async function ({ rootGetters: { middleware }, commit }, { account, limit, page, txtype }) {
+  getTransactionByAccount: async function (
+    { rootGetters: { middleware }, commit },
+    { account, limit, page, txtype }
+  ) {
     try {
       if (page !== null) {
         const res = await fetchMiddleware(page)
         return res
       }
 
-      const tx = await middleware.getTxBackward({ account, limit, type: txtype || undefined })
+      const tx = await middleware.getTxBackward({
+        account,
+        limit,
+        type: txtype || undefined
+      })
       return tx
     } catch (e) {
       console.log(e)
@@ -68,5 +86,20 @@ export const actions = {
   getTransactionFunctionCalls: async function ({ state }, txi) {
     const { data } = await fetchMiddleware(`contracts/calls/txi/${txi}`)
     return data
+  },
+  getInternalTransactions: async function ({ state }, { account, gen, page }) {
+    if (page) {
+      const { data, next } = await fetchMiddleware(page)
+      return { data: data.map(t => ({ tx: { type: 'InternalTx' }, ...t })), next }
+    }
+    let queryStr
+    if (gen) {
+      queryStr = `gen/${gen}`
+    }
+    if (account) {
+      queryStr = `backward?account=${account}`
+    }
+    const { data, next } = await fetchMiddleware(`transfers/${queryStr}`)
+    return { data: data.map(t => ({ tx: { type: 'InternalTx' }, ...t })), next }
   }
 }

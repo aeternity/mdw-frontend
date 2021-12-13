@@ -32,7 +32,8 @@ export const state = () => ({
     'contract_call',
     'contract_create',
     'aex9_sent',
-    'aex9_received'
+    'aex9_received',
+    'internal_transfers'
   ]
 })
 

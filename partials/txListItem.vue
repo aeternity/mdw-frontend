@@ -23,6 +23,7 @@ import ContractCreateTx from './txListType/contractCreateTx.vue'
 import GAAttachTx from './txListType/gaAttachTx.vue'
 import Aex9ReceivedTx from './txListType/aex9ReceivedTx.vue'
 import Aex9SentTx from './txListType/aex9SentTx.vue'
+import InternalTx from './txListType/internalTx.vue'
 
 export default {
   name: 'TXListItem',
@@ -41,7 +42,8 @@ export default {
     ContractCreateTx,
     GAAttachTx,
     Aex9ReceivedTx,
-    Aex9SentTx
+    Aex9SentTx,
+    InternalTx
   },
   props: {
     data: {
