@@ -50,7 +50,7 @@ export default {
     const { data, next } = await store.dispatch('contracts/getContractCalls', { contract: params.id, page: null, limit: 10 })
     let transactions = []
     if (createTransactions && data) {
-      transactions = [...createTransactions, ...data]
+      transactions = [...createTransactions.map((t) => ({ ...t, tx: { function: 'init', ...t.tx, arguments: t.tx.args ?? [] } })), ...data]
     }
     return { contract: params.id, transactions, loading: false, page: next, nextPage: !!next }
   },
