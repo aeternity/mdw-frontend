@@ -70,6 +70,12 @@ export default {
     if (txDetails.tx.contractId) {
       txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
     }
+    if (!txDetails.tx.function) {
+      txDetails.tx.function = 'init'
+    }
+    if (!txDetails.tx.arguments) {
+      txDetails.tx.arguments = txDetails.tx.args ?? []
+    }
     return { transaction: txDetails, generation, height, loading: false }
   },
   data () {
