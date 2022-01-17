@@ -31,7 +31,7 @@ import GenerationDetails from '../../../partials/generationDetails'
 import TransactionDetails from '../../../partials/transactionDetails'
 import FunctionCalls from '../../../partials/functionCalls'
 import PageHeader from '../../../components/PageHeader'
-import { transformMetaTx } from '../../../store/utils'
+import { transformMetaTx, fixContractCreateTx } from '../../../store/utils'
 
 export default {
   name: 'AppTransaction',
@@ -71,11 +71,9 @@ export default {
       txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
     }
     if (!txDetails.tx.function) {
-      txDetails.tx.function = 'init'
+      txDetails = fixContractCreateTx(txDetails)
     }
-    if (!txDetails.tx.arguments) {
-      txDetails.tx.arguments = txDetails.tx.args ?? []
-    }
+
     return { transaction: txDetails, generation, height, loading: false }
   },
   data () {
