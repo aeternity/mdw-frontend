@@ -2,12 +2,12 @@
   <div class="oracle">
     <div class="container-first">
       <div class="container-first-inner">
-        <!-- <nuxt-link :to="`/oracles/queries/${data.oracle}`"> -->
-        <LabelType
-          title="Oracle"
-          fill="green"
-        />
-        <!-- </nuxt-link> -->
+        <nuxt-link :to="`/oracles/queries/${data.oracle}`">
+          <LabelType
+            title="Oracle"
+            fill="green"
+          />
+        </nuxt-link>
       </div>
       <div class="containter-first-inner">
         <Account

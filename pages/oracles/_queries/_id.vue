@@ -6,17 +6,24 @@
       :page="{to: '/oracles', name: 'Oracles'}"
       :subpage="{to: `/oracles/queries/${$route.params.id}`, name: 'Oracle Queries'}"
     />
+
+    <List v-if="oracle">
+      <Oracle
+        :data="oracle"
+      />
+    </List>
     <div
       v-if="queries.length"
     >
       <List>
-        <OracleQuery
+        <TXListItem
           v-for="(item, index) of queries"
           :key="index"
           :data="item"
         />
       </List>
       <LoadMoreButton
+        v-if="page"
         :loading="loading"
         @update="loadMore"
       />
@@ -28,27 +35,42 @@
 </template>
 
 <script>
-
 import List from '../../../components/list'
-import OracleQuery from '../../../partials/oracleQuery'
+import Oracle from '../../../partials/oracle'
+import TXListItem from '../../../partials/txListItem'
 import PageHeader from '../../../components/PageHeader'
 import LoadMoreButton from '../../../components/loadMoreButton'
+import { fetchMiddleware, initMiddleware } from '../../../store/utils'
 
 export default {
   name: 'OracleQueryResponse',
   components: {
     List,
-    OracleQuery,
+    Oracle,
+    TXListItem,
     PageHeader,
     LoadMoreButton
   },
   async asyncData ({ store, params }) {
-    const { data, next } = await store.dispatch('oracles/getAllQueries', { oracleId: params.id, page: null, limit: 10 })
-    return { oracleId: params.id, data, page: next }
+    const middleware = initMiddleware()
+    let queries = []
+    let page = null
+    let oracle = null
+    try {
+      const oracleQueries = await fetchMiddleware(`txs/backward?type_group=oracle&oracle_id=${params.id}`)
+      queries = oracleQueries.data
+      page = oracleQueries.next
+    } catch (error) {
+    }
+    try {
+      oracle = await middleware.getOracle(params.id)
+    } catch (error) {
+    }
+    return { queries, oracle, page }
   },
   data () {
     return {
-      oracleId: null,
+      oracle: null,
       queries: [],
       page: null,
       loading: false
@@ -57,10 +79,13 @@ export default {
   methods: {
     async loadMore () {
       this.loading = true
-      const { data, next } = await this.$store.dispatch('oracles/getAllQueries', { oracleId: this.oracleId, page: this.page, limit: 10 })
+      const oracleQueries = await fetchMiddleware(this.page)
+      this.page = oracleQueries.next
+      this.queries = [
+        ...this.queries,
+        ...oracleQueries.data
+      ]
       this.loading = false
-      this.queries = [...this.queries, ...data]
-      this.page = next
     }
   }
 }
