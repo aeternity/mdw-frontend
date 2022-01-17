@@ -6,6 +6,10 @@ export const state = () => ({
 })
 
 export const mutations = {
+  setNames (state, names) {
+    state.names = [...names.data]
+    state.nextPageUrl = names.next
+  },
   addNames (state, names) {
     state.names = [...state.names, ...names.data]
     state.nextPageUrl = names.next
@@ -13,11 +17,10 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { limit }) {
+  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { limit, sortby }) {
     try {
-      if (nextPageUrl) return
-      const names = await middleware.getAllNames({ limit })
-      commit('addNames', names)
+      const names = await middleware.getAllNames({ limit, ...sortby })
+      commit('setNames', names)
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
