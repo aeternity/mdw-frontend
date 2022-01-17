@@ -172,9 +172,14 @@ export default {
   async asyncData ({ store, params: { token } }) {
     const allTokens = await store.dispatch('tokens/getAllTokens')
     const tokenInfo = allTokens.find(t => t.contractId === token)
-    const tokenBalances = await store.dispatch('tokens/getTokenBalances', token)
+    let tokenBalances = await store.dispatch('tokens/getTokenBalances', token)
     const { data, next } = await store.dispatch('contracts/getContractCalls', { contract: token, page: null, limit: 25 })
     const transactions = data.filter(({ tx }) => tx.function === 'transfer' || tx.function === 'mint')
+    try {
+      tokenBalances = tokenBalances.sort((a, b) => b[1] - a[1])
+    } catch (error) {
+    }
+
     return { token, tokenInfo, tokenBalances, transactions, loading: false, page: next, nextPage: !!next }
   },
   data () {
