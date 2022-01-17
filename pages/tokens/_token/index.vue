@@ -117,7 +117,7 @@
                 {{ transaction.tx.arguments.find(a=>a.type === 'int').value | formatToken(tokenInfo.decimals) }}
               </td>
               <td>
-                {{ transaction.microTime && new Date(transaction.microTime).toLocaleDateString("en-US") }}
+                {{ transaction.microTime | timestampToUTC }}
               </td>
             </tr>
           </tbody>
@@ -151,6 +151,7 @@ import FormatAddress from '../../../components/formatAddress.vue'
 import LoadMoreButton from '../../../components/loadMoreButton'
 import Token from '../../../partials/token.vue'
 import formatToken from '../../../plugins/filters/formatToken'
+import timestampToUTC from '../../../plugins/filters/timestampToUTC'
 
 export default {
   name: 'AppToken',
@@ -167,7 +168,7 @@ export default {
     LoadMoreButton,
     Multiselect
   },
-  filters: { formatToken },
+  filters: { formatToken, timestampToUTC },
   async asyncData ({ store, params: { token } }) {
     const allTokens = await store.dispatch('tokens/getAllTokens')
     const tokenInfo = allTokens.find(t => t.contractId === token)
