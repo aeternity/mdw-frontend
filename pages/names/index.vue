@@ -6,6 +6,11 @@
       :page="{ to: '/names', name: 'Names' }"
     />
     <div class="filter">
+      <input
+        v-model="searchName"
+        class="search-name"
+        placeholder="Search for a name..."
+      >
       <multiselect
         v-model="sortby"
         track-by="name"
@@ -70,13 +75,17 @@ export default {
         { name: 'Expiring Soon', value: { direction: 'backward', by: 'expiration' } }
 
       ],
-      sortby: { name: 'Expiring Soon', value: { direction: 'backward', by: 'expiration' } }
+      sortby: { name: 'Expiring Soon', value: { direction: 'backward', by: 'expiration' } },
+      searchName: null
     }
   },
   computed: mapState('names', ['names', 'nextPageUrl']),
   watch: {
     sortby: function (sortby, old) {
       this.$store.dispatch('names/getLatest', { limit: 10, sortby: sortby.value })
+    },
+    searchName: function (search) {
+      this.$store.dispatch('names/getLatest', { limit: 10, sortby: this.sortby.value, search })
     }
   },
   methods: {
@@ -89,3 +98,24 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.filter {
+  display: flex;
+  width: 80%;
+  flex-direction: row;
+}
+.search-name {
+  border-radius: .4rem;
+  border: 2px solid #D3DCE6;
+  padding: .6rem;
+  margin-bottom: .6rem;
+  min-width: 50%;
+  height: 40px;
+  margin-right: 15px;
+
+  @media (max-width: 767px) {
+    width: 100%;
+  }
+}
+</style>

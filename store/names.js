@@ -17,10 +17,15 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { limit, sortby }) {
+  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { limit, sortby, search }) {
     try {
-      const names = await middleware.getAllNames({ limit, ...sortby })
-      commit('setNames', names)
+      if (search && search.length) {
+        const data = await fetchMiddleware(`names/search/${search}`)
+        commit('setNames', { data, nextPageUrl: null })
+      } else {
+        const data = await middleware.getAllNames({ limit, ...sortby })
+        commit('setNames', data)
+      }
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })
