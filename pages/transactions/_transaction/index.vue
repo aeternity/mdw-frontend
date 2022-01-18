@@ -3,8 +3,11 @@
     <PageHeader
       title="Transactions"
       :has-crumbs="true"
-      :page="{to: '/transactions', name: 'Transactions'}"
-      :subpage="{to: `/transactions/${$route.params.transaction}`, name: 'Transaction Overview'}"
+      :page="{ to: '/transactions', name: 'Transactions' }"
+      :subpage="{
+        to: `/transactions/${$route.params.transaction}`,
+        name: 'Transaction Overview',
+      }"
     />
     <TransactionDetails
       :status="loading"
@@ -47,7 +50,10 @@ export default {
     let height = null
     txDetails = store.state.transactions.transactions?.[transaction]
     if (!txDetails) {
-      txDetails = await store.dispatch('transactions/getTransactionById', transaction)
+      txDetails = await store.dispatch(
+        'transactions/getTransactionById',
+        transaction
+      )
     }
     if (!txDetails) {
       return error({
@@ -55,26 +61,22 @@ export default {
         statusCode: 400
       })
     }
-    if (txDetails.tx.type === 'GAMetaTx') {
-      txDetails = transformMetaTx(txDetails)
-    }
-    generation = store.state.generations.generations?.[txDetails.blockHeight]
-    if (!generation) {
-      generation = (await store.dispatch('generations/getGenerationByRange', { start: (txDetails.blockHeight - 1), end: (txDetails.blockHeight + 1) }))
-        .find(g => g.height === txDetails.blockHeight)
-    }
-    height = store.state.height
-    if (!height) {
-      height = await store.dispatch('height')
-    }
-    if (txDetails.tx.contractId) {
-      txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
-    }
-    if (!txDetails.tx.function) {
-      txDetails.tx.function = 'init'
-    }
-    if (!txDetails.tx.arguments) {
-      txDetails.tx.arguments = txDetails.tx.args ?? []
+    try {
+      if (txDetails.tx.type === 'GAMetaTx') {
+        txDetails = transformMetaTx(txDetails)
+      }
+
+      generation = store.state.generations.generations?.[txDetails.blockHeight]
+      height = store.state.height
+
+      if (!txDetails.tx.function) {
+        txDetails.tx.function = 'init'
+      }
+      if (!txDetails.tx.arguments) {
+        txDetails.tx.arguments = txDetails.tx.args ?? []
+      }
+    } catch (error) {
+
     }
     return { transaction: txDetails, generation, height, loading: false }
   },
@@ -88,7 +90,37 @@ export default {
     }
   },
   async fetch () {
-    this.functionCalls = await this.$store.dispatch('transactions/getTransactionFunctionCalls', this.transaction.txIndex)
+    this.functionCalls = await this.$store.dispatch(
+      'transactions/getTransactionFunctionCalls',
+      this.transaction.txIndex
+    )
+  },
+  async mounted () {
+    this.loading = true
+    if (!this.generation) {
+      this.generation = (
+        await this.$store.dispatch('generations/getGenerationByRange', {
+          start: this.transaction.blockHeight - 1,
+          end: this.transaction.blockHeight + 1
+        })
+      ).find((g) => g.height === this.transaction.blockHeight)
+    }
+
+    if (!this.height) {
+      this.height = await this.$store.dispatch('height')
+    }
+
+    if (this.transaction.tx.contractId) {
+      this.transaction.tokenInfo = await this.$store.dispatch(
+        'tokens/getTokenTransactionInfo',
+        {
+          contractId: this.transaction.tx.contractId,
+          address: this.transaction.tx.callerId,
+          id: this.transaction.txIndex
+        }
+      )
+    }
+    this.loading = false
   }
 }
 </script>
