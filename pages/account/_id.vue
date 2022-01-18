@@ -92,6 +92,31 @@ export default {
         transactions = await Promise.all(transformed.map(async (txDetails) => {
           if (txDetails.tx.contractId && txDetails.tx.callerId) {
             txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
+
+            if (txDetails.tx.function === 'create_allowance' || txDetails.tx.function === 'change_allowance') {
+              if (txDetails.tokenInfo && !txDetails.tokenInfo.recipient) {
+                const loadContract = await store.dispatch('contracts/getContractCalls', { contract: txDetails.tx.contractId, page: null, limit: 10 })
+                let recipient = null
+                try {
+                  loadContract.data.forEach(ct => {
+                    if (ct.tx.function === 'change_allowance' && ct.tx.arguments && !recipient) {
+                      ct.tx.arguments.forEach(arg => {
+                        if (arg.type === 'address') {
+                          recipient = arg.value
+                        }
+                      })
+                    }
+                  })
+                } catch (error) {
+
+                }
+                txDetails.tokenInfo.recipient = recipient
+
+                console.info('===========')
+                console.info('txDetails::', txDetails)
+                console.info('===========')
+              }
+            }
           }
           return txDetails
         }))

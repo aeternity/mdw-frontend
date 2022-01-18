@@ -107,7 +107,7 @@
         <div class="transaction-main-info-inner">
           <nuxt-link :to="`/transactions/${transaction.hash}`">
             <div class="transaction-label">
-              <LabelType title="token transfer" />
+              <LabelType :title="isChangeAllowance ? 'Change Allowance' :'token transfer'" />
             </div>
           </nuxt-link>
         </div>
@@ -116,13 +116,13 @@
             <Account
               v-if="transaction.tx.callerId"
               :value="transaction.tx.callerId"
-              title="sender"
+              :title="isChangeAllowance ? 'Affected account' : 'sender'"
               icon
             />
             <Account
               v-if="transaction.tokenInfo.recipient"
               :value="transaction.tokenInfo.recipient"
-              title="recipient"
+              :title="isChangeAllowance ? 'Affected recipient' : 'recipient'"
               icon
             />
           </AccountGroup>
@@ -130,7 +130,7 @@
       </div>
       <div class="transaction-type-info">
         <div class="transaction-type-info-item">
-          <AppDefinition title="Amount">
+          <AppDefinition :title="isChangeAllowance ? 'Allowance' : 'Amount'">
             {{ transaction.tokenInfo.amount | formatToken(transaction.tokenInfo.decimals, transaction.tokenInfo.symbol) }}
           </AppDefinition>
         </div>
@@ -166,6 +166,11 @@ export default {
     transaction: {
       type: Object,
       required: true
+    }
+  },
+  computed: {
+    isChangeAllowance () {
+      return this.transaction.tx.function === 'create_allowance' || this.transaction.tx.function === 'change_allowance'
     }
   }
 }
