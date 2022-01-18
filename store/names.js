@@ -17,14 +17,42 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { limit, sortby, search }) {
+  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { limit, sortby, filterby, search }) {
     try {
       if (search && search.length) {
-        const data = await fetchMiddleware(`names/search/${search}`)
+        let data = await fetchMiddleware(`names/search/${search}`)
+
+        if (filterby === 'active') {
+          data = data.filter(item => item.active)
+        }
+        if (filterby === 'expired') {
+          data = data.filter(item => !item.active)
+        }
+        if (filterby === 'inauction') {
+          data = data.filter(item => !!item.auction)
+        }
+
         commit('setNames', { data, nextPageUrl: null })
       } else {
-        const data = await middleware.getAllNames({ limit, ...sortby })
-        commit('setNames', data)
+        let result = { data: [], next: null }
+
+        if (!filterby) {
+          result = await middleware.getAllNames({ limit, ...sortby })
+        }
+
+        if (filterby === 'active') {
+          result = await middleware.getActiveNames({ limit, ...sortby })
+        }
+
+        if (filterby === 'expired') {
+          result = await middleware.getInActiveNames({ limit, ...sortby })
+        }
+
+        if (filterby === 'inauction') {
+          result = await middleware.getAllAuctions({ limit, ...sortby })
+        }
+
+        commit('setNames', result)
       }
     } catch (e) {
       console.log(e)
