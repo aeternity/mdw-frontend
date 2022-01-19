@@ -70,9 +70,6 @@ export default {
       generation = store.state.generations.generations?.[txDetails.blockHeight]
       height = store.state.height
 
-      if (!txDetails.tx.function) {
-        txDetails = fixContractCreateTx(txDetails)
-      }
       if (!txDetails.tx.arguments) {
         txDetails.tx.arguments = txDetails.tx.args ?? []
       }
