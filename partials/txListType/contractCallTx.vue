@@ -107,7 +107,7 @@
         <div class="transaction-main-info-inner">
           <nuxt-link :to="`/transactions/${transaction.hash}`">
             <div class="transaction-label">
-              <LabelType :title="isChangeAllowance ? 'Change Allowance' :'token transfer'" />
+              <LabelType :title="getTitle(transaction, isChangeAllowance)" />
             </div>
           </nuxt-link>
         </div>
@@ -171,6 +171,14 @@ export default {
   computed: {
     isChangeAllowance () {
       return this.transaction.tx.function === 'create_allowance' || this.transaction.tx.function === 'change_allowance'
+    }
+  },
+  methods: {
+    getTitle (transaction, isChangeAllowance) {
+      if (isChangeAllowance) {
+        return transaction.tx.function === 'change_allowance' ? 'Change Allowance' : 'Create Allowance'
+      }
+      return 'token transfer'
     }
   }
 }
