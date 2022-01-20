@@ -105,16 +105,16 @@ export default {
           value: { direction: 'backward', by: 'name' }
         },
         {
-          name: 'Expires At - Asc',
+          name: 'Expiration Height - Asc',
           value: { direction: 'forward', by: 'expiration' }
         },
         {
-          name: 'Expires At - Desc',
+          name: 'Expiration Height - Desc',
           value: { direction: 'backward', by: 'expiration' }
         }
       ],
       sortby: {
-        name: 'Expires At - Desc',
+        name: 'Expiration Height - Desc',
         value: { direction: 'backward', by: 'expiration' }
       },
       filterby: { name: 'Active', value: 'active' },
