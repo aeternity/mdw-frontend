@@ -34,9 +34,10 @@
         </AppDefinition>
         <AppDefinition
           class="container-last-inner"
-          title="Expires At"
+          :title="expired ? 'Expired At' : 'Expires At'"
         >
           {{ data.info.expireHeight }}
+          <small v-if="expiresAt">(≈{{ expiresAt }})</small>
         </AppDefinition>
       </div>
       <div
@@ -83,6 +84,12 @@ export default {
       required: true
     }
   },
+  data () {
+    return {
+      expiresAt: null,
+      expired: false
+    }
+  },
   computed: {
     firstPointerKey () {
       const pointers = Object.keys(this.data.info.pointers)
@@ -94,6 +101,21 @@ export default {
       const pointersKeys = Object.keys(pointers)
 
       return pointersKeys.length > 0 ? pointers[pointersKeys[0]] : '-'
+    }
+  },
+  mounted () {
+    this.$watch('data', async (data) => this.calculateExpireTime(data), { deep: true })
+    this.calculateExpireTime(this.data)
+  },
+  methods: {
+    async calculateExpireTime (data) {
+      const generations = await this.$store.dispatch('generations/getGenerationByRange', { start: data.info.activeFrom, end: data.info.activeFrom })
+      let generation = generations.find(g => g.height === data.info.activeFrom)
+      let date = this.$moment(generation.time)
+      date.add((data.info.expireHeight * 3) - (generation.height * 3), 'minutes')
+
+      this.expired = date.diff(this.$moment(), 'seconds') < 0
+      this.expiresAt = date.from(this.$moment())
     }
   }
 }
