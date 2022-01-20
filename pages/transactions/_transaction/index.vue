@@ -34,7 +34,7 @@ import GenerationDetails from '../../../partials/generationDetails'
 import TransactionDetails from '../../../partials/transactionDetails'
 import FunctionCalls from '../../../partials/functionCalls'
 import PageHeader from '../../../components/PageHeader'
-import { transformMetaTx } from '../../../store/utils'
+import { transformMetaTx, fixContractCreateTx } from '../../../store/utils'
 
 export default {
   name: 'AppTransaction',
@@ -61,6 +61,7 @@ export default {
         statusCode: 400
       })
     }
+
     try {
       if (txDetails.tx.type === 'GAMetaTx') {
         txDetails = transformMetaTx(txDetails)
@@ -70,14 +71,12 @@ export default {
       height = store.state.height
 
       if (!txDetails.tx.function) {
-        txDetails.tx.function = 'init'
-      }
-      if (!txDetails.tx.arguments) {
-        txDetails.tx.arguments = txDetails.tx.args ?? []
+        txDetails = fixContractCreateTx(txDetails)
       }
     } catch (error) {
 
     }
+
     return { transaction: txDetails, generation, height, loading: false }
   },
   data () {
