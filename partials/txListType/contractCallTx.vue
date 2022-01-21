@@ -107,7 +107,7 @@
         <div class="transaction-main-info-inner">
           <nuxt-link :to="`/transactions/${transaction.hash}`">
             <div class="transaction-label">
-              <LabelType :title="getTitle(transaction, isChangeAllowance)" />
+              <LabelType :title="getTitle(transaction)" />
             </div>
           </nuxt-link>
         </div>
@@ -116,13 +116,13 @@
             <Account
               v-if="transaction.tx.callerId"
               :value="transaction.tx.callerId"
-              :title="isChangeAllowance ? 'Affected account' : 'sender'"
+              :title="isChangeAllowance ? 'Authorized account' : 'sender'"
               icon
             />
             <Account
               v-if="transaction.tokenInfo.recipient"
               :value="transaction.tokenInfo.recipient"
-              :title="isChangeAllowance ? 'Affected recipient' : 'recipient'"
+              :title="isChangeAllowance ? 'Affected Account' : 'recipient'"
               icon
             />
           </AccountGroup>
@@ -130,7 +130,7 @@
       </div>
       <div class="transaction-type-info">
         <div class="transaction-type-info-item">
-          <AppDefinition :title="isChangeAllowance ? 'Allowance' : 'Amount'">
+          <AppDefinition :title="isChangeAllowance ? 'Token' : 'Amount'">
             {{ transaction.tokenInfo.amount | formatToken(transaction.tokenInfo.decimals, transaction.tokenInfo.symbol) }}
           </AppDefinition>
         </div>
@@ -170,13 +170,13 @@ export default {
   },
   computed: {
     isChangeAllowance () {
-      return this.transaction.tx.function === 'create_allowance' || this.transaction.tx.function === 'change_allowance'
+      return this.transaction.tx.function && this.transaction.tx.function.includes('allowance')
     }
   },
   methods: {
-    getTitle (transaction, isChangeAllowance) {
-      if (isChangeAllowance) {
-        return transaction.tx.function === 'change_allowance' ? 'Change Allowance' : 'Create Allowance'
+    getTitle (transaction) {
+      if (transaction.tx.function) {
+        return transaction.tx.function.replaceAll('_', ' ')
       }
       return 'token transfer'
     }
