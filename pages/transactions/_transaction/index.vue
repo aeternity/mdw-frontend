@@ -57,8 +57,6 @@ export default {
   },
   async asyncData ({ store, params: { transaction }, error }) {
     let txDetails = null
-    let generation = null
-    let height = null
     let status = 'synced'
     txDetails = store.state.transactions.transactions?.[transaction]
     if (!txDetails) {
@@ -75,16 +73,13 @@ export default {
       } else {
         status = 'unknown'
       }
-      return { transaction: txDetails ?? {}, generation, height, status, loading: false }
+      return { transaction: txDetails ?? {}, status, loading: false }
     }
 
     try {
       if (txDetails.tx.type === 'GAMetaTx') {
         txDetails = transformMetaTx(txDetails)
       }
-
-      generation = store.state.generations.generations?.[txDetails.blockHeight]
-      height = store.state.height
 
       if (!txDetails.tx.function) {
         txDetails = fixContractCreateTx(txDetails)
@@ -93,7 +88,7 @@ export default {
 
     }
 
-    return { transaction: txDetails, generation, height, status, loading: false }
+    return { transaction: txDetails, status, loading: false }
   },
   data () {
     return {
@@ -170,18 +165,14 @@ export default {
     },
     async loadTransactionData () {
       this.loading = true
-      if (!this.generation) {
-        this.generation = (
-          await this.$store.dispatch('generations/getGenerationByRange', {
-            start: this.transaction.blockHeight - 1,
-            end: this.transaction.blockHeight + 1
-          })
-        ).find((g) => g.height === this.transaction.blockHeight)
-      }
+      this.generation = (
+        await this.$store.dispatch('generations/getGenerationByRange', {
+          start: this.transaction.blockHeight - 1,
+          end: this.transaction.blockHeight + 1
+        })
+      ).find((g) => g.height === this.transaction.blockHeight)
 
-      if (!this.height) {
-        this.height = await this.$store.dispatch('height')
-      }
+      this.height = await this.$store.dispatch('height')
 
       if (this.transaction.tx.contractId) {
         this.transaction.tokenInfo = await this.$store.dispatch(
