@@ -132,6 +132,20 @@ export const transformTxType = (transaction) => {
   return txType
 }
 
+export const fixContractCreateTx = (c) => ({
+  ...c,
+  tx: {
+    function: 'init',
+    arguments: c.tx.args ?? [],
+    result: c.tx.returnType,
+    return: {
+      type: 'bool',
+      value: c.tx.returnType === 'ok' ? 'true' : 'false'
+    },
+    ...c.tx
+  }
+})
+
 export const fetchJson = async (...args) => {
   const response = await fetch(...args)
   return response.json()

@@ -66,7 +66,8 @@ module.exports = {
   ** Nuxt.js modules
   */
   modules: [
-    '@nuxtjs/svg-sprite'
+    '@nuxtjs/svg-sprite',
+    '@nuxtjs/moment'
   ],
 
   /*
