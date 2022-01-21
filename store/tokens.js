@@ -54,12 +54,18 @@ export const actions = {
       if (!tokenInfo.recipient && _function) {
         const loadContract = await dispatch('contracts/getContractCalls', { contract: contractId, page: null, limit: 10 }, { root: true })
         let recipient = null
+        let amount = tokenInfo.amount
+
         try {
           loadContract.data.forEach(ct => {
             if (ct.tx.function === _function && ct.tx.arguments && !recipient) {
               ct.tx.arguments.forEach(arg => {
                 if (arg.type === 'address') {
                   recipient = arg.value
+                }
+
+                if (arg.type === 'int') {
+                  amount = arg.value
                 }
               })
             }
@@ -68,6 +74,7 @@ export const actions = {
 
         }
         tokenInfo.recipient = recipient
+        tokenInfo.amount = amount
       }
 
       return tokenInfo
