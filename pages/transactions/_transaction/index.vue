@@ -1,15 +1,26 @@
 <template>
   <div class="app-transaction">
-    <PageHeader
-      title="Transactions"
-      :has-crumbs="true"
-      :page="{ to: '/transactions', name: 'Transactions' }"
-      :subpage="{
-        to: `/transactions/${$route.params.transaction}`,
-        name: 'Transaction Overview',
-      }"
-    />
+    <div class="transaction-header">
+      <PageHeader
+        title="Transactions"
+        :has-crumbs="true"
+        :page="{ to: '/transactions', name: 'Transactions' }"
+        :subpage="{
+          to: `/transactions/${$route.params.transaction}`,
+          name: 'Transaction Overview',
+        }"
+      />
+      <div :class="`chip ${status}`">
+        <div class="chip-status">
+          Status:
+        </div>
+        <div class="chip-text">
+          {{ status }}
+        </div>
+      </div>
+    </div>
     <TransactionDetails
+      v-if="transaction.tx"
       :status="loading"
       :data="transaction"
     />
@@ -17,7 +28,7 @@
       Loading....
     </div>
     <FunctionCalls
-      v-if="functionCalls.length > 0"
+      v-if="functionCalls && functionCalls.length > 0"
       :function-calls="functionCalls"
     />
     <GenerationDetails
@@ -34,7 +45,7 @@ import GenerationDetails from '../../../partials/generationDetails'
 import TransactionDetails from '../../../partials/transactionDetails'
 import FunctionCalls from '../../../partials/functionCalls'
 import PageHeader from '../../../components/PageHeader'
-import { transformMetaTx, fixContractCreateTx } from '../../../store/utils'
+import { transformMetaTx, fixContractCreateTx, fetchMainnet } from '../../../store/utils'
 
 export default {
   name: 'AppTransaction',
@@ -48,6 +59,7 @@ export default {
     let txDetails = null
     let generation = null
     let height = null
+    let status = 'synced'
     txDetails = store.state.transactions.transactions?.[transaction]
     if (!txDetails) {
       txDetails = await store.dispatch(
@@ -56,10 +68,14 @@ export default {
       )
     }
     if (!txDetails) {
-      return error({
-        message: `Transaction not found. If you have sent it only a short time ago, please give the network some time to sync and recheck again in a few seconds.`,
-        statusCode: 400
-      })
+      txDetails = await fetchMainnet(`transactions/${transaction}`)
+
+      if (txDetails) {
+        status = txDetails.block_height < 0 ? 'pending' : 'mined'
+      } else {
+        status = 'unknown'
+      }
+      return { transaction: txDetails ?? {}, generation, height, status, loading: false }
     }
 
     try {
@@ -77,7 +93,7 @@ export default {
 
     }
 
-    return { transaction: txDetails, generation, height, loading: false }
+    return { transaction: txDetails, generation, height, status, loading: false }
   },
   data () {
     return {
@@ -85,7 +101,14 @@ export default {
       generation: {},
       height: 0,
       loading: true,
-      functionCalls: []
+      functionCalls: [],
+      /**
+       * unknown (not seen on the node, ever) // red
+       * pending (in mempool but not included in microblock yet) // orange
+       * mined (included in microblock) // light - green
+       * synced (in microblock and indexed by mdw) green
+       */
+      status: 'unknown'
     }
   },
   async fetch () {
@@ -95,31 +118,154 @@ export default {
     )
   },
   async mounted () {
-    this.loading = true
-    if (!this.generation) {
-      this.generation = (
-        await this.$store.dispatch('generations/getGenerationByRange', {
-          start: this.transaction.blockHeight - 1,
-          end: this.transaction.blockHeight + 1
+    if (this.transaction.tx) {
+      this.loadTransactionData()
+    }
+
+    if (this.status !== 'synced') {
+      this.$ws()
+        .listen('Transactions', (payload) => {
+          if (payload.hash === this.$route.params.transaction) {
+            console.info('===========')
+            console.info('Got Transaction ::', payload, this.$moment().format('LL HH:mm:ss'))
+            console.info('===========')
+            this.transaction = {
+              ...payload
+            }
+            this.status = payload.block_height < 0 ? 'pending' : 'mined'
+            this.reloadTranasaction()
+          }
         })
-      ).find((g) => g.height === this.transaction.blockHeight)
+        .listen('KeyBlocks', (payload) => {
+          this.status = 'synced'
+          this.reloadTranasaction()
+        })
     }
-
-    if (!this.height) {
-      this.height = await this.$store.dispatch('height')
-    }
-
-    if (this.transaction.tx.contractId) {
-      this.transaction.tokenInfo = await this.$store.dispatch(
-        'tokens/getTokenTransactionInfo',
-        {
-          contractId: this.transaction.tx.contractId,
-          address: this.transaction.tx.callerId,
-          id: this.transaction.txIndex
-        }
+  },
+  methods: {
+    async reloadTranasaction () {
+      let transaction = await this.$store.dispatch(
+        'transactions/getTransactionById',
+        this.$route.params.transaction
       )
+      if (transaction) {
+        try {
+          if (transaction.tx.type === 'GAMetaTx') {
+            transaction = transformMetaTx(transaction)
+          }
+
+          if (!transaction.tx.function) {
+            transaction = fixContractCreateTx(transaction)
+          }
+        } catch (error) {
+
+        }
+
+        this.transaction = {
+          ...transaction
+        }
+
+        this.loadTransactionData()
+      }
+    },
+    async loadTransactionData () {
+      this.loading = true
+      if (!this.generation) {
+        this.generation = (
+          await this.$store.dispatch('generations/getGenerationByRange', {
+            start: this.transaction.blockHeight - 1,
+            end: this.transaction.blockHeight + 1
+          })
+        ).find((g) => g.height === this.transaction.blockHeight)
+      }
+
+      if (!this.height) {
+        this.height = await this.$store.dispatch('height')
+      }
+
+      if (this.transaction.tx.contractId) {
+        this.transaction.tokenInfo = await this.$store.dispatch(
+          'tokens/getTokenTransactionInfo',
+          {
+            contractId: this.transaction.tx.contractId,
+            address: this.transaction.tx.callerId,
+            id: this.transaction.txIndex
+          }
+        )
+      }
+      this.loading = false
     }
-    this.loading = false
   }
 }
 </script>
+<style scoped lang="scss">
+
+.transaction-header, .chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.transaction-header {
+  width: 100%;
+}
+
+.chip {
+  text-transform: capitalize;
+  font-weight: bold;
+  max-height: 20px;
+  .chip-status {
+    height: 35px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    padding: 8px 15px;
+    color: white;
+  }
+  .chip-text {
+    height: 35px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding: 8px 15px;
+    border: 2px solid #15803d;
+  }
+
+  &.unknown {
+    .chip-status {
+      background-color: #4b5563;
+    }
+    .chip-text {
+      color: #4b5563;
+      border-color:#4b5563;
+    }
+  }
+
+  &.pending {
+    .chip-status {
+      background-color: #ea580c;
+    }
+    .chip-text {
+      color: #ea580c;
+      border-color:#ea580c;
+    }
+  }
+
+  &.mined {
+    .chip-status {
+      background-color: #0d9488;
+    }
+    .chip-text {
+      color: #0d9488;
+      border-color:#0d9488;
+    }
+  }
+
+  &.synced {
+    .chip-status {
+      background-color: #15803d;
+    }
+    .chip-text {
+      color: #15803d;
+      border-color:#15803d;
+    }
+  }
+}
+</style>
