@@ -45,7 +45,7 @@ import GenerationDetails from '../../../partials/generationDetails'
 import TransactionDetails from '../../../partials/transactionDetails'
 import FunctionCalls from '../../../partials/functionCalls'
 import PageHeader from '../../../components/PageHeader'
-import { transformMetaTx, fixContractCreateTx, fetchMainnet } from '../../../store/utils'
+import { transformMetaTx, fixContractCreateTx, fetchNode } from '../../../store/utils'
 
 export default {
   name: 'AppTransaction',
