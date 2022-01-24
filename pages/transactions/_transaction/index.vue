@@ -208,23 +208,29 @@ export default {
   font-size: 16px;
   max-height: 20px;
   .chip-status {
+    display: flex;
+    align-items: center;
     height: 35px;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
-    padding: 9px 14px;
+    padding: 0 14px;
     color: white;
+    border: 2px solid #15803d;
   }
   .chip-text {
+    display: flex;
+    align-items: center;
     height: 35px;
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
-    padding: 8px 15px;
+    padding: 0 14px;
     border: 2px solid #15803d;
   }
 
   &.unknown {
     .chip-status {
       background-color: #4b5563;
+      border-color:#4b5563;
     }
     .chip-text {
       color: #4b5563;
@@ -235,6 +241,7 @@ export default {
   &.pending {
     .chip-status {
       background-color: #ea580c;
+      border-color:#ea580c;
     }
     .chip-text {
       color: #ea580c;
@@ -245,6 +252,7 @@ export default {
   &.mined {
     .chip-status {
       background-color: #0d9488;
+      border-color:#0d9488;
     }
     .chip-text {
       color: #0d9488;
@@ -255,6 +263,7 @@ export default {
   &.synced {
     .chip-status {
       background-color: #15803d;
+      border-color:#15803d;
     }
     .chip-text {
       color: #15803d;
