@@ -1,7 +1,7 @@
 <template>
   <div class="confirmations">
     <span class="confirmations-num">
-      {{ maxHeight - height }}
+      {{ (maxHeight - height) > 0 ? maxHeight - height : 0 }}
     </span>
     <span class="confirmations-name">
       <span>

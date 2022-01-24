@@ -82,6 +82,9 @@ export const initMiddleware = () => {
 export const fetchMiddleware = async (path) => {
   return camelcaseKeysDeep(await fetchJson(`${process.env.middlewareURL}/${path}`))
 }
+export const fetchNode = async (path) => {
+  return camelcaseKeysDeep(await fetchJson(`${process.env.nodeURL}/${path}`))
+}
 
 // replacement for lodash times function in vanilla ES5
 export const times = (count, func) => {
