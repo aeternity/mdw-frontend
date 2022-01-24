@@ -41,8 +41,8 @@ module.exports = {
     }
   ],
   env: {
-    mainnetURL: process.env.NUXT_APP_NODE_URL || 'https://mainnet.aeternity.io/v3',
-    middlewareURL: process.env.NUXT_APP_NODE_URL || 'https://mainnet.aeternity.io/mdw',
+    nodeURL: process.env.NUXT_APP_NODE_URL || 'https://mainnet.aeternity.io/v3',
+    middlewareURL: process.env.NUXT_APP_MDW_URL || 'https://mainnet.aeternity.io/mdw',
     middlewareWS: process.env.NUXT_APP_NODE_WS || 'wss://mainnet.aeternity.io/mdw/websocket',
     networkName: process.env.NUXT_APP_NETWORK_NAME || 'MAIN NET',
     enableFaucet: process.env.NUXT_APP_ENABLE_FAUCET || false,
