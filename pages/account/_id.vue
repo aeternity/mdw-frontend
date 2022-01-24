@@ -91,7 +91,12 @@ export default {
         const transformed = data.map(t => t.tx.type === 'GAMetaTx' ? transformMetaTx(t) : t)
         transactions = await Promise.all(transformed.map(async (txDetails) => {
           if (txDetails.tx.contractId && txDetails.tx.callerId) {
-            txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
+            txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', {
+              contractId: txDetails.tx.contractId,
+              address: txDetails.tx.callerId,
+              id: txDetails.txIndex,
+              _function: txDetails.tx.function
+            })
           }
           return txDetails
         }))
