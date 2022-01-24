@@ -203,12 +203,13 @@ export default {
 .chip {
   text-transform: capitalize;
   font-weight: bold;
+  font-size: 16px;
   max-height: 20px;
   .chip-status {
     height: 35px;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
-    padding: 8px 15px;
+    padding: 9px 14px;
     color: white;
   }
   .chip-text {
