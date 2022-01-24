@@ -66,14 +66,14 @@ export default {
       )
     }
     if (!txDetails) {
-      txDetails = await fetchMainnet(`transactions/${transaction}`)
+      txDetails = await fetchNode(`transactions/${transaction}`)
 
       if (txDetails) {
         status = txDetails.block_height < 0 ? 'pending' : 'mined'
       } else {
         status = 'unknown'
       }
-      return { transaction: txDetails ?? {}, status, loading: false }
+      return { transaction: { ...txDetails, _status: status } ?? {}, status, loading: false }
     }
 
     try {
@@ -88,7 +88,7 @@ export default {
 
     }
 
-    return { transaction: txDetails, status, loading: false }
+    return { transaction: { ...txDetails, _status: status }, status, loading: false }
   },
   data () {
     return {
