@@ -53,12 +53,15 @@ export const actions = {
       // Get the recepiet address
       if (!tokenInfo.recipient && _function) {
         const loadContract = await dispatch('contracts/getContractCalls', { contract: contractId, page: null, limit: 10 }, { root: true })
+
+        const contracts = loadContract.data.filter(ct => ct.txIndex === id)
+
         let recipient = null
         let amount = tokenInfo.amount
 
         try {
-          loadContract.data.forEach(ct => {
-            if (ct.tx.function === _function && ct.tx.arguments && !recipient) {
+          contracts.forEach(ct => {
+            if (ct.tx.contractId === contractId && ct.tx.function === _function && ct.tx.arguments && !recipient) {
               ct.tx.arguments.forEach(arg => {
                 if (arg.type === 'address') {
                   recipient = arg.value
