@@ -121,9 +121,6 @@ export default {
       this.$ws()
         .listen('Transactions', (payload) => {
           if (payload.hash === this.$route.params.transaction) {
-            console.info('===========')
-            console.info('Got Transaction ::', payload, this.$moment().format('LL HH:mm:ss'))
-            console.info('===========')
             this.transaction = {
               ...payload
             }
@@ -175,16 +172,21 @@ export default {
       this.height = await this.$store.dispatch('height')
 
       if (this.transaction.tx.contractId) {
-        this.transaction.tokenInfo = await this.$store.dispatch(
+        let tokenInfo = await this.$store.dispatch(
           'tokens/getTokenTransactionInfo',
           {
             contractId: this.transaction.tx.contractId,
             address: this.transaction.tx.callerId,
-            id: this.transaction.txIndex
+            id: this.transaction.txIndex,
+            _function: this.transaction.tx.function
           }
         )
+
+        this.transaction = {
+          tokenInfo,
+          ...this.transaction
+        }
       }
-      this.loading = false
     }
   }
 }
