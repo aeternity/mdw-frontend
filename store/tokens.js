@@ -32,15 +32,17 @@ export const actions = {
       return []
     }
   },
+
   getTokenTransactionInfo: async function (
     { state: { tokens }, dispatch },
     { transaction }
   ) {
     let contractId = transaction.tx.contractId
+    let contractsIds = [transaction.tx.contractId]
 
     transaction.tx.arguments.forEach((arg) => {
       if (arg.type === 'contract' && arg.value !== transaction.tx.callerId) {
-        contractId = arg.value
+        contractsIds.push(arg.value)
       }
 
       if (arg.type === 'list' && Array.isArray(arg.value)) {
@@ -49,7 +51,7 @@ export const actions = {
             _arg.type === 'contract' &&
             _arg.value !== transaction.tx.callerId
           ) {
-            contractId = _arg.value
+            contractsIds.push(_arg.value)
           }
         })
       }
@@ -60,15 +62,23 @@ export const actions = {
     if (!tokens.length) {
       allTokens = await dispatch('getAllTokens')
     }
+    let token = null
 
-    const token = allTokens.find((t) => t.contractId === contractId)
+    contractsIds.forEach((_contractId) => {
+      if (!token) {
+        token = allTokens.find((t) => t.contractId === _contractId)
+        contractId = _contractId
+      }
+    })
 
     if (!token) return null
     try {
       let tokenInfo = {
-        ...(await dispatch('getAex9Transfers', { address: transaction.tx.callerId })).find(
-          (b) => b.callTxi === transaction.txIndex
-        ),
+        ...(
+          await dispatch('getAex9Transfers', {
+            address: transaction.tx.callerId
+          })
+        ).find((b) => b.callTxi === transaction.txIndex),
         ...token
       }
 
@@ -80,7 +90,9 @@ export const actions = {
           { root: true }
         )
 
-        const contracts = loadContract.data.filter((ct) => ct.txIndex === transaction.txIndex)
+        const contracts = loadContract.data.filter(
+          (ct) => ct.txIndex === transaction.txIndex
+        )
 
         let recipient = null
         let amount = tokenInfo.amount
@@ -107,7 +119,7 @@ export const actions = {
         } catch (error) {}
         if (
           !amount &&
-          transaction.tx.function === 'swap_exact_ae_for_tokens' &&
+          transaction.tx.function.includes('swap_exact') &&
           transaction.tx.return &&
           transaction.tx.return.type === 'list' &&
           transaction.tx.return.value.length
@@ -115,7 +127,7 @@ export const actions = {
           amount = transaction.tx.return.value[1].value
         }
 
-        if (!recipient && transaction.tx.function === 'swap_exact_ae_for_tokens') {
+        if (!recipient && transaction.tx.function.includes('swap_exact')) {
           recipient = contractId
         }
         tokenInfo.recipient = recipient
