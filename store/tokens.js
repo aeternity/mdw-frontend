@@ -34,35 +34,66 @@ export const actions = {
   },
   getTokenTransactionInfo: async function (
     { state: { tokens }, dispatch },
-    { contractId, address, id, _function }
+    { transaction }
   ) {
+    let contractId = transaction.tx.contractId
+
+    transaction.tx.arguments.forEach((arg) => {
+      if (arg.type === 'contract' && arg.value !== transaction.tx.callerId) {
+        contractId = arg.value
+      }
+
+      if (arg.type === 'list' && Array.isArray(arg.value)) {
+        arg.value.forEach((_arg) => {
+          if (
+            _arg.type === 'contract' &&
+            _arg.value !== transaction.tx.callerId
+          ) {
+            contractId = _arg.value
+          }
+        })
+      }
+    })
+
+    // TODO:: fetch this specific contract token
     let allTokens = tokens
     if (!tokens.length) {
       allTokens = await dispatch('getAllTokens')
     }
+
     const token = allTokens.find((t) => t.contractId === contractId)
+
     if (!token) return null
     try {
       let tokenInfo = {
-        ...(await dispatch('getAex9Transfers', { address })).find(
-          (b) => b.callTxi === id
+        ...(await dispatch('getAex9Transfers', { address: transaction.tx.callerId })).find(
+          (b) => b.callTxi === transaction.txIndex
         ),
         ...token
       }
 
       // Get the recepiet address
-      if (!tokenInfo.recipient && _function) {
-        const loadContract = await dispatch('contracts/getContractCalls', { contract: contractId, page: null, limit: 10 }, { root: true })
+      if (!tokenInfo.recipient && transaction.tx.function) {
+        const loadContract = await dispatch(
+          'contracts/getContractCalls',
+          { contract: contractId, page: null, limit: 10 },
+          { root: true }
+        )
 
-        const contracts = loadContract.data.filter(ct => ct.txIndex === id)
+        const contracts = loadContract.data.filter((ct) => ct.txIndex === transaction.txIndex)
 
         let recipient = null
         let amount = tokenInfo.amount
 
         try {
-          contracts.forEach(ct => {
-            if (ct.tx.contractId === contractId && ct.tx.function === _function && ct.tx.arguments && !recipient) {
-              ct.tx.arguments.forEach(arg => {
+          contracts.forEach((ct) => {
+            if (
+              ct.tx.contractId === contractId &&
+              ct.tx.function === transaction.tx.function &&
+              ct.tx.arguments &&
+              !recipient
+            ) {
+              ct.tx.arguments.forEach((arg) => {
                 if (arg.type === 'address') {
                   recipient = arg.value
                 }
@@ -73,8 +104,19 @@ export const actions = {
               })
             }
           })
-        } catch (error) {
+        } catch (error) {}
+        if (
+          !amount &&
+          transaction.tx.function === 'swap_exact_ae_for_tokens' &&
+          transaction.tx.return &&
+          transaction.tx.return.type === 'list' &&
+          transaction.tx.return.value.length
+        ) {
+          amount = transaction.tx.return.value[1].value
+        }
 
+        if (!recipient && transaction.tx.function === 'swap_exact_ae_for_tokens') {
+          recipient = contractId
         }
         tokenInfo.recipient = recipient
         tokenInfo.amount = amount
@@ -135,7 +177,9 @@ export const actions = {
     })
   },
   getTokenBalances: async function ({ rootState: { nodeUrl } }, contractId) {
-    const tokenBalances = await fetchJson(`${nodeUrl}/aex9/balances/${contractId}`)
+    const tokenBalances = await fetchJson(
+      `${nodeUrl}/aex9/balances/${contractId}`
+    )
     return Object.entries(tokenBalances.amounts)
   }
 }

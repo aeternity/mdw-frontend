@@ -175,10 +175,7 @@ export default {
         let tokenInfo = await this.$store.dispatch(
           'tokens/getTokenTransactionInfo',
           {
-            contractId: this.transaction.tx.contractId,
-            address: this.transaction.tx.callerId,
-            id: this.transaction.txIndex,
-            _function: this.transaction.tx.function
+            transaction: this.transaction
           }
         )
 

@@ -127,13 +127,13 @@
             <Account
               v-if="transaction.tx.callerId"
               :value="transaction.tx.callerId"
-              :title="isChangeAllowance ? 'Authorized account' : 'sender'"
+              :title="getCallerTitle(transaction)"
               icon
             />
             <Account
               v-if="transaction.tokenInfo.recipient"
               :value="transaction.tokenInfo.recipient"
-              :title="isChangeAllowance ? 'Affected Account' : 'recipient'"
+              :title="getRecipientTitle(transaction)"
               icon
             />
           </AccountGroup>
@@ -141,7 +141,7 @@
       </div>
       <div class="transaction-type-info">
         <div class="transaction-type-info-item">
-          <AppDefinition :title="isChangeAllowance ? 'Token' : 'Amount'">
+          <AppDefinition :title="getAmountTitle(transaction)">
             {{ transaction.tokenInfo.amount | formatToken(transaction.tokenInfo.decimals, transaction.tokenInfo.symbol) }}
           </AppDefinition>
         </div>
@@ -192,6 +192,35 @@ export default {
         return transaction.tx.function.replaceAll('_', ' ')
       }
       return 'token transfer'
+    },
+    getCallerTitle (transaction) {
+      if (transaction.tx.function && transaction.tx.function.includes('allowance')) {
+        return 'Authorized account'
+      }
+
+      if (transaction.tx.function && transaction.tx.function.includes('swap')) {
+        return 'Caller'
+      }
+
+      return 'Sender'
+    },
+    getRecipientTitle (transaction) {
+      if (transaction.tx.function && transaction.tx.function.includes('allowance')) {
+        return 'Affected account'
+      }
+
+      if (transaction.tx.function && transaction.tx.function.includes('swap')) {
+        return 'Contract'
+      }
+
+      return 'Recipient'
+    },
+    getAmountTitle (transaction) {
+      if (transaction.tx.function && (transaction.tx.function.includes('allowance') || transaction.tx.function.includes('swap'))) {
+        return 'Token'
+      }
+
+      return 'Amount'
     }
   }
 }
