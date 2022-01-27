@@ -151,15 +151,15 @@
           <AppDefinition
             :title="`${index == 0 ? 'From ': 'To '} ${getAmountTitle(transaction)}`"
           >
-            {{ token.amount | formatToken(token.decimals, token.symbol) }}
-            <br>
             <nuxt-link
               v-if="token.name"
               :to="`/tokens/${token.contractId}`"
             >
-              {{ token.name }}
+              {{ token.amount | formatToken(token.decimals, token.symbol) }}
             </nuxt-link>
-            <br>
+            <span v-else>
+              {{ token.amount | formatToken(token.decimals, token.symbol) }}
+            </span>
           </AppDefinition>
         </div>
       </div>
