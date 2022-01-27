@@ -1,3 +1,4 @@
+import { Encoder } from '@aeternity/aepp-calldata'
 import camelcaseKeysDeep from 'camelcase-keys-deep'
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger'
 import swag from '../swagger.json'
@@ -135,19 +136,31 @@ export const transformTxType = (transaction) => {
   return txType
 }
 
-export const fixContractCreateTx = (c) => ({
-  ...c,
-  tx: {
-    function: 'init',
-    arguments: c.tx.args ?? [],
-    result: c.tx.returnType,
-    return: {
-      type: 'bool',
-      value: c.tx.returnType === 'ok' ? 'true' : 'false'
-    },
-    ...c.tx
+export const fixContractCreateTx = (c) => {
+  let _return = {
+    type: 'bool',
+    value: c.tx.returnType === 'ok' ? 'true' : 'false'
   }
-})
+  if (c.tx.returnType === 'revert' && c.tx.returnValue && c.tx.returnValue.includes('cb_')) {
+    const encoder = new Encoder()
+
+    _return = {
+      type: 'message',
+      value: encoder.decodeFateString(c.tx.returnValue)
+    }
+  }
+
+  return {
+    ...c,
+    tx: {
+      function: 'init',
+      arguments: c.tx.args ?? [],
+      result: c.tx.returnType,
+      return: _return,
+      ...c.tx
+    }
+  }
+}
 
 export const fetchJson = async (...args) => {
   const response = await fetch(...args)
