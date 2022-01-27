@@ -123,17 +123,17 @@
           </nuxt-link>
         </div>
         <div class="transaction-main-info-inner accounts">
-          <AccountGroup v-if="!transaction.tx.function || !transaction.tx.function.includes('swap')">
+          <AccountGroup v-if="!transaction.tx.function || (!transaction.tx.function.includes('swap') && !transaction.tx.function.includes('allowance'))">
             <Account
               v-if="transaction.tokenInfo.sender"
               :value="transaction.tokenInfo.sender"
-              :title="getCallerTitle(transaction)"
+              title="Sender"
               icon
             />
             <Account
               v-if="transaction.tokenInfo.recipient"
               :value="transaction.tokenInfo.recipient"
-              :title="getRecipientTitle(transaction)"
+              title="Recipient"
               icon
             />
           </AccountGroup>
@@ -224,20 +224,7 @@ export default {
       }
       return 'token transfer'
     },
-    getCallerTitle (transaction) {
-      if (transaction.tx.function && transaction.tx.function.includes('allowance')) {
-        return 'Authorized account'
-      }
 
-      return 'Sender'
-    },
-    getRecipientTitle (transaction) {
-      if (transaction.tx.function && transaction.tx.function.includes('allowance')) {
-        return 'Affected account'
-      }
-
-      return 'Recipient'
-    },
     getAmountTitle (transaction) {
       if (transaction.tx.function && (transaction.tx.function.includes('allowance') || transaction.tx.function.includes('swap'))) {
         return 'Token'
