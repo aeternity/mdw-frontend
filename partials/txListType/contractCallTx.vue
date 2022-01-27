@@ -111,7 +111,7 @@
       </div>
     </div>
     <div
-      v-if="transaction.tokenInfo && transaction.tx.returnType === 'ok'"
+      v-if="transaction.tokenInfo"
       class="transaction"
     >
       <div class="transaction-main-info">

@@ -129,9 +129,11 @@ export const actions = {
       tokens: _tokens
     }
 
-    if (tokenInfo) {
-      return tokenInfo
-    }
+    console.info('=============')
+    console.info('tokenInfo :: ', tokenInfo)
+    console.info('=============')
+
+    return tokenInfo
   },
   getAex9Transactions: async function (
     { state: { tokens }, dispatch },
