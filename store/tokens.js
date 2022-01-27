@@ -37,107 +37,100 @@ export const actions = {
     { state: { tokens }, dispatch },
     { transaction }
   ) {
-    let contractId = transaction.tx.contractId
-    let contractsIds = [transaction.tx.contractId]
+    let tokenInfo = {
+      sender: transaction.tx.callerId
+    }
+    let contracts = []
 
-    transaction.tx.arguments.forEach((arg) => {
-      if (arg.type === 'contract' && arg.value !== transaction.tx.callerId) {
-        contractsIds.push(arg.value)
-      }
-
-      if (arg.type === 'list' && Array.isArray(arg.value)) {
-        arg.value.forEach((_arg) => {
-          if (
-            _arg.type === 'contract' &&
-            _arg.value !== transaction.tx.callerId
-          ) {
-            contractsIds.push(_arg.value)
-          }
-        })
-      }
-    })
-
-    // TODO:: fetch this specific contract token
     let allTokens = tokens
     if (!tokens.length) {
       allTokens = await dispatch('getAllTokens')
     }
-    let token = null
 
-    contractsIds.forEach((_contractId) => {
-      if (!token) {
-        token = allTokens.find((t) => t.contractId === _contractId)
-        contractId = _contractId
+    if (typeof transaction.tx.return === 'object' && transaction.tx.return.type === 'list') {
+      transaction.tx.return.value.forEach((arg, index) => {
+        if (arg.type === 'int') {
+          contracts[index] = {
+            amount: arg.value
+          }
+        }
+      })
+    }
+
+    transaction.tx.arguments.forEach((arg, index) => {
+      // swap contrats
+      if (transaction.tx.function && transaction.tx.function.includes('swap')) {
+        if (arg.type === 'list' && Array.isArray(arg.value)) {
+          arg.value.forEach((_arg, i) => {
+            if (_arg.type === 'contract' && contracts[i]) {
+              contracts[i].contractId = _arg.value
+            } else {
+              contracts[i] = {
+                contractId: _arg.value
+              }
+            }
+          })
+        }
+      } else { // allowance
+        if (arg.type === 'int') {
+          contracts = [
+            {
+              contractId: transaction.tx.contractId,
+              amount: arg.value
+            }
+          ]
+        }
+
+        if (arg.type === 'address') {
+          tokenInfo.recipient = arg.value
+        }
       }
     })
 
-    if (!token) return null
-    try {
-      let tokenInfo = {
-        ...(
-          await dispatch('getAex9Transfers', {
-            address: transaction.tx.callerId
+    let _tokens = []
+    for (const contract of contracts) {
+      if (contract && contract.contractId) {
+        let _token = allTokens.find((t) => t.contractId === contract.contractId)
+        if (_token) {
+          _tokens.push({
+            ...contract,
+            ..._token
           })
-        ).find((b) => b.callTxi === transaction.txIndex),
-        ...token
-      }
-
-      // Get the recepiet address
-      if (!tokenInfo.recipient && transaction.tx.function) {
-        const loadContract = await dispatch(
-          'contracts/getContractCalls',
-          { contract: contractId, page: null, limit: 10 },
-          { root: true }
-        )
-
-        const contracts = loadContract.data.filter(
-          (ct) => ct.txIndex === transaction.txIndex
-        )
-
-        let recipient = null
-        let amount = tokenInfo.amount
-
-        try {
-          contracts.forEach((ct) => {
-            if (
-              ct.tx.contractId === contractId &&
-              ct.tx.function === transaction.tx.function &&
-              ct.tx.arguments &&
-              !recipient
-            ) {
-              ct.tx.arguments.forEach((arg) => {
-                if (arg.type === 'address') {
-                  recipient = arg.value
-                }
-
-                if (arg.type === 'int') {
-                  amount = arg.value
-                }
-              })
-            }
+        } else {
+          // when the token not found default to AE
+          _tokens.push({
+            ...contract,
+            decimals: 18,
+            name: null,
+            symbol: 'AE'
           })
-        } catch (error) {}
-        if (
-          !amount &&
-          transaction.tx.function.includes('swap_exact') &&
-          transaction.tx.return &&
-          transaction.tx.return.type === 'list' &&
-          transaction.tx.return.value.length
-        ) {
-          amount = transaction.tx.return.value[1].value
         }
-
-        if (!recipient && transaction.tx.function.includes('swap_exact')) {
-          recipient = contractId
-        }
-        tokenInfo.recipient = recipient
-        tokenInfo.amount = amount
       }
+    }
 
+    let getAex9Transfers = (
+      await dispatch('getAex9Transfers', {
+        address: transaction.tx.callerId
+      })
+    ).find((b) => b.callTxi === transaction.txIndex)
+
+    if (!getAex9Transfers) {
+      getAex9Transfers = (
+        await dispatch('getAex9Transfers', {
+          address: transaction.tx.callerId,
+          incoming: true
+        })
+      ).find((b) => b.callTxi === transaction.txIndex)
+    }
+
+    tokenInfo = {
+      ...tokenInfo,
+      ...getAex9Transfers,
+      tokens: _tokens
+    }
+
+    if (tokenInfo) {
       return tokenInfo
-    } catch (e) {
-      console.log(e)
-      return {}
     }
   },
   getAex9Transactions: async function (

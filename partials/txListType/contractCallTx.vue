@@ -125,8 +125,8 @@
         <div class="transaction-main-info-inner accounts">
           <AccountGroup>
             <Account
-              v-if="transaction.tx.callerId"
-              :value="transaction.tx.callerId"
+              v-if="transaction.tokenInfo.sender"
+              :value="transaction.tokenInfo.sender"
               :title="getCallerTitle(transaction)"
               icon
             />
@@ -139,10 +139,42 @@
           </AccountGroup>
         </div>
       </div>
-      <div class="transaction-type-info">
-        <div class="transaction-type-info-item">
-          <AppDefinition :title="getAmountTitle(transaction)">
-            {{ transaction.tokenInfo.amount | formatToken(transaction.tokenInfo.decimals, transaction.tokenInfo.symbol) }}
+      <div
+        v-if="transaction.tokenInfo.tokens.length >= 2"
+        class="transaction-type-info"
+      >
+        <div
+          v-for="(token, index) of transaction.tokenInfo.tokens"
+          :key="`token-${token.contractId}`"
+          class="transaction-type-info-item"
+        >
+          <AppDefinition
+            :title="`${index == 0 ? 'From ': 'To '} ${getAmountTitle(transaction)}`"
+          >
+            {{ token.amount | formatToken(token.decimals, token.symbol) }}
+            <br>
+            <nuxt-link
+              v-if="token.name"
+              :to="`/tokens/${token.contractId}`"
+            >
+              {{ token.name }}
+            </nuxt-link>
+            <br>
+          </AppDefinition>
+        </div>
+      </div>
+      <div
+        v-else
+        class="transaction-type-info"
+      >
+        <div
+
+          class="transaction-type-info-item"
+        >
+          <AppDefinition
+            :title="getAmountTitle(transaction)"
+          >
+            {{ transaction.tokenInfo.tokens[0].amount | formatToken(transaction.tokenInfo.tokens[0].decimals, transaction.tokenInfo.tokens[0].symbol) }}
           </AppDefinition>
         </div>
       </div>
@@ -181,14 +213,13 @@ export default {
       required: true
     }
   },
-  computed: {
-    isChangeAllowance () {
-      return this.transaction.tx.function && this.transaction.tx.function.includes('allowance')
-    }
-  },
   methods: {
     getTitle (transaction) {
       if (transaction.tx.function) {
+        if (transaction.tx.function.includes('swap')) {
+          return 'Swap'
+        }
+
         return transaction.tx.function.replaceAll('_', ' ')
       }
       return 'token transfer'
@@ -198,19 +229,11 @@ export default {
         return 'Authorized account'
       }
 
-      if (transaction.tx.function && transaction.tx.function.includes('swap')) {
-        return 'Caller'
-      }
-
       return 'Sender'
     },
     getRecipientTitle (transaction) {
       if (transaction.tx.function && transaction.tx.function.includes('allowance')) {
         return 'Affected account'
-      }
-
-      if (transaction.tx.function && transaction.tx.function.includes('swap')) {
-        return 'Contract'
       }
 
       return 'Recipient'

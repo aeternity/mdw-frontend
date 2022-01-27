@@ -162,12 +162,16 @@ export default {
     },
     async loadTransactionData () {
       this.loading = true
-      this.generation = (
-        await this.$store.dispatch('generations/getGenerationByRange', {
-          start: this.transaction.blockHeight - 1,
-          end: this.transaction.blockHeight + 1
-        })
-      ).find((g) => g.height === this.transaction.blockHeight)
+      try {
+        this.generation = (
+          await this.$store.dispatch('generations/getGenerationByRange', {
+            start: this.transaction.blockHeight - 1,
+            end: this.transaction.blockHeight + 1
+          })
+        ).find((g) => g.height === this.transaction.blockHeight)
+      } catch (error) {
+        this.generation = null
+      }
 
       this.height = await this.$store.dispatch('height')
 
