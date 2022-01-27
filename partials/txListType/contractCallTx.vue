@@ -123,7 +123,7 @@
           </nuxt-link>
         </div>
         <div class="transaction-main-info-inner accounts">
-          <AccountGroup>
+          <AccountGroup v-if="!transaction.tx.function || !transaction.tx.function.includes('swap')">
             <Account
               v-if="transaction.tokenInfo.sender"
               :value="transaction.tokenInfo.sender"
