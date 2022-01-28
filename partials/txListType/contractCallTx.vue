@@ -220,7 +220,7 @@ export default {
           return 'Swap'
         }
 
-        return transaction.tx.function.replaceAll('_', ' ')
+        return transaction.tx.function.replaceAll('_ae', '').replaceAll('_', ' ')
       }
       return 'token transfer'
     },
