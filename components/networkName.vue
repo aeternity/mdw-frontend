@@ -62,13 +62,17 @@ export default {
   background-color: #f1f1f1;
   min-width: 110px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  border-radius: 0.3rem;
   z-index: 1;
 }
 
 /* Links inside the dropdown */
 .dropdown-content a {
+  @extend %face-sans-xs;
+  @extend %face-uppercase-xs;
+  font-weight: 500;
   color: black;
-  padding: 12px 16px;
+  padding: 1rem 1.2rem;
   text-decoration: none;
   display: block;
 }
