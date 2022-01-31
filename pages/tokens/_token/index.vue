@@ -204,7 +204,8 @@ export default {
     async loadmore () {
       this.loading = true
       const { data, next } = await this.$store.dispatch('contracts/getContractCalls', { contract: this.token, page: this.page, limit: 25 })
-      this.transactions = [...this.transactions, ...data]
+      const transactions = data.filter(({ tx }) => tx.function === 'transfer' || tx.function === 'mint')
+      this.transactions = [...this.transactions, ...transactions]
       this.nextPage = !!next
       this.page = next
       this.loading = false
