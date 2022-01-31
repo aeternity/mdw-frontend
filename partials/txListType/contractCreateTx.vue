@@ -139,3 +139,24 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+@import "~@aeternity/aepp-components-3/src/styles/variables/colors";
+.status {
+  text-transform: uppercase;
+  &.ok {
+    color: $color-alternative;
+  }
+  &.revert {
+    color: $color-red;
+  }
+}
+.contract-call.transfer {
+  border-left: 2px #14CCB7 solid;
+
+  .transaction:nth-child(2) .transaction-main-info .transaction-main-info-inner .label-type {
+    background-color: rgba(0, 24, 51, 0.35);
+    padding-left: 24px;
+  }
+}
+</style>

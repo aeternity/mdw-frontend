@@ -6,6 +6,10 @@ export const state = () => ({
 })
 
 export const mutations = {
+  setNames (state, names) {
+    state.names = [...names.data]
+    state.nextPageUrl = names.next
+  },
   addNames (state, names) {
     state.names = [...state.names, ...names.data]
     state.nextPageUrl = names.next
@@ -13,11 +17,43 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { limit }) {
+  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { limit, sortby, filterby, search }) {
     try {
-      if (nextPageUrl) return
-      const names = await middleware.getAllNames({ limit })
-      commit('addNames', names)
+      if (search && search.length) {
+        let data = await fetchMiddleware(`names/search/${search}`)
+
+        if (filterby === 'active') {
+          data = data.filter(item => item.active)
+        }
+        if (filterby === 'expired') {
+          data = data.filter(item => !item.active)
+        }
+        if (filterby === 'inauction') {
+          data = data.filter(item => !!item.auction)
+        }
+
+        commit('setNames', { data, nextPageUrl: null })
+      } else {
+        let result = { data: [], next: null }
+
+        if (!filterby) {
+          result = await middleware.getAllNames({ limit, ...sortby })
+        }
+
+        if (filterby === 'active') {
+          result = await middleware.getActiveNames({ limit, ...sortby })
+        }
+
+        if (filterby === 'expired') {
+          result = await middleware.getInActiveNames({ limit, ...sortby })
+        }
+
+        if (filterby === 'inauction') {
+          result = await middleware.getAllAuctions({ limit, ...sortby })
+        }
+
+        commit('setNames', result)
+      }
     } catch (e) {
       console.log(e)
       commit('catchError', 'Error', { root: true })

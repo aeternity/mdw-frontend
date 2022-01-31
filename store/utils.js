@@ -1,3 +1,4 @@
+import { Encoder } from '@aeternity/aepp-calldata'
 import camelcaseKeysDeep from 'camelcase-keys-deep'
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger'
 import swag from '../swagger.json'
@@ -82,6 +83,9 @@ export const initMiddleware = () => {
 export const fetchMiddleware = async (path) => {
   return camelcaseKeysDeep(await fetchJson(`${process.env.middlewareURL}/${path}`))
 }
+export const fetchNode = async (path) => {
+  return camelcaseKeysDeep(await fetchJson(`${process.env.nodeURL}/${path}`))
+}
 
 // replacement for lodash times function in vanilla ES5
 export const times = (count, func) => {
@@ -130,6 +134,32 @@ export const transformTxType = (transaction) => {
     txType += ' (GA)'
   }
   return txType
+}
+
+export const fixContractCreateTx = (c) => {
+  let _return = {
+    type: 'bool',
+    value: c.tx.returnType === 'ok' ? 'true' : 'false'
+  }
+  if (c.tx.returnType === 'revert' && c.tx.returnValue && c.tx.returnValue.includes('cb_')) {
+    const encoder = new Encoder()
+
+    _return = {
+      type: 'message',
+      value: encoder.decodeFateString(c.tx.returnValue)
+    }
+  }
+
+  return {
+    ...c,
+    tx: {
+      function: 'init',
+      arguments: c.tx.args ?? [],
+      result: c.tx.returnType,
+      return: _return,
+      ...c.tx
+    }
+  }
 }
 
 export const fetchJson = async (...args) => {

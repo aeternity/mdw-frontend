@@ -45,7 +45,12 @@
           <AppDefinition
             title="gas used"
           >
-            {{ transaction.tx.gasUsed }}
+            <span v-if="transaction._status == 'mined'">
+              <app-loading tooltip-text="Waiting for mdw sync" />
+            </span>
+            <span v-else>
+              {{ transaction.tx.gasUsed }}
+            </span>
           </AppDefinition>
           <AppDefinition
             v-if="transaction.tx.gasPrice"
@@ -78,10 +83,16 @@
             <FormatAeUnit :value="transaction.tx.fee" />
           </AppDefinition>
           <AppDefinition
-            v-if="transaction.tx.fee"
+            v-if="transaction.tx.fee || transaction._status == 'mined'"
             title="total cost"
           >
-            <FormatAeUnit :value="transaction.tx.gasUsed * transaction.tx.gasPrice + transaction.tx.fee" />
+            <span v-if="transaction._status == 'mined'">
+              <app-loading tooltip-text="Waiting for mdw sync" />
+            </span>
+            <FormatAeUnit
+              v-else
+              :value="transaction.tx.gasUsed * transaction.tx.gasPrice + transaction.tx.fee"
+            />
           </AppDefinition>
           <AppDefinition
             v-if="transaction.tx.nonce"
@@ -107,7 +118,7 @@
         <div class="transaction-main-info-inner">
           <nuxt-link :to="`/transactions/${transaction.hash}`">
             <div class="transaction-label">
-              <LabelType title="token transfer" />
+              <LabelType :title="getTitle(transaction)" />
             </div>
           </nuxt-link>
         </div>
@@ -116,13 +127,13 @@
             <Account
               v-if="transaction.tx.callerId"
               :value="transaction.tx.callerId"
-              title="sender"
+              :title="isChangeAllowance ? 'Authorized account' : 'sender'"
               icon
             />
             <Account
               v-if="transaction.tokenInfo.recipient"
               :value="transaction.tokenInfo.recipient"
-              title="recipient"
+              :title="isChangeAllowance ? 'Affected Account' : 'recipient'"
               icon
             />
           </AccountGroup>
@@ -130,7 +141,7 @@
       </div>
       <div class="transaction-type-info">
         <div class="transaction-type-info-item">
-          <AppDefinition title="Amount">
+          <AppDefinition :title="isChangeAllowance ? 'Token' : 'Amount'">
             {{ transaction.tokenInfo.amount | formatToken(transaction.tokenInfo.decimals, transaction.tokenInfo.symbol) }}
           </AppDefinition>
         </div>
@@ -147,6 +158,7 @@ import LabelType from '../../components/labelType'
 import timestampToUTC from '../../plugins/filters/timestampToUTC'
 import formatToken from '../../plugins/filters/formatToken'
 import { transformTxType } from '../../store/utils'
+import AppLoading from '../../components/appLoading.vue'
 
 export default {
   name: 'ContractCallTx',
@@ -155,7 +167,8 @@ export default {
     AppDefinition,
     FormatAeUnit,
     AccountGroup,
-    Account
+    Account,
+    AppLoading
   },
   filters: {
     timestampToUTC,
@@ -166,6 +179,19 @@ export default {
     transaction: {
       type: Object,
       required: true
+    }
+  },
+  computed: {
+    isChangeAllowance () {
+      return this.transaction.tx.function && this.transaction.tx.function.includes('allowance')
+    }
+  },
+  methods: {
+    getTitle (transaction) {
+      if (transaction.tx.function) {
+        return transaction.tx.function.replaceAll('_', ' ')
+      }
+      return 'token transfer'
     }
   }
 }

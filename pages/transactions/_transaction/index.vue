@@ -1,12 +1,26 @@
 <template>
   <div class="app-transaction">
-    <PageHeader
-      title="Transactions"
-      :has-crumbs="true"
-      :page="{to: '/transactions', name: 'Transactions'}"
-      :subpage="{to: `/transactions/${$route.params.transaction}`, name: 'Transaction Overview'}"
-    />
+    <div class="transaction-header">
+      <PageHeader
+        title="Transactions"
+        :has-crumbs="true"
+        :page="{ to: '/transactions', name: 'Transactions' }"
+        :subpage="{
+          to: `/transactions/${$route.params.transaction}`,
+          name: 'Transaction Overview',
+        }"
+      />
+      <div :class="`chip ${status}`">
+        <div class="chip-status">
+          Status:
+        </div>
+        <div class="chip-text">
+          {{ status }}
+        </div>
+      </div>
+    </div>
     <TransactionDetails
+      v-if="transaction.tx"
       :status="loading"
       :data="transaction"
     />
@@ -14,7 +28,7 @@
       Loading....
     </div>
     <FunctionCalls
-      v-if="functionCalls.length > 0"
+      v-if="functionCalls && functionCalls.length > 0"
       :function-calls="functionCalls"
     />
     <GenerationDetails
@@ -31,7 +45,7 @@ import GenerationDetails from '../../../partials/generationDetails'
 import TransactionDetails from '../../../partials/transactionDetails'
 import FunctionCalls from '../../../partials/functionCalls'
 import PageHeader from '../../../components/PageHeader'
-import { transformMetaTx } from '../../../store/utils'
+import { transformMetaTx, fixContractCreateTx, fetchNode } from '../../../store/utils'
 
 export default {
   name: 'AppTransaction',
@@ -43,34 +57,38 @@ export default {
   },
   async asyncData ({ store, params: { transaction }, error }) {
     let txDetails = null
-    let generation = null
-    let height = null
+    let status = 'synced'
     txDetails = store.state.transactions.transactions?.[transaction]
     if (!txDetails) {
-      txDetails = await store.dispatch('transactions/getTransactionById', transaction)
+      txDetails = await store.dispatch(
+        'transactions/getTransactionById',
+        transaction
+      )
     }
     if (!txDetails) {
-      return error({
-        message: `Transaction not found. If you have sent it only a short time ago, please give the network some time to sync and recheck again in a few seconds.`,
-        statusCode: 400
-      })
+      txDetails = await fetchNode(`transactions/${transaction}`)
+
+      if (txDetails) {
+        status = txDetails.block_height < 0 ? 'pending' : 'mined'
+      } else {
+        status = 'unknown'
+      }
+      return { transaction: { ...txDetails, _status: status } ?? {}, status, loading: false }
     }
-    if (txDetails.tx.type === 'GAMetaTx') {
-      txDetails = transformMetaTx(txDetails)
+
+    try {
+      if (txDetails.tx.type === 'GAMetaTx') {
+        txDetails = transformMetaTx(txDetails)
+      }
+
+      if (!txDetails.tx.function) {
+        txDetails = fixContractCreateTx(txDetails)
+      }
+    } catch (error) {
+
     }
-    generation = store.state.generations.generations?.[txDetails.blockHeight]
-    if (!generation) {
-      generation = (await store.dispatch('generations/getGenerationByRange', { start: (txDetails.blockHeight - 1), end: (txDetails.blockHeight + 1) }))
-        .find(g => g.height === txDetails.blockHeight)
-    }
-    height = store.state.height
-    if (!height) {
-      height = await store.dispatch('height')
-    }
-    if (txDetails.tx.contractId) {
-      txDetails.tokenInfo = await store.dispatch('tokens/getTokenTransactionInfo', { contractId: txDetails.tx.contractId, address: txDetails.tx.callerId, id: txDetails.txIndex })
-    }
-    return { transaction: txDetails, generation, height, loading: false }
+
+    return { transaction: { ...txDetails, _status: status }, status, loading: false }
   },
   data () {
     return {
@@ -78,11 +96,179 @@ export default {
       generation: {},
       height: 0,
       loading: true,
-      functionCalls: []
+      functionCalls: [],
+      /**
+       * unknown (not seen on the node, ever) // red
+       * pending (in mempool but not included in microblock yet) // orange
+       * mined (included in microblock) // light - green
+       * synced (in microblock and indexed by mdw) green
+       */
+      status: 'unknown'
     }
   },
   async fetch () {
-    this.functionCalls = await this.$store.dispatch('transactions/getTransactionFunctionCalls', this.transaction.txIndex)
+    this.functionCalls = await this.$store.dispatch(
+      'transactions/getTransactionFunctionCalls',
+      this.transaction.txIndex
+    )
+  },
+  async mounted () {
+    if (this.transaction.tx) {
+      this.loadTransactionData()
+    }
+
+    if (this.status !== 'synced') {
+      this.$ws()
+        .listen('Transactions', (payload) => {
+          if (payload.hash === this.$route.params.transaction) {
+            this.transaction = {
+              ...payload
+            }
+            this.status = payload.block_height < 0 ? 'pending' : 'mined'
+            this.reloadTranasaction()
+          }
+        })
+        .listen('KeyBlocks', (payload) => {
+          this.status = 'synced'
+          this.reloadTranasaction()
+        })
+    }
+  },
+  methods: {
+    async reloadTranasaction () {
+      let transaction = await this.$store.dispatch(
+        'transactions/getTransactionById',
+        this.$route.params.transaction
+      )
+      if (transaction) {
+        try {
+          if (transaction.tx.type === 'GAMetaTx') {
+            transaction = transformMetaTx(transaction)
+          }
+
+          if (!transaction.tx.function) {
+            transaction = fixContractCreateTx(transaction)
+          }
+        } catch (error) {
+
+        }
+
+        this.transaction = {
+          ...transaction
+        }
+
+        this.loadTransactionData()
+      }
+    },
+    async loadTransactionData () {
+      this.loading = true
+      this.generation = (
+        await this.$store.dispatch('generations/getGenerationByRange', {
+          start: this.transaction.blockHeight - 1,
+          end: this.transaction.blockHeight + 1
+        })
+      ).find((g) => g.height === this.transaction.blockHeight)
+
+      this.height = await this.$store.dispatch('height')
+
+      if (this.transaction.tx.contractId) {
+        let tokenInfo = await this.$store.dispatch(
+          'tokens/getTokenTransactionInfo',
+          {
+            contractId: this.transaction.tx.contractId,
+            address: this.transaction.tx.callerId,
+            id: this.transaction.txIndex,
+            _function: this.transaction.tx.function
+          }
+        )
+
+        this.transaction = {
+          tokenInfo,
+          ...this.transaction
+        }
+      }
+    }
   }
 }
 </script>
+<style scoped lang="scss">
+
+.transaction-header, .chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.transaction-header {
+  width: 100%;
+}
+
+.chip {
+  text-transform: capitalize;
+  font-weight: bold;
+  font-size: 16px;
+  max-height: 20px;
+  .chip-status {
+    display: flex;
+    align-items: center;
+    height: 35px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    padding: 0 14px;
+    color: white;
+    border: 2px solid #15803d;
+  }
+  .chip-text {
+    display: flex;
+    align-items: center;
+    height: 35px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding: 0 14px;
+    border: 2px solid #15803d;
+  }
+
+  &.unknown {
+    .chip-status {
+      background-color: #4b5563;
+      border-color:#4b5563;
+    }
+    .chip-text {
+      color: #4b5563;
+      border-color:#4b5563;
+    }
+  }
+
+  &.pending {
+    .chip-status {
+      background-color: #ea580c;
+      border-color:#ea580c;
+    }
+    .chip-text {
+      color: #ea580c;
+      border-color:#ea580c;
+    }
+  }
+
+  &.mined {
+    .chip-status {
+      background-color: #0d9488;
+      border-color:#0d9488;
+    }
+    .chip-text {
+      color: #0d9488;
+      border-color:#0d9488;
+    }
+  }
+
+  &.synced {
+    .chip-status {
+      background-color: #15803d;
+      border-color:#15803d;
+    }
+    .chip-text {
+      color: #15803d;
+      border-color:#15803d;
+    }
+  }
+}
+</style>

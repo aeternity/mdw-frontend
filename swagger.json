@@ -2253,6 +2253,84 @@
         ]
       }
     },
+    "/names/inactive": {
+      "get": {
+        "deprecated": false,
+        "description": "Get inactive names.",
+        "operationId": "get_in_active_names",
+        "parameters": [
+          {
+            "default": "expiration",
+            "description": "The ordering via parameters",
+            "enum": [
+              "expiration",
+              "name"
+            ],
+            "in": "query",
+            "name": "by",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "default": "backward",
+            "description": "The direction - **forward** is from genesis to the end, **backward** is from end to the beginning",
+            "enum": [
+              "forward",
+              "backward"
+            ],
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "default": 1,
+            "description": "The number of page to show",
+            "format": "int32",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "type": "integer",
+            "x-example": 1
+          },
+          {
+            "default": 10,
+            "description": "The numbers of items to return",
+            "format": "int32",
+            "in": "query",
+            "maximum": 1000,
+            "minimum": 1,
+            "name": "limit",
+            "required": false,
+            "type": "integer",
+            "x-example": 10
+          }
+        ],
+        "produces": [
+          [
+            "application/json"
+          ]
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns information for active names",
+            "schema": {
+              "$ref": "#/definitions/NamesResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Middleware"
+        ]
+      }
+    },
     "/names/auctions": {
       "get": {
         "deprecated": false,
