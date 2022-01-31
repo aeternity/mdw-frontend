@@ -101,6 +101,7 @@
               </td>
               <td>
                 <FormatAddress
+                  v-if="transaction.tx.arguments.find(a=>a.type === 'address')"
                   :value="transaction.tx.arguments.find(a=>a.type === 'address').value"
                   length="responsive"
                 />
@@ -114,7 +115,9 @@
                 </span>
               </td>
               <td>
-                {{ transaction.tx.arguments.find(a=>a.type === 'int').value | formatToken(tokenInfo.decimals) }}
+                <span v-if="transaction.tx.arguments.find(a=>a.type === 'int')">
+                  {{ transaction.tx.arguments.find(a=>a.type === 'int').value | formatToken(tokenInfo.decimals) }}
+                </span>
               </td>
               <td>
                 {{ transaction.microTime | timestampToUTC }}
@@ -173,14 +176,13 @@ export default {
     const allTokens = await store.dispatch('tokens/getAllTokens')
     const tokenInfo = allTokens.find(t => t.contractId === token)
     let tokenBalances = await store.dispatch('tokens/getTokenBalances', token)
-    const { data, next } = await store.dispatch('contracts/getContractCalls', { contract: token, page: null, limit: 25 })
-    const transactions = data.filter(({ tx }) => tx.function === 'transfer' || tx.function === 'mint')
+    const { data, next } = await store.dispatch('contracts/getContractCalls', { contract: token, page: null, limit: 20 })
     try {
       tokenBalances = tokenBalances.sort((a, b) => b[1] - a[1])
     } catch (error) {
     }
 
-    return { token, tokenInfo, tokenBalances, transactions, loading: false, page: next, nextPage: !!next }
+    return { token, tokenInfo, tokenBalances, transactions: data, loading: false, page: next, nextPage: !!next }
   },
   data () {
     return {
@@ -203,9 +205,8 @@ export default {
   methods: {
     async loadmore () {
       this.loading = true
-      const { data, next } = await this.$store.dispatch('contracts/getContractCalls', { contract: this.token, page: this.page, limit: 25 })
-      const transactions = data.filter(({ tx }) => tx.function === 'transfer' || tx.function === 'mint')
-      this.transactions = [...this.transactions, ...transactions]
+      const { data, next } = await this.$store.dispatch('contracts/getContractCalls', { contract: this.token, page: this.page, limit: 20 })
+      this.transactions = [...this.transactions, ...data]
       this.nextPage = !!next
       this.page = next
       this.loading = false
