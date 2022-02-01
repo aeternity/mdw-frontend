@@ -164,7 +164,7 @@
         </div>
       </div>
       <div
-        v-else
+        v-else-if="transaction.tokenInfo.tokens.length == 1"
         class="transaction-type-info"
       >
         <div

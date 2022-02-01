@@ -47,7 +47,7 @@ export const actions = {
       allTokens = await dispatch('getAllTokens')
     }
 
-    if (typeof transaction.tx.return === 'object' && transaction.tx.return.type === 'list') {
+    if (typeof transaction.tx.return === 'object' && (transaction.tx.return.type === 'list' || transaction.tx.return.type === 'tuple')) {
       transaction.tx.return.value.forEach((arg, index) => {
         if (arg.type === 'int') {
           contracts[index] = {
@@ -71,6 +71,15 @@ export const actions = {
             }
           })
         }
+      } else if (transaction.tx.function && transaction.tx.function.includes('liquidity')) {
+        if (arg.type === 'contract' && contracts.length >= 2) {
+          contracts[0].contractId = arg.value
+          contracts[1].contractId = transaction.tx.contractId
+        }
+
+        if (arg.type === 'address') {
+          tokenInfo.recipient = arg.value
+        }
       } else { // allowance
         if (arg.type === 'int') {
           contracts = [
@@ -86,6 +95,10 @@ export const actions = {
         }
       }
     })
+
+    if (transaction.tx.function && transaction.tx.function.includes('liquidity')) {
+      contracts = contracts.reverse()
+    }
 
     let _tokens = []
     for (const contract of contracts) {
