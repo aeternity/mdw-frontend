@@ -1,6 +1,6 @@
 import camelcaseKeysDeep from 'camelcase-keys-deep'
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger'
-import swag from '../swagger.json'
+import swag from './../../swagger.json'
 
 export const initMiddleware = () => {
   swag.paths = {

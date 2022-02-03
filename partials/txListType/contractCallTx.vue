@@ -140,43 +140,36 @@
         </div>
       </div>
       <div
-        v-if="transaction.tokenInfo.tokens.length >= 2"
+        v-if="transaction.tokenInfo.tokenIn"
         class="transaction-type-info"
       >
         <div
-          v-for="(token, index) of transaction.tokenInfo.tokens"
-          :key="`token-${token.contractId}`"
           class="transaction-type-info-item"
         >
           <AppDefinition
-            :title="`${index == 0 ? 'From ': 'To '} ${getAmountTitle(transaction)}`"
+            :title="transaction.tokenInfo.tokenIn.title"
           >
             <nuxt-link
-              v-if="token.name"
-              :to="`/tokens/${token.contractId}`"
+              v-if="transaction.tokenInfo.tokenIn.name"
+              :to="`/tokens/${transaction.tokenInfo.tokenIn.contractId}`"
             >
-              {{ token.amount | formatToken(token.decimals, token.symbol) }}
+              {{ transaction.tokenInfo.tokenIn.amount | formatToken(transaction.tokenInfo.tokenIn.decimals, transaction.tokenInfo.tokenIn.symbol) }}
             </nuxt-link>
             <span v-else>
-              {{ token.amount | formatToken(token.decimals, token.symbol) }}
+              {{ transaction.tokenInfo.tokenIn.amount | formatToken(transaction.tokenInfo.tokenIn.decimals, transaction.tokenInfo.tokenIn.symbol) }}
             </span>
           </AppDefinition>
         </div>
       </div>
       <div
-        v-else-if="transaction.tokenInfo.tokens.length == 1"
+        v-if="transaction.tokenInfo.tokenOut"
         class="transaction-type-info"
       >
-        <div
-
-          class="transaction-type-info-item"
+        <AppDefinition
+          :title="transaction.tokenInfo.tokenOut.title"
         >
-          <AppDefinition
-            :title="getAmountTitle(transaction)"
-          >
-            {{ transaction.tokenInfo.tokens[0].amount | formatToken(transaction.tokenInfo.tokens[0].decimals, transaction.tokenInfo.tokens[0].symbol) }}
-          </AppDefinition>
-        </div>
+          {{ transaction.tokenInfo.tokenOut.amount | formatToken(transaction.tokenInfo.tokenOut.decimals, transaction.tokenInfo.tokenOut.symbol) }}
+        </AppDefinition>
       </div>
     </div>
   </div>
@@ -223,14 +216,6 @@ export default {
         return transaction.tx.function.replaceAll('_ae', '').replaceAll('_', ' ')
       }
       return 'token transfer'
-    },
-
-    getAmountTitle (transaction) {
-      if (transaction.tx.function && (transaction.tx.function.includes('allowance') || transaction.tx.function.includes('swap'))) {
-        return 'Token'
-      }
-
-      return 'Amount'
     }
   }
 }

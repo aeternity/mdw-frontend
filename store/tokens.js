@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { fetchMiddleware, fetchJson } from './utils'
+import * as transactionTokenInfoResolvers from './utils/transaction-token-info-resolvers'
 
 export const state = () => ({
   tokens: [],
@@ -37,114 +38,27 @@ export const actions = {
     { state: { tokens }, dispatch },
     { transaction }
   ) {
-    let tokenInfo = {
-      sender: transaction.tx.callerId
+    if (!transaction.tx.function) return null
+
+    let _function = String(transaction.tx.function)
+      .replaceAll('_', ' ')
+      .split(' ')
+      .map((text, index) =>
+        index === 0 ? text : text.charAt(0).toUpperCase() + text.slice(1)
+      )
+      .join('')
+
+    if (!transactionTokenInfoResolvers[_function]) {
+      console.warn(`${_function} resolver is not implemented.`)
+      return null
     }
-    let contracts = []
 
     let allTokens = tokens
     if (!tokens.length) {
       allTokens = await dispatch('getAllTokens')
     }
 
-    if (typeof transaction.tx.return === 'object' && (transaction.tx.return.type === 'list' || transaction.tx.return.type === 'tuple')) {
-      transaction.tx.return.value.forEach((arg, index) => {
-        if (arg.type === 'int') {
-          contracts[index] = {
-            amount: arg.value
-          }
-        }
-      })
-    }
-
-    transaction.tx.arguments.forEach((arg, index) => {
-      // swap contrats
-      if (transaction.tx.function && transaction.tx.function.includes('swap')) {
-        if (arg.type === 'list' && Array.isArray(arg.value)) {
-          arg.value.forEach((_arg, i) => {
-            if (_arg.type === 'contract' && contracts[i]) {
-              contracts[i].contractId = _arg.value
-            } else {
-              contracts[i] = {
-                contractId: _arg.value
-              }
-            }
-          })
-        }
-      } else if (transaction.tx.function && transaction.tx.function.includes('liquidity')) {
-        if (arg.type === 'contract' && contracts.length >= 2) {
-          contracts[0].contractId = arg.value
-          contracts[1].contractId = transaction.tx.contractId
-        }
-
-        if (arg.type === 'address') {
-          tokenInfo.recipient = arg.value
-        }
-      } else { // allowance
-        if (arg.type === 'int') {
-          contracts = [
-            {
-              contractId: transaction.tx.contractId,
-              amount: arg.value
-            }
-          ]
-        }
-
-        if (arg.type === 'address') {
-          tokenInfo.recipient = arg.value
-        }
-      }
-    })
-
-    if (transaction.tx.function && transaction.tx.function.includes('liquidity')) {
-      contracts = contracts.reverse()
-    }
-
-    let _tokens = []
-    for (const contract of contracts) {
-      if (contract && contract.contractId) {
-        let _token = allTokens.find((t) => t.contractId === contract.contractId)
-        if (_token) {
-          _tokens.push({
-            ...contract,
-            ..._token
-          })
-        } else {
-          // when the token not found default to AE
-          _tokens.push({
-            ...contract,
-            decimals: 18,
-            name: null,
-            symbol: 'AE'
-          })
-        }
-      }
-    }
-
-    let getAex9Transfers = (
-      await dispatch('getAex9Transfers', {
-        address: transaction.tx.callerId
-      })
-    ).find((b) => b.callTxi === transaction.txIndex)
-
-    if (!getAex9Transfers) {
-      getAex9Transfers = (
-        await dispatch('getAex9Transfers', {
-          address: transaction.tx.callerId,
-          incoming: true
-        })
-      ).find((b) => b.callTxi === transaction.txIndex)
-    }
-
-    tokenInfo = {
-      ...tokenInfo,
-      ...getAex9Transfers,
-      tokens: _tokens
-    }
-
-    console.info('=============')
-    console.info('tokenInfo :: ', tokenInfo)
-    console.info('=============')
+    let tokenInfo = await transactionTokenInfoResolvers[_function](transaction, allTokens)
 
     return tokenInfo
   },
