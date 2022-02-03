@@ -18,6 +18,7 @@
     "precommit": "npm run lint"
   },
   "dependencies": {
+    "@aeternity/aepp-calldata": "^1.1.0",
     "@aeternity/aepp-components-3": "3.0.0-alpha.9",
     "@aeternity/aepp-sdk": "^7.7.0",
     "@download/blockies": "1.0.3",
@@ -38,12 +39,12 @@
     "babel-eslint": "10.0.3",
     "eslint": "7.20.0",
     "eslint-config-prettier": "7.2.0",
-    "eslint-webpack-plugin": "2.5.2",
     "eslint-plugin-import": "2.22.1",
     "eslint-plugin-prettier": "3.3.1",
     "eslint-plugin-vue": "7.6.0",
+    "eslint-webpack-plugin": "2.5.2",
+    "node-sass": "4.14.1",
     "prettier": "2.2.1",
-    "sass-loader": "10.1.1",
-    "node-sass": "4.14.1"
+    "sass-loader": "10.1.1"
   }
 }

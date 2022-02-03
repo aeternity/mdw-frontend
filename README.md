@@ -8,8 +8,16 @@
     - Dev Mode: `npm run dev`
     - Prod: `npm run build && npm start`
 
+
 ## Supported Environment Variables
 
-- NUXT_APP_NODE_URL: Middleware url you want the frontend to connect to (default: `https://testnet.mdw.aepps.com`).
-- NUXT_APP_NODE_WS: Middleware websocket url (default: `wss://testnet.mdw.aepps.com/websocket`).
-- NUXT_APP_NETWORK_NAME: Network name to show in the network indicator (default: `TEST NET`).
+| Name                  | Description           | Value                                                                             | 
+| :---                      |    :----:             |        ----:                                        | 
+| `NUXT_APP_NODE_URL`       | Node Api URL          |  (default) `https://mainnet.aeternity.io/v3`  <br/>  `https://testnet.aeternity.io/v3`                 | 
+| `NUXT_APP_MDW_URL`        | Middleware Api URL    |  (default) `https://mainnet.aeternity.io/mdw`  <br/> `https://testnet.aeternity.io/mdw`                | 
+| `NUXT_APP_NODE_WS`        | Middleware Websocket  |  (default) `wss://mainnet.aeternity.io/mdw/websocket` <br/> `wss://testnet.aeternity.io/mdw/websocket`          | 
+| `NUXT_APP_NETWORK_NAME`   | Network Name          |  `MAINNET`                                          | 
+| `NUXT_APP_API_DOCS`       | Api Docs              |  `https://github.com/aeternity/ae_mdw#http-endpoints`| 
+| `NUXT_APP_ENABLE_FAUCET`  | Enable Faucet         |  (default) `false`| 
+| `NUXT_APP_FAUCET_API`     | Faucet Api URL         |  (default) `https://testnet.faucet.aepps.com/account`| 
+| `NUXT_APP_OTHER_DEPLOYMENTS`     | Other Deployments        |  (default) `TESTNET@https://explorer.testnet.aeternity.io`| 
