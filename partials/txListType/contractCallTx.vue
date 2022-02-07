@@ -111,7 +111,7 @@
       </div>
     </div>
     <div
-      v-if="transaction.tokenInfo && transaction.tx.returnType === 'ok'"
+      v-if="transaction.tokenInfo"
       class="transaction"
     >
       <div class="transaction-main-info">
@@ -122,29 +122,97 @@
             </div>
           </nuxt-link>
         </div>
-        <div class="transaction-main-info-inner accounts">
-          <AccountGroup>
+        <div
+          v-if="transaction.tokenInfo"
+          class="transaction-main-info-inner accounts"
+        >
+          <AccountGroup v-if="!transaction.tx.function || (!transaction.tx.function.includes('swap') && !transaction.tx.function.includes('allowance'))">
             <Account
-              v-if="transaction.tx.callerId"
-              :value="transaction.tx.callerId"
-              :title="isChangeAllowance ? 'Authorized account' : 'sender'"
+              v-if="transaction.tokenInfo.sender"
+              :value="transaction.tokenInfo.sender"
+              title="Sender"
               icon
             />
             <Account
               v-if="transaction.tokenInfo.recipient"
               :value="transaction.tokenInfo.recipient"
-              :title="isChangeAllowance ? 'Affected Account' : 'recipient'"
+              title="Recipient"
               icon
             />
           </AccountGroup>
+
+          <Account
+            v-else-if="transaction.tokenInfo.recipient && transaction.tx.function.includes('allowance')"
+            :value="transaction.tokenInfo.recipient"
+            title="Affected Account"
+            icon
+          />
         </div>
       </div>
-      <div class="transaction-type-info">
-        <div class="transaction-type-info-item">
-          <AppDefinition :title="isChangeAllowance ? 'Token' : 'Amount'">
-            {{ transaction.tokenInfo.amount | formatToken(transaction.tokenInfo.decimals, transaction.tokenInfo.symbol) }}
+      <template v-if="transaction.tokenInfo.tokens && transaction.tokenInfo.tokens.length">
+        <div
+          v-for="(token, index) of transaction.tokenInfo.tokens"
+          :key="`${transaction.tx.contractId}-${index}`"
+          class="transaction-type-info"
+        >
+          <div
+            class="transaction-type-info-item"
+          >
+            <AppDefinition
+              :title="token.title"
+            >
+              <nuxt-link
+                v-if="token.contractId"
+                :to="`/tokens/${token.contractId}`"
+              >
+                {{ getAmount(token) }}
+              </nuxt-link>
+              <span v-else>
+                {{ getAmount(token) }}
+              </span>
+            </AppDefinition>
+          </div>
+        </div>
+      </template>
+      <div
+        v-if="transaction.tokenInfo.tokenIn"
+        class="transaction-type-info"
+      >
+        <div
+          class="transaction-type-info-item"
+        >
+          <AppDefinition
+            :title="transaction.tokenInfo.tokenIn.title"
+          >
+            <nuxt-link
+              v-if="transaction.tokenInfo.tokenIn.contractId"
+              :to="`/tokens/${transaction.tokenInfo.tokenIn.contractId}`"
+            >
+              {{ getAmount(transaction.tokenInfo.tokenIn) }}
+            </nuxt-link>
+            <span v-else>
+              {{ getAmount(transaction.tokenInfo.tokenIn) }}
+            </span>
           </AppDefinition>
         </div>
+      </div>
+      <div
+        v-if="transaction.tokenInfo.tokenOut"
+        class="transaction-type-info"
+      >
+        <AppDefinition
+          :title="transaction.tokenInfo.tokenOut.title"
+        >
+          <nuxt-link
+            v-if="transaction.tokenInfo.tokenOut.contractId"
+            :to="`/tokens/${transaction.tokenInfo.tokenOut.contractId}`"
+          >
+            {{ getAmount(transaction.tokenInfo.tokenOut) }}
+          </nuxt-link>
+          <span v-else>
+            {{ getAmount(transaction.tokenInfo.tokenOut) }}
+          </span>
+        </AppDefinition>
       </div>
     </div>
   </div>
@@ -181,17 +249,19 @@ export default {
       required: true
     }
   },
-  computed: {
-    isChangeAllowance () {
-      return this.transaction.tx.function && this.transaction.tx.function.includes('allowance')
-    }
-  },
   methods: {
     getTitle (transaction) {
       if (transaction.tx.function) {
-        return transaction.tx.function.replaceAll('_', ' ')
+        if (transaction.tx.function.includes('swap')) {
+          return 'Swap'
+        }
+
+        return transaction.tx.function.replaceAll('_ae', '').replaceAll('_', ' ')
       }
       return 'token transfer'
+    },
+    getAmount (token) {
+      return formatToken(token.amount, token.decimals, token.symbol)
     }
   }
 }

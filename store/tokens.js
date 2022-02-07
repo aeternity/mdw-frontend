@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { fetchMiddleware, fetchJson } from './utils'
+import * as transactionTokenInfoResolvers from './utils/transaction-token-info-resolvers'
 
 export const state = () => ({
   tokens: [],
@@ -32,59 +33,34 @@ export const actions = {
       return []
     }
   },
+
   getTokenTransactionInfo: async function (
     { state: { tokens }, dispatch },
-    { contractId, address, id, _function }
+    { transaction }
   ) {
+    if (!transaction.tx.function) return null
+
+    let _function = String(transaction.tx.function)
+      .replaceAll('_', ' ')
+      .split(' ')
+      .map((text, index) =>
+        index === 0 ? text : text.charAt(0).toUpperCase() + text.slice(1)
+      )
+      .join('')
+
+    if (!transactionTokenInfoResolvers[_function]) {
+      console.warn(`${_function} resolver is not implemented.`)
+      return null
+    }
+
     let allTokens = tokens
     if (!tokens.length) {
       allTokens = await dispatch('getAllTokens')
     }
-    const token = allTokens.find((t) => t.contractId === contractId)
-    if (!token) return null
-    try {
-      let tokenInfo = {
-        ...(await dispatch('getAex9Transfers', { address })).find(
-          (b) => b.callTxi === id
-        ),
-        ...token
-      }
 
-      // Get the recepiet address
-      if (!tokenInfo.recipient && _function) {
-        const loadContract = await dispatch('contracts/getContractCalls', { contract: contractId, page: null, limit: 10 }, { root: true })
+    let tokenInfo = await transactionTokenInfoResolvers[_function](transaction, allTokens)
 
-        const contracts = loadContract.data.filter(ct => ct.txIndex === id)
-
-        let recipient = null
-        let amount = tokenInfo.amount
-
-        try {
-          contracts.forEach(ct => {
-            if (ct.tx.contractId === contractId && ct.tx.function === _function && ct.tx.arguments && !recipient) {
-              ct.tx.arguments.forEach(arg => {
-                if (arg.type === 'address') {
-                  recipient = arg.value
-                }
-
-                if (arg.type === 'int') {
-                  amount = arg.value
-                }
-              })
-            }
-          })
-        } catch (error) {
-
-        }
-        tokenInfo.recipient = recipient
-        tokenInfo.amount = amount
-      }
-
-      return tokenInfo
-    } catch (e) {
-      console.log(e)
-      return {}
-    }
+    return tokenInfo
   },
   getAex9Transactions: async function (
     { state: { tokens }, dispatch },
@@ -135,7 +111,9 @@ export const actions = {
     })
   },
   getTokenBalances: async function ({ rootState: { nodeUrl } }, contractId) {
-    const tokenBalances = await fetchJson(`${nodeUrl}/aex9/balances/${contractId}`)
+    const tokenBalances = await fetchJson(
+      `${nodeUrl}/aex9/balances/${contractId}`
+    )
     return Object.entries(tokenBalances.amounts)
   }
 }

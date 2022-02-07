@@ -162,12 +162,16 @@ export default {
     },
     async loadTransactionData () {
       this.loading = true
-      this.generation = (
-        await this.$store.dispatch('generations/getGenerationByRange', {
-          start: this.transaction.blockHeight - 1,
-          end: this.transaction.blockHeight + 1
-        })
-      ).find((g) => g.height === this.transaction.blockHeight)
+      try {
+        this.generation = (
+          await this.$store.dispatch('generations/getGenerationByRange', {
+            start: this.transaction.blockHeight - 1,
+            end: this.transaction.blockHeight + 1
+          })
+        ).find((g) => g.height === this.transaction.blockHeight)
+      } catch (error) {
+        this.generation = null
+      }
 
       this.height = await this.$store.dispatch('height')
 
@@ -175,10 +179,7 @@ export default {
         let tokenInfo = await this.$store.dispatch(
           'tokens/getTokenTransactionInfo',
           {
-            contractId: this.transaction.tx.contractId,
-            address: this.transaction.tx.callerId,
-            id: this.transaction.txIndex,
-            _function: this.transaction.tx.function
+            transaction: this.transaction
           }
         )
 
