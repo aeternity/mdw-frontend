@@ -313,6 +313,7 @@ export async function swapExactTokensForTokens (transaction, tokens = []) {
     let contracts = _arguments[2].value
     let _tokenInInfo = tokens.find((t) => t.contractId === contracts[0].value)
     tokenIn = {
+      title: 'From Token',
       ...tokenIn,
       ...defaultToken,
       ..._tokenInInfo
@@ -320,6 +321,7 @@ export async function swapExactTokensForTokens (transaction, tokens = []) {
 
     let _tokenOutInfo = tokens.find((t) => t.contractId === contracts[1].value)
     tokenOut = {
+      title: 'To Token',
       ...tokenOut,
       ...defaultToken,
       ..._tokenOutInfo
@@ -370,6 +372,7 @@ export async function swapTokensForExactTokens (transaction, tokens = []) {
     let contracts = _arguments[2].value
     let _tokenOutInfo = tokens.find((t) => t.contractId === contracts[0].value)
     tokenOut = {
+      title: 'To Token',
       ...tokenOut,
       ...defaultToken,
       ..._tokenOutInfo,
@@ -378,6 +381,7 @@ export async function swapTokensForExactTokens (transaction, tokens = []) {
 
     let _tokenInInfo = tokens.find((t) => t.contractId === contracts[1].value)
     tokenIn = {
+      title: 'From Token',
       ...tokenIn,
       ..._tokenInInfo
     }
@@ -426,6 +430,7 @@ export async function swapExactAeForTokens (transaction, tokens = []) {
     let contracts = _arguments[1].value
     let _tokenOutInfo = tokens.find((t) => t.contractId === contracts[1].value)
     tokenOut = {
+      title: 'To Token',
       ...tokenOut,
       ...defaultToken,
       ..._tokenOutInfo
@@ -433,6 +438,7 @@ export async function swapExactAeForTokens (transaction, tokens = []) {
 
     let _tokenInInfo = tokens.find((t) => t.contractId === contracts[0].value)
     tokenIn = {
+      title: 'From Token',
       ...tokenIn,
       ...defaultToken,
       ..._tokenInInfo,
@@ -547,6 +553,7 @@ export async function swapExactTokensForAe (transaction, tokens = []) {
     let contracts = _arguments[2].value
     let _tokenInInfo = tokens.find((t) => t.contractId === contracts[0].value)
     tokenIn = {
+      title: 'From Token',
       ...tokenIn,
       ...defaultToken,
       ..._tokenInInfo,
@@ -555,6 +562,7 @@ export async function swapExactTokensForAe (transaction, tokens = []) {
 
     let _tokenOutInfo = tokens.find((t) => t.contractId === contracts[1].value)
     tokenOut = {
+      title: 'To Token',
       ...tokenOut,
       ...defaultToken,
       ..._tokenOutInfo
