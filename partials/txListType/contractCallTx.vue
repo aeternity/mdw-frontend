@@ -150,7 +150,7 @@
             :title="transaction.tokenInfo.tokenIn.title"
           >
             <nuxt-link
-              v-if="transaction.tokenInfo.tokenIn.name"
+              v-if="transaction.tokenInfo.tokenIn.contractId"
               :to="`/tokens/${transaction.tokenInfo.tokenIn.contractId}`"
             >
               {{ transaction.tokenInfo.tokenIn.amount | formatToken(transaction.tokenInfo.tokenIn.decimals, transaction.tokenInfo.tokenIn.symbol) }}
@@ -168,7 +168,15 @@
         <AppDefinition
           :title="transaction.tokenInfo.tokenOut.title"
         >
-          {{ transaction.tokenInfo.tokenOut.amount | formatToken(transaction.tokenInfo.tokenOut.decimals, transaction.tokenInfo.tokenOut.symbol) }}
+          <nuxt-link
+            v-if="transaction.tokenInfo.tokenOut.contractId"
+            :to="`/tokens/${transaction.tokenInfo.tokenOut.contractId}`"
+          >
+            {{ transaction.tokenInfo.tokenOut.amount | formatToken(transaction.tokenInfo.tokenOut.decimals, transaction.tokenInfo.tokenOut.symbol) }}
+          </nuxt-link>
+          <span v-else>
+            {{ transaction.tokenInfo.tokenOut.amount | formatToken(transaction.tokenInfo.tokenOut.decimals, transaction.tokenInfo.tokenOut.symbol) }}
+          </span>
         </AppDefinition>
       </div>
     </div>

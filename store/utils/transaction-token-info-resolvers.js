@@ -1,3 +1,9 @@
+const defaultToken = {
+  decimals: 18,
+  name: 'AE',
+  symbol: 'AE'
+}
+
 /**
  * @description gets liquidity from a pair of tokenA*tokenB
  * ref: AedexV2Router.add_liquidity
@@ -36,6 +42,7 @@ export async function addLiquidity (transaction, tokens = []) {
     tokenIn = {
       title: 'From Token',
       ...tokenIn,
+      ...defaultToken,
       ..._tokenInInfo,
       contractId: _arguments[0].value
     }
@@ -46,6 +53,7 @@ export async function addLiquidity (transaction, tokens = []) {
     tokenOut = {
       title: 'To Token',
       ...tokenOut,
+      ...defaultToken,
       ..._tokenOutInfo,
       contractId: _arguments[1].value
     }
@@ -107,9 +115,7 @@ export async function addLiquidityAe (transaction, tokens = []) {
     tokenIn = {
       title: 'From Amount',
       ...tokenIn,
-      decimals: 18,
-      name: 'AE',
-      symbol: 'AE',
+      ...defaultToken,
       ..._tokenInInfo,
       contractId: transaction.tx.contractId
     }
@@ -118,6 +124,7 @@ export async function addLiquidityAe (transaction, tokens = []) {
     tokenOut = {
       title: 'To Amount',
       ...tokenOut,
+      ...defaultToken,
       ..._tokenOutInfo,
       contractId: _arguments[0].value
     }
@@ -138,13 +145,145 @@ export async function addLiquidityAe (transaction, tokens = []) {
 
   return { tokenIn, tokenOut, sender, recipient, minLiquidity, deadline }
 }
-// todo
-export async function removeLiquidity (transaction, tokens = []) {}
-// todo
-export async function removeLiquidityAe (transaction, tokens = []) {}
 
 /**
- * TODO test
+ * TODO: Test
+ * ref: AedexV2Router.remove_liquidity
+ * @async
+ * @param transaction
+ * @param tokens
+ * @return {Promise<{ tokenIn, tokenOut, sender, recipient, liquidity, deadline }>}
+ */
+export async function removeLiquidity (transaction, tokens = []) {
+  let tokenIn = {}
+  let tokenOut = {}
+  let sender = null
+  let recipient = null
+  let liquidity = null
+  let deadline = null
+
+  try {
+    let _arguments = transaction.tx.arguments
+    let _returns = []
+    if (transaction.tx.return && transaction.tx.return.type === 'tuple') {
+      _returns = transaction.tx.return.value
+    }
+
+    // amount_a_min: int
+    tokenIn.amount = _arguments[3].value
+    tokenIn.min_amount = _arguments[3].value
+
+    // amount_b_min: int
+    tokenOut.min_amount = _arguments[4].value
+    tokenOut.amount = _arguments[4].value // to handle when this transaction is been reverted
+
+    // path: list(IAEX9Minimal)
+    let _tokenInInfo = tokens.find((t) => t.contractId === _arguments[0].value)
+    tokenIn = {
+      title: 'From Amount',
+      ...tokenIn,
+      ...defaultToken,
+      ..._tokenInInfo,
+      contractId: _arguments[0].value
+    }
+
+    let _tokenOutInfo = tokens.find((t) => t.contractId === _arguments[1].value)
+    tokenOut = {
+      title: 'To Amount',
+      ...tokenOut,
+      ...defaultToken,
+      ..._tokenOutInfo,
+      contractId: _arguments[1].value
+    }
+
+    recipient = _arguments[5].value
+    // TODO check (liquidity: int) => _arguments[2].value
+    liquidity = _arguments[2].value
+    deadline = _arguments[6].value
+    sender = transaction.tx.callerId
+
+    // final results
+    if (_returns.length) {
+      // tokenIn.amount = _returns[1].value
+      // tokenOut.amount = _returns[0].value
+    }
+  } catch (error) {
+    throw Error(`check removeLiquidity implementation : `, null, error)
+  }
+
+  return { tokenIn, tokenOut, sender, recipient, liquidity, deadline }
+}
+
+/**
+ * TODO: Test
+ * ref: AedexV2Router.remove_liquidity_ae
+ * @async
+ * @param transaction
+ * @param tokens
+ * @return {Promise<{ tokenIn, tokenOut, sender, recipient, liquidity, deadline }>}
+ */
+export async function removeLiquidityAe (transaction, tokens = []) {
+  let tokenIn = {}
+  let tokenOut = {}
+  let sender = null
+  let recipient = null
+  let liquidity = null
+  let deadline = null
+
+  try {
+    let _arguments = transaction.tx.arguments
+    let _returns = []
+    if (transaction.tx.return && transaction.tx.return.type === 'tuple') {
+      _returns = transaction.tx.return.value
+    }
+
+    // amount_token_min: int
+    tokenIn.amount = _arguments[2].value
+    tokenIn.min_amount = _arguments[2].value
+
+    // amount_ae_min: int
+    tokenOut.min_amount = _arguments[3].value
+    tokenOut.amount = _arguments[3].value // to handle when this transaction is been reverted
+
+    // path: list(IAEX9Minimal)
+    let _tokenInInfo = tokens.find((t) => t.contractId === _arguments[0].value)
+    tokenIn = {
+      title: 'From Amount',
+      ...tokenIn,
+      ...defaultToken,
+      ..._tokenInInfo,
+      contractId: _arguments[0].value
+    }
+
+    let _tokenOutInfo = tokens.find((t) => t.contractId === transaction.tx.contractId)
+    tokenOut = {
+      title: 'To Amount',
+      ...tokenOut,
+      ...defaultToken,
+      ..._tokenOutInfo,
+      contractId: transaction.tx.contractId
+    }
+
+    // to: address
+    recipient = _arguments[4].value
+    // TODO check (liquidity: int) => _arguments[2].value
+    liquidity = _arguments[1].value
+    deadline = _arguments[5].value
+    sender = transaction.tx.callerId
+
+    // final results
+    if (_returns.length) {
+      // tokenIn.amount = _returns[1].value
+      // tokenOut.amount = _returns[0].value
+    }
+  } catch (error) {
+    throw Error(`check removeLiquidityAe implementation : `, null, error)
+  }
+
+  return { tokenIn, tokenOut, sender, recipient, liquidity, deadline }
+}
+
+/**
  * ref: AedexV2Router.swap_exact_tokens_for_tokens
  * @param transaction
  * @param tokens
@@ -175,15 +314,15 @@ export async function swapExactTokensForTokens (transaction, tokens = []) {
     let _tokenInInfo = tokens.find((t) => t.contractId === contracts[0].value)
     tokenIn = {
       ...tokenIn,
-      ..._tokenInInfo,
-      contractId: contracts[0].value
+      ...defaultToken,
+      ..._tokenInInfo
     }
 
     let _tokenOutInfo = tokens.find((t) => t.contractId === contracts[1].value)
     tokenOut = {
       ...tokenOut,
-      ..._tokenOutInfo,
-      contractId: contracts[1].value
+      ...defaultToken,
+      ..._tokenOutInfo
     }
 
     recipient = _arguments[3].value
@@ -202,7 +341,6 @@ export async function swapExactTokensForTokens (transaction, tokens = []) {
 }
 
 /**
- * TODO test
  * ref: AedexV2Router.swap_tokens_for_exact_tokens
  * @param transaction
  * @param tokens
@@ -233,6 +371,7 @@ export async function swapTokensForExactTokens (transaction, tokens = []) {
     let _tokenOutInfo = tokens.find((t) => t.contractId === contracts[0].value)
     tokenOut = {
       ...tokenOut,
+      ...defaultToken,
       ..._tokenOutInfo,
       contractId: contracts[0].value
     }
@@ -240,8 +379,7 @@ export async function swapTokensForExactTokens (transaction, tokens = []) {
     let _tokenInInfo = tokens.find((t) => t.contractId === contracts[1].value)
     tokenIn = {
       ...tokenIn,
-      ..._tokenInInfo,
-      contractId: contracts[1].value
+      ..._tokenInInfo
     }
 
     recipient = _arguments[3].value
@@ -289,16 +427,14 @@ export async function swapExactAeForTokens (transaction, tokens = []) {
     let _tokenOutInfo = tokens.find((t) => t.contractId === contracts[1].value)
     tokenOut = {
       ...tokenOut,
-      ..._tokenOutInfo,
-      contractId: contracts[1].value
+      ...defaultToken,
+      ..._tokenOutInfo
     }
 
     let _tokenInInfo = tokens.find((t) => t.contractId === contracts[0].value)
     tokenIn = {
       ...tokenIn,
-      decimals: 18,
-      name: 'AE',
-      symbol: 'AE',
+      ...defaultToken,
       ..._tokenInInfo,
       contractId: contracts[0].value
     }
@@ -351,17 +487,15 @@ export async function swapTokensForExactAe (transaction, tokens = []) {
     tokenOut = {
       title: 'To Token',
       ...tokenOut,
-      decimals: 18,
-      name: 'AE',
-      symbol: 'AE',
-      ..._tokenOutInfo,
-      contractId: contracts[1].value
+      ...defaultToken,
+      ..._tokenOutInfo
     }
 
     let _tokenInInfo = tokens.find((t) => t.contractId === contracts[0].value)
     tokenIn = {
       title: 'From Token',
       ...tokenIn,
+      ...defaultToken,
       ..._tokenInInfo,
       contractId: contracts[0].value
     }
@@ -414,6 +548,7 @@ export async function swapExactTokensForAe (transaction, tokens = []) {
     let _tokenInInfo = tokens.find((t) => t.contractId === contracts[0].value)
     tokenIn = {
       ...tokenIn,
+      ...defaultToken,
       ..._tokenInInfo,
       contractId: contracts[0].value
     }
@@ -421,11 +556,8 @@ export async function swapExactTokensForAe (transaction, tokens = []) {
     let _tokenOutInfo = tokens.find((t) => t.contractId === contracts[1].value)
     tokenOut = {
       ...tokenOut,
-      decimals: 18,
-      name: 'AE',
-      symbol: 'AE',
-      ..._tokenOutInfo,
-      contractId: contracts[1].value
+      ...defaultToken,
+      ..._tokenOutInfo
     }
 
     recipient = _arguments[3].value
@@ -475,9 +607,7 @@ export async function swapAeForExactTokens (transaction, tokens = []) {
     tokenIn = {
       title: 'From Token',
       ...tokenIn,
-      decimals: 18,
-      name: 'AE',
-      symbol: 'AE',
+      ...defaultToken,
       ..._tokenInInfo,
       contractId: contracts[0].value
     }
@@ -486,9 +616,8 @@ export async function swapAeForExactTokens (transaction, tokens = []) {
     tokenOut = {
       title: 'To Token',
       ...tokenOut,
-
-      ..._tokenOutInfo,
-      contractId: contracts[1].value
+      ...defaultToken,
+      ..._tokenOutInfo
     }
 
     recipient = _arguments[2].value
@@ -505,4 +634,124 @@ export async function swapAeForExactTokens (transaction, tokens = []) {
   }
 
   return { tokenIn, tokenOut, sender, recipient, deadline }
+}
+
+/**
+ * TODO:: test
+ * ref: AedexV2Pair.create_allowance
+ * @param transaction
+ * @param tokens
+ * @returns {Promise<{ tokenIn, sender, recipient }>}
+ */
+export async function createAllowance (transaction, tokens = []) {
+  let tokenIn = {}
+  let sender = null
+  let recipient = null
+
+  try {
+    let _arguments = transaction.tx.arguments
+
+    sender = transaction.tx.callerId
+
+    // for_account: address
+    recipient = _arguments[0].value
+
+    // value: int
+    tokenIn.amount = _arguments[1].value
+
+    // path: list(IAEX9Minimal)
+    let _tokenInInfo = tokens.find(
+      (t) => t.contractId === transaction.tx.contractId
+    )
+    tokenIn = {
+      title: 'Amount',
+      ...tokenIn,
+      ...defaultToken,
+      ..._tokenInInfo
+    }
+  } catch (error) {
+    throw Error(`check createAllowance implementation : `, null, error)
+  }
+
+  return { tokenIn, sender, recipient }
+}
+
+/**
+ * ref: AedexV2Pair.change_allowance
+ * @param transaction
+ * @param tokens
+ * @returns {Promise<{ tokenIn, sender, recipient }>}
+ */
+export async function changeAllowance (transaction, tokens = []) {
+  let tokenIn = {}
+  let sender = null
+  let recipient = null
+
+  try {
+    let _arguments = transaction.tx.arguments
+
+    sender = transaction.tx.callerId
+
+    // for_account: address
+    recipient = _arguments[0].value
+
+    // value_change: int
+    tokenIn.amount = _arguments[1].value
+
+    // path: list(IAEX9Minimal)
+    let _tokenInInfo = tokens.find(
+      (t) => t.contractId === transaction.tx.contractId
+    )
+    tokenIn = {
+      title: 'Amount',
+      ...tokenIn,
+      ...defaultToken,
+      ..._tokenInInfo
+    }
+  } catch (error) {
+    throw Error(`check changeAllowance implementation : `, null, error)
+  }
+
+  return { tokenIn, sender, recipient }
+}
+
+/**
+ * TODO:: test
+ * ref: AedexV2Pair.transfer_allowance
+ * @param transaction
+ * @param tokens
+ * @returns {Promise<{ tokenIn, sender, recipient }>}
+ */
+export async function transferAllowance (transaction, tokens = []) {
+  let tokenIn = {}
+  let sender = null
+  let recipient = null
+
+  try {
+    let _arguments = transaction.tx.arguments
+
+    // from_account: address
+    sender = _arguments[0].value
+
+    // to_account: address
+    recipient = _arguments[1].value
+
+    // value: int
+    tokenIn.amount = _arguments[0].value
+
+    // path: list(IAEX9Minimal)
+    let _tokenInInfo = tokens.find(
+      (t) => t.contractId === transaction.tx.contractId
+    )
+    tokenIn = {
+      title: 'Amount',
+      ...tokenIn,
+      ...defaultToken,
+      ..._tokenInInfo
+    }
+  } catch (error) {
+    throw Error(`check transferAllowance implementation : `, null, error)
+  }
+
+  return { tokenIn, sender, recipient }
 }
