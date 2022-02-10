@@ -1,5 +1,5 @@
 import camelcaseKeysDeep from 'camelcase-keys-deep'
-import { initMiddleware } from './utils'
+import { initMiddleware, fetchNode } from './utils'
 
 export const state = () => ({
   nodeStatus: {},
@@ -97,7 +97,7 @@ export const mutations = {
 export const actions = {
   async height ({ rootGetters: { middleware }, commit }) {
     try {
-      const { mdwHeight: height } = await middleware.getStatus()
+      const { height } = await fetchNode('key-blocks/current/height')
       commit('setHeight', height)
       return height
     } catch (e) {
