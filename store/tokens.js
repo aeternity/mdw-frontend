@@ -78,7 +78,10 @@ export const actions = {
       const token = allTokens.find((t) => t.contractId === tx.contractId)
       return {
         tx: { ...tx, type: incoming ? 'Aex9ReceivedTx' : 'Aex9SentTx' },
-        token
+        token: {
+          decimals: 18,
+          ...token
+        }
       }
     })
   },
