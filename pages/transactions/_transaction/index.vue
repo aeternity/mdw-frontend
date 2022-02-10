@@ -10,12 +10,12 @@
           name: 'Transaction Overview',
         }"
       />
-      <div :class="`chip ${status}`">
+      <div :class="`chip ${transaction._status}`">
         <div class="chip-status">
           Status:
         </div>
         <div class="chip-text">
-          {{ status }}
+          {{ transaction._status }}
         </div>
       </div>
     </div>
@@ -57,6 +57,12 @@ export default {
   },
   async asyncData ({ store, params: { transaction }, error }) {
     let txDetails = null
+    /**
+     * unknown (not seen on the node, ever) // red
+     * pending (in mempool but not included in microblock yet) // orange
+     * mined (included in microblock) // light - green
+     * synced (in microblock and indexed by mdw) green
+     */
     let status = 'synced'
     txDetails = store.state.transactions.transactions?.[transaction]
     if (!txDetails) {
@@ -73,7 +79,7 @@ export default {
       } else {
         status = 'unknown'
       }
-      return { transaction: { ...txDetails, _status: status } ?? {}, status, loading: false }
+      return { transaction: { ...txDetails, _status: status } ?? {}, loading: false }
     }
 
     try {
@@ -88,7 +94,7 @@ export default {
 
     }
 
-    return { transaction: { ...txDetails, _status: status }, status, loading: false }
+    return { transaction: { ...txDetails, _status: status }, loading: false }
   },
   data () {
     return {
@@ -96,14 +102,7 @@ export default {
       generation: {},
       height: 0,
       loading: true,
-      functionCalls: [],
-      /**
-       * unknown (not seen on the node, ever) // red
-       * pending (in mempool but not included in microblock yet) // orange
-       * mined (included in microblock) // light - green
-       * synced (in microblock and indexed by mdw) green
-       */
-      status: 'unknown'
+      functionCalls: []
     }
   },
   async fetch () {
@@ -117,7 +116,7 @@ export default {
       this.loadTransactionData()
     }
 
-    if (this.status !== 'synced') {
+    if (this.transaction._status !== 'synced') {
       this.$ws()
         .listen('Transactions', (payload) => {
           if (payload.hash === this.$route.params.transaction) {
@@ -129,8 +128,9 @@ export default {
           }
         })
         .listen('KeyBlocks', (payload) => {
-          this.status = 'synced'
-          this.reloadTranasaction()
+          if (this.transaction._status !== 'synced') {
+            this.reloadTranasaction()
+          }
         })
     }
   },
@@ -154,7 +154,8 @@ export default {
         }
 
         this.transaction = {
-          ...transaction
+          ...transaction,
+          _status: 'synced'
         }
 
         this.loadTransactionData()
