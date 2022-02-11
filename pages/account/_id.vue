@@ -9,20 +9,34 @@
       :account="accountDetails"
       :tokens-balance="tokensBalance"
     />
-    <div class="filter">
-      <multiselect
-        v-model="value"
-        :options="options"
-        :allow-empty="false"
-        :loading="loading"
-        placeholder="Select transaction type...."
-        @input="processInput"
-      />
+    <div class="filters-container">
+      <div class="filter">
+        <multiselect
+          v-model="value"
+          :options="options"
+          :allow-empty="false"
+          :loading="loading"
+          placeholder="Select transaction type...."
+          @input="processInput"
+        />
+      </div>
+      <div
+        v-if="value == 'contract_call'"
+        class="filter"
+      >
+        <multiselect
+          v-model="contractCallFilter"
+          :options="contractCallFilterOptions"
+          :allow-empty="false"
+          :loading="loading"
+          placeholder="Select action...."
+        />
+      </div>
     </div>
-    <div v-if="transactions.length > 0">
+    <div v-if="fitleredTransactions.length > 0">
       <List>
         <TXListItem
-          v-for="(tx, index) of transactions"
+          v-for="(tx, index) of fitleredTransactions"
           :key="index"
           :data="tx"
           :address="`${$route.params.id}`"
@@ -117,7 +131,45 @@ export default {
       loading: true,
       value: 'All',
       options: this.$store.state.filterOptions,
-      nextPage: false
+      nextPage: false,
+      contractCallFilterOptions: [
+        'All', 'transfer', 'change allowance', 'mint', 'burn',
+        'add liquidity', 'remove liquidity', 'swap'
+      ],
+      contractCallFilter: null
+    }
+  },
+  computed: {
+    fitleredTransactions () {
+      if (!this.contractCallFilter || this.contractCallFilter === 'All') return this.transactions
+
+      return this.transactions.filter((transaction) => {
+        if (transaction.tx && transaction.tx.function) {
+          if (this.contractCallFilter === 'transfer' && transaction.tx.function.includes('transfer')) {
+            return true
+          }
+          if (this.contractCallFilter === 'change allowance' && transaction.tx.function.includes('change_allowance')) {
+            return true
+          }
+          if (this.contractCallFilter === 'mint' && transaction.tx.function.includes('mint')) {
+            return true
+          }
+          if (this.contractCallFilter === 'burn' && transaction.tx.function.includes('burn')) {
+            return true
+          }
+
+          if (this.contractCallFilter === 'add liquidity' && transaction.tx.function.includes('add_liquidity')) {
+            return true
+          }
+          if (this.contractCallFilter === 'remove liquidity' && transaction.tx.function.includes('remove_liquidity')) {
+            return true
+          }
+          if (this.contractCallFilter === 'swap' && transaction.tx.function.includes('swap')) {
+            return true
+          }
+        }
+        return false
+      })
     }
   },
   methods: {
@@ -159,3 +211,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.filters-container {
+  display: inline-flex;
+  width: 100%;
+}
+</style>
