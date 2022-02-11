@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.5.1](https://www.github.com/aeternity/mdw-frontend/compare/v0.5.0...v0.5.1) (2022-02-11)
+
+
+### Bug Fixes
+
+* fetch block height from node API ([c07f847](https://www.github.com/aeternity/mdw-frontend/commit/c07f8473f9a584635e2437459f643ac7f1fcf5a4))
+
 ## [0.5.0](https://www.github.com/aeternity/mdw-frontend/compare/v0.4.0...v0.5.0) (2022-02-07)
 
 
