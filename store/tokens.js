@@ -99,19 +99,23 @@ export const actions = {
     return addressTransfers
   },
   getAccountBalance: async function ({ state: { tokens } }, { address }) {
-    const balance = await fetchMiddleware(`aex9/balances/account/${address}`)
-    if (balance.hasOwnProperty('error')) {
+    try {
+      const balance = await fetchMiddleware(`aex9/balances/account/${address}`)
+      if (balance.hasOwnProperty('error')) {
+        return []
+      }
+      return balance.map((b) => {
+        const tokenInfo = tokens.find((t) => t.contractId === b.contractId)
+        return {
+          ...b,
+          decimals: tokenInfo.decimals,
+          symbol: tokenInfo.symbol,
+          name: tokenInfo.name
+        }
+      })
+    } catch (error) {
       return []
     }
-    return balance.map((b) => {
-      const tokenInfo = tokens.find((t) => t.contractId === b.contractId)
-      return {
-        ...b,
-        decimals: tokenInfo.decimals,
-        symbol: tokenInfo.symbol,
-        name: tokenInfo.name
-      }
-    })
   },
   getTokenBalances: async function ({ rootState: { nodeUrl } }, contractId) {
     const tokenBalances = await fetchJson(
