@@ -114,7 +114,7 @@ export const actions = {
         }
       })
     } catch (error) {
-      return []
+      return null
     }
   },
   getTokenBalances: async function ({ rootState: { nodeUrl } }, contractId) {
