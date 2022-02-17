@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.0](https://www.github.com/aeternity/mdw-frontend/compare/v0.5.0...v0.6.0) (2022-02-17)
+
+
+### Features
+
+* account filter transactions based on AEX-9 and DEX [#155](https://www.github.com/aeternity/mdw-frontend/issues/155) ([42a2d53](https://www.github.com/aeternity/mdw-frontend/commit/42a2d532cb228d0b2c263036b44b637e38441b04))
+
+
+### Bug Fixes
+
+* **account:** show token failed message on aex9 balances load error [#168](https://www.github.com/aeternity/mdw-frontend/issues/168) ([9ddab7d](https://www.github.com/aeternity/mdw-frontend/commit/9ddab7de910d47c632f09fca8a99ebb0d663688d))
+* **account:** when aex9 balance cannot be loaded [#168](https://www.github.com/aeternity/mdw-frontend/issues/168) ([81c85c6](https://www.github.com/aeternity/mdw-frontend/commit/81c85c6ec6d5e39837977f14d4930dd10e541b8c))
+* aex transaction when token decimals not defined ([aec56ae](https://www.github.com/aeternity/mdw-frontend/commit/aec56ae7f31151e6d7401f4fe2ce83284231527d))
+* fetch block height from node API ([c07f847](https://www.github.com/aeternity/mdw-frontend/commit/c07f8473f9a584635e2437459f643ac7f1fcf5a4))
+* transaction loading state ([993e4cd](https://www.github.com/aeternity/mdw-frontend/commit/993e4cd89d6f2c97a1ff0b1e28dc0e772c59738a))
+
 ## [0.5.0](https://www.github.com/aeternity/mdw-frontend/compare/v0.4.0...v0.5.0) (2022-02-07)
 
 
