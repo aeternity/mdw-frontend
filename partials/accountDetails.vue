@@ -45,7 +45,7 @@
         {{ account['auth_fun'] }}
       </AppDefinition>
       <AppDefinition
-        v-if="tokensBalance.length > 0"
+        v-if="tokensBalance && Array.isArray(tokensBalance) && tokensBalance.length > 0"
         title="tokens"
       >
         <div class="show-zero">
@@ -58,7 +58,9 @@
           </button>
           Hide empty balances
         </div>
-        <div class="tokens-balances">
+        <div
+          class="tokens-balances"
+        >
           <p
             v-for="(token, index) in showZeros? tokensBalance : tokensWithBalance"
             :key="index"
@@ -68,6 +70,14 @@
               {{ token.amount | formatToken(token.decimals, token.symbol) }}
             </nuxt-link>
           </p>
+        </div>
+      </AppDefinition>
+      <AppDefinition
+        v-else
+        title="tokens"
+      >
+        <div class="show-error">
+          Loading Tokens Failed
         </div>
       </AppDefinition>
     </div>
@@ -161,7 +171,10 @@ export default {
   }
   .account-details-info {
     border-top: 2px solid $color-neutral-positive-2;
-
+    .show-error {
+      color: #FF0D6A;
+      margin-top: 0.2rem;
+    }
     .show-zero {
       display: inline-flex;
       align-items: center;
