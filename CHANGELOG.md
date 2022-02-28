@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.6.1](https://www.github.com/aeternity/mdw-frontend/compare/v0.6.0...v0.6.1) (2022-02-28)
+
+
+### Bug Fixes
+
+* when tokens could not be loaded should display transactions ([6b7a851](https://www.github.com/aeternity/mdw-frontend/commit/6b7a8516de125a985b88069e24ee702681a3a9f5))
+
 ## [0.6.0](https://www.github.com/aeternity/mdw-frontend/compare/v0.5.0...v0.6.0) (2022-02-17)
 
 
