@@ -13,9 +13,18 @@ const defaultToken = {
  * @return {Promise<{ tokens: [tokenA, tokenB, poolToken] }>}
  */
 export async function addLiquidity (transaction, tokens = []) {
-  let tokenA = {}
-  let tokenB = {}
-  let poolToken = {}
+  let tokenA = {
+    title: 'Token A',
+    decimals: 18
+  }
+  let tokenB = {
+    title: 'Token B',
+    decimals: 18
+  }
+  let poolToken = {
+    title: 'Pool Token',
+    decimals: 18
+  }
 
   try {
     let _arguments = transaction.tx.arguments
@@ -34,33 +43,37 @@ export async function addLiquidity (transaction, tokens = []) {
     // amount_b_min: int
     tokenB.min_amount = _arguments[5].value
 
-    let _tokenAInfo = tokens.find(
-      (t) => t.contractId === _arguments[0].value /** token_a: IAEX9Minimal */
-    )
     tokenA = {
-      title: 'Token A',
       ...tokenA,
-      ...defaultToken,
-      ..._tokenAInfo,
       contractId: _arguments[0].value
     }
 
-    let _tokenBInfo = tokens.find(
-      (t) => t.contractId === _arguments[1].value /** token_b: IAEX9Minimal */
-    )
     tokenB = {
-      title: 'Token B',
       ...tokenB,
-      ...defaultToken,
-      ..._tokenBInfo,
       contractId: _arguments[1].value
     }
 
     poolToken = {
-      title: 'Pool Token',
       ...poolToken,
-      amount: _arguments[7].value, // min_liquidity: int
-      decimals: 18
+      amount: _arguments[7].value // min_liquidity: int
+    }
+
+    if (tokens && Array.isArray(tokens)) {
+      tokenA = {
+        ...tokenA,
+        ...defaultToken,
+        ...tokens.find(
+          (t) => t.contractId === _arguments[0].value /** token_a: IAEX9Minimal */
+        )
+      }
+
+      tokenB = {
+        ...tokenB,
+        ...defaultToken,
+        ...tokens.find(
+          (t) => t.contractId === _arguments[1].value /** token_b: IAEX9Minimal */
+        )
+      }
     }
 
     // final results
@@ -70,7 +83,7 @@ export async function addLiquidity (transaction, tokens = []) {
       poolToken.amount = _returns[2].value
     }
   } catch (error) {
-    throw Error(`check addLiquidity implementation : `, null, error)
+    console.error('addLiquidity Error:', error)
   }
 
   return { tokens: [tokenA, tokenB, poolToken] }
@@ -85,9 +98,18 @@ export async function addLiquidity (transaction, tokens = []) {
  * @return {Promise<{ tokenA, tokenB, poolToken, deadline }>}
  */
 export async function addLiquidityAe (transaction, tokens = []) {
-  let tokenA = {}
-  let tokenB = {}
-  let poolToken = {}
+  let tokenA = {
+    title: 'Token A',
+    decimals: 18
+  }
+  let tokenB = {
+    title: 'Token B',
+    decimals: 18
+  }
+  let poolToken = {
+    title: 'Pool Token',
+    decimals: 18
+  }
   let deadline = null
 
   try {
@@ -105,32 +127,36 @@ export async function addLiquidityAe (transaction, tokens = []) {
     tokenB.min_amount = _arguments[2].value
     tokenB.amount = _arguments[1].value // to handle when this transaction is been reverted
 
-    // path: list(IAEX9Minimal)
-    let _tokenAInfo = tokens.find(
-      (t) => t.contractId === transaction.tx.contractId
-    )
     tokenA = {
-      title: 'Token A',
       ...tokenA,
-      ...defaultToken,
-      ..._tokenAInfo,
       contractId: transaction.tx.contractId
     }
 
-    let _tokenBInfo = tokens.find((t) => t.contractId === _arguments[0].value)
     tokenB = {
-      title: 'Token B',
       ...tokenB,
-      ...defaultToken,
-      ..._tokenBInfo,
       contractId: _arguments[0].value
     }
 
     poolToken = {
-      title: 'Pool Token',
       ...poolToken,
       amount: _arguments[5].value,
       decimals: 18
+    }
+
+    if (tokens && Array.isArray(tokens)) {
+      tokenA = {
+        ...tokenA,
+        ...defaultToken,
+        ...tokens.find(
+          (t) => t.contractId === transaction.tx.contractId
+        )
+      }
+
+      tokenB = {
+        ...tokenB,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === _arguments[0].value)
+      }
     }
 
     deadline = _arguments[6].value
@@ -142,7 +168,7 @@ export async function addLiquidityAe (transaction, tokens = []) {
       tokenB.amount = _returns[0].value
     }
   } catch (error) {
-    throw Error(`check addLiquidityAe implementation : `, null, error)
+    console.error('addLiquidityAe Error:', error)
   }
 
   return { tokens: [ tokenA, tokenB, poolToken ], deadline }
@@ -156,9 +182,18 @@ export async function addLiquidityAe (transaction, tokens = []) {
  * @return {Promise<{ tokens: [tokenA, tokenB, poolToken], deadline }>}
  */
 export async function removeLiquidity (transaction, tokens = []) {
-  let tokenA = {}
-  let tokenB = {}
-  let poolToken = {}
+  let tokenA = {
+    title: 'Token A',
+    decimals: 18
+  }
+  let tokenB = {
+    title: 'Token B',
+    decimals: 18
+  }
+  let poolToken = {
+    title: 'Pool Token',
+    decimals: 18
+  }
   let deadline = null
 
   try {
@@ -176,31 +211,33 @@ export async function removeLiquidity (transaction, tokens = []) {
     tokenB.min_amount = _arguments[4].value
     tokenB.amount = _arguments[4].value // to handle when this transaction is been reverted
 
-    // path: list(IAEX9Minimal)
-    let _tokenAInfo = tokens.find((t) => t.contractId === _arguments[0].value)
     tokenA = {
-      title: 'Token A',
       ...tokenA,
-      ...defaultToken,
-      ..._tokenAInfo,
       contractId: _arguments[0].value
     }
-
-    let _tokenBInfo = tokens.find((t) => t.contractId === _arguments[1].value)
     tokenB = {
-      title: 'Token B',
       ...tokenB,
-      ...defaultToken,
-      ..._tokenBInfo,
       contractId: _arguments[1].value
     }
 
     poolToken = {
-      title: 'Pool Token',
       ...poolToken,
-      amount: _arguments[2].value,
-      decimals: 18
+      amount: _arguments[2].value
     }
+
+    if (tokens && Array.isArray(tokens)) {
+      tokenA = {
+        ...tokenA,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === _arguments[0].value)
+      }
+      tokenB = {
+        ...tokenB,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === _arguments[1].value)
+      }
+    }
+
     deadline = _arguments[6].value
 
     // final results
@@ -209,7 +246,7 @@ export async function removeLiquidity (transaction, tokens = []) {
       tokenB.amount = _returns[0].value
     }
   } catch (error) {
-    throw Error(`check removeLiquidity implementation : `, null, error)
+    console.error('removeLiquidity Error:', error)
   }
 
   return { tokens: [tokenA, tokenB, poolToken], deadline }
@@ -223,9 +260,18 @@ export async function removeLiquidity (transaction, tokens = []) {
  * @return {Promise<{ tokens: [tokenA, tokenB, poolToken], deadline }>}
  */
 export async function removeLiquidityAe (transaction, tokens = []) {
-  let tokenA = {}
-  let tokenB = {}
-  let poolToken = {}
+  let tokenA = {
+    title: 'Token A',
+    decimals: 18
+  }
+  let tokenB = {
+    title: 'Token B',
+    decimals: 18
+  }
+  let poolToken = {
+    title: 'Pool Token',
+    decimals: 18
+  }
   let deadline = null
 
   try {
@@ -243,30 +289,30 @@ export async function removeLiquidityAe (transaction, tokens = []) {
     tokenB.min_amount = _arguments[3].value
     tokenB.amount = _arguments[3].value // to handle when this transaction is been reverted
 
-    // path: list(IAEX9Minimal)
-    let _tokenAInfo = tokens.find((t) => t.contractId === _arguments[0].value)
     tokenA = {
-      title: 'Token A',
       ...tokenA,
-      ...defaultToken,
-      ..._tokenAInfo,
       contractId: _arguments[0].value
     }
-
-    let _tokenBInfo = tokens.find((t) => t.contractId === transaction.tx.contractId)
     tokenB = {
-      title: 'Token B',
       ...tokenB,
-      ...defaultToken,
-      ..._tokenBInfo,
       contractId: transaction.tx.contractId
     }
-
     poolToken = {
-      title: 'Pool Token',
       ...poolToken,
-      amount: _arguments[1].value,
-      decimals: 18
+      amount: _arguments[1].value
+    }
+
+    if (tokens && Array.isArray(tokens)) {
+      tokenA = {
+        ...tokenA,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === _arguments[0].value)
+      }
+      tokenB = {
+        ...tokenB,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === transaction.tx.contractId)
+      }
     }
 
     deadline = _arguments[5].value
@@ -277,7 +323,7 @@ export async function removeLiquidityAe (transaction, tokens = []) {
       tokenB.amount = _returns[0].value
     }
   } catch (error) {
-    throw Error(`check removeLiquidityAe implementation : `, null, error)
+    console.error('removeLiquidityAe Error:', error)
   }
 
   return { tokens: [tokenA, tokenB, poolToken], deadline }
@@ -290,8 +336,14 @@ export async function removeLiquidityAe (transaction, tokens = []) {
  * @returns {Promise<{ tokens: [fromToken, toToken] }>}
  */
 export async function swapExactTokensForTokens (transaction, tokens = []) {
-  let fromToken = {}
-  let toToken = {}
+  let fromToken = {
+    title: 'From Token',
+    decimals: 18
+  }
+  let toToken = {
+    title: 'To Token',
+    decimals: 18
+  }
 
   try {
     let _arguments = transaction.tx.arguments
@@ -309,20 +361,20 @@ export async function swapExactTokensForTokens (transaction, tokens = []) {
 
     // path: list(IAEX9Minimal)
     let contracts = _arguments[2].value
-    let _fromTokenInfo = tokens.find((t) => t.contractId === contracts[0].value)
-    fromToken = {
-      title: 'From Token',
-      ...fromToken,
-      ...defaultToken,
-      ..._fromTokenInfo
-    }
 
-    let _toTokenInfo = tokens.find((t) => t.contractId === contracts[1].value)
-    toToken = {
-      title: 'To Token',
-      ...toToken,
-      ...defaultToken,
-      ..._toTokenInfo
+    if (tokens && Array.isArray(tokens)) {
+      fromToken = {
+        ...fromToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[0].value)
+      }
+
+      toToken = {
+        title: 'To Token',
+        ...toToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[1].value)
+      }
     }
 
     // final results
@@ -331,7 +383,7 @@ export async function swapExactTokensForTokens (transaction, tokens = []) {
       toToken.amount = _returns[1].value
     }
   } catch (error) {
-    throw Error(`check swapExactTokensForTokens implementation : `, null, error)
+    console.error('swapExactTokensForTokens Error:', error)
   }
 
   return { tokens: [fromToken, toToken] }
@@ -344,8 +396,14 @@ export async function swapExactTokensForTokens (transaction, tokens = []) {
  * @returns {Promise<{ tokens: [fromToken, toToken] }>}
  */
 export async function swapTokensForExactTokens (transaction, tokens = []) {
-  let fromToken = {}
-  let toToken = {}
+  let fromToken = {
+    title: 'From Token',
+    decimals: 18
+  }
+  let toToken = {
+    title: 'To Token',
+    decimals: 18
+  }
 
   try {
     let _arguments = transaction.tx.arguments
@@ -363,20 +421,29 @@ export async function swapTokensForExactTokens (transaction, tokens = []) {
 
     // path: list(IAEX9Minimal)
     let contracts = _arguments[2].value
-    let _toTokenInfo = tokens.find((t) => t.contractId === contracts[0].value)
+
     toToken = {
-      title: 'To Token',
       ...toToken,
-      ...defaultToken,
-      ..._toTokenInfo,
       contractId: contracts[0].value
     }
 
-    let _fromTokenInfo = tokens.find((t) => t.contractId === contracts[1].value)
     fromToken = {
-      title: 'From Token',
       ...fromToken,
-      ..._fromTokenInfo
+      contractId: contracts[1].value
+    }
+
+    if (tokens && Array.isArray(tokens)) {
+      toToken = {
+        ...toToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[0].value)
+      }
+
+      fromToken = {
+        ...fromToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[1].value)
+      }
     }
 
     // final results
@@ -385,7 +452,7 @@ export async function swapTokensForExactTokens (transaction, tokens = []) {
       fromToken.amount = _returns[1].value
     }
   } catch (error) {
-    throw Error(`check swapTokensForExactTokens implementation : `, null, error)
+    console.error('swapTokensForExactTokens Error:', error)
   }
 
   return { tokens: [fromToken, toToken] }
@@ -398,8 +465,14 @@ export async function swapTokensForExactTokens (transaction, tokens = []) {
  * @returns {Promise<{ tokens: [fromToken, toToken] }>}
  */
 export async function swapExactAeForTokens (transaction, tokens = []) {
-  let fromToken = {}
-  let toToken = {}
+  let fromToken = {
+    title: 'From Token',
+    decimals: 18
+  }
+  let toToken = {
+    title: 'To Token',
+    decimals: 18
+  }
 
   try {
     let _arguments = transaction.tx.arguments
@@ -416,21 +489,27 @@ export async function swapExactAeForTokens (transaction, tokens = []) {
 
     // path: list(IAEX9Minimal)
     let contracts = _arguments[1].value
-    let _toTokenInfo = tokens.find((t) => t.contractId === contracts[1].value)
+
     toToken = {
-      title: 'To Token',
       ...toToken,
-      ...defaultToken,
-      ..._toTokenInfo
+      contractId: contracts[1].value
+    }
+    fromToken = {
+      ...fromToken,
+      contractId: contracts[0].value
     }
 
-    let _fromTokenInfo = tokens.find((t) => t.contractId === contracts[0].value)
-    fromToken = {
-      title: 'From Token',
-      ...fromToken,
-      ...defaultToken,
-      ..._fromTokenInfo,
-      contractId: contracts[0].value
+    if (tokens && Array.isArray(tokens)) {
+      toToken = {
+        ...toToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[1].value)
+      }
+      fromToken = {
+        ...fromToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[0].value)
+      }
     }
 
     // final results
@@ -439,7 +518,7 @@ export async function swapExactAeForTokens (transaction, tokens = []) {
       fromToken.amount = _returns[0].value
     }
   } catch (error) {
-    throw Error(`check swapExactAeForTokens implementation : `, null, error)
+    console.error('swapExactAeForTokens Error:', error)
   }
 
   return { tokens: [fromToken, toToken] }
@@ -452,8 +531,14 @@ export async function swapExactAeForTokens (transaction, tokens = []) {
  * @returns {Promise<{ tokens: [fromToken, toToken] }>}
  */
 export async function swapTokensForExactAe (transaction, tokens = []) {
-  let fromToken = {}
-  let toToken = {}
+  let fromToken = {
+    title: 'Fom Token',
+    decimals: 18
+  }
+  let toToken = {
+    title: 'To Token',
+    decimals: 18
+  }
 
   try {
     let _arguments = transaction.tx.arguments
@@ -472,21 +557,28 @@ export async function swapTokensForExactAe (transaction, tokens = []) {
 
     // path: list(IAEX9Minimal)
     let contracts = _arguments[2].value
-    let _toTokenInfo = tokens.find((t) => t.contractId === contracts[1].value)
+
     toToken = {
-      title: 'To Token',
       ...toToken,
-      ...defaultToken,
-      ..._toTokenInfo
+      contractId: contracts[1].value
     }
 
-    let _fromTokenInfo = tokens.find((t) => t.contractId === contracts[0].value)
     fromToken = {
-      title: 'Fom Token',
       ...fromToken,
-      ...defaultToken,
-      ..._fromTokenInfo,
       contractId: contracts[0].value
+    }
+
+    if (tokens && Array.isArray(tokens)) {
+      toToken = {
+        ...toToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[1].value)
+      }
+      fromToken = {
+        ...fromToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[0].value)
+      }
     }
 
     // final results
@@ -495,7 +587,7 @@ export async function swapTokensForExactAe (transaction, tokens = []) {
       fromToken.amount = _returns[0].value
     }
   } catch (error) {
-    throw Error(`check swapTokensForExactAe implementation : `, null, error)
+    console.error('swapTokensForExactAe Error:', error)
   }
 
   return { tokens: [fromToken, toToken] }
@@ -508,8 +600,14 @@ export async function swapTokensForExactAe (transaction, tokens = []) {
  * @returns {Promise<{ tokens: [fromToken, toToken], deadline }>}
  */
 export async function swapExactTokensForAe (transaction, tokens = []) {
-  let fromToken = {}
-  let toToken = {}
+  let fromToken = {
+    title: 'From Token',
+    decimals: 18
+  }
+  let toToken = {
+    title: 'To Token',
+    decimals: 18
+  }
   let deadline = null
 
   try {
@@ -529,21 +627,27 @@ export async function swapExactTokensForAe (transaction, tokens = []) {
 
     // path: list(IAEX9Minimal)
     let contracts = _arguments[2].value
-    let _fromTokenInfo = tokens.find((t) => t.contractId === contracts[0].value)
+
     fromToken = {
-      title: 'From Token',
       ...fromToken,
-      ...defaultToken,
-      ..._fromTokenInfo,
       contractId: contracts[0].value
     }
-
-    let _toTokenInfo = tokens.find((t) => t.contractId === contracts[1].value)
     toToken = {
-      title: 'To Token',
       ...toToken,
-      ...defaultToken,
-      ..._toTokenInfo
+      contractId: contracts[1].value
+    }
+
+    if (tokens && Array.isArray(tokens)) {
+      fromToken = {
+        ...fromToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[0].value)
+      }
+      toToken = {
+        ...toToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[1].value)
+      }
     }
 
     deadline = _arguments[4].value
@@ -554,7 +658,7 @@ export async function swapExactTokensForAe (transaction, tokens = []) {
       toToken.amount = _returns[1].value
     }
   } catch (error) {
-    throw Error(`check swapTokensForExactAe implementation : `, null, error)
+    console.error('swapTokensForExactAe Error:', error)
   }
 
   return { tokens: [fromToken, toToken], deadline }
@@ -567,8 +671,14 @@ export async function swapExactTokensForAe (transaction, tokens = []) {
  * @returns {Promise<{ tokens: [fromToken, toToken], deadline }>}
  */
 export async function swapAeForExactTokens (transaction, tokens = []) {
-  let fromToken = {}
-  let toToken = {}
+  let fromToken = {
+    title: 'From Token',
+    decimals: 18
+  }
+  let toToken = {
+    title: 'To Token',
+    decimals: 18
+  }
   let deadline = null
 
   try {
@@ -585,21 +695,27 @@ export async function swapAeForExactTokens (transaction, tokens = []) {
 
     // path: list(IAEX9Minimal)
     let contracts = _arguments[1].value
-    let _fromTokenInfo = tokens.find((t) => t.contractId === contracts[0].value)
+
     fromToken = {
-      title: 'From Token',
       ...fromToken,
-      ...defaultToken,
-      ..._fromTokenInfo,
       contractId: contracts[0].value
     }
-
-    let _toTokenInfo = tokens.find((t) => t.contractId === contracts[1].value)
     toToken = {
-      title: 'To Token',
       ...toToken,
-      ...defaultToken,
-      ..._toTokenInfo
+      contractId: contracts[1].value
+    }
+
+    if (tokens && Array.isArray(tokens)) {
+      fromToken = {
+        ...fromToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[0].value)
+      }
+      toToken = {
+        ...toToken,
+        ...defaultToken,
+        ...tokens.find((t) => t.contractId === contracts[1].value)
+      }
     }
 
     deadline = _arguments[3].value
@@ -610,7 +726,7 @@ export async function swapAeForExactTokens (transaction, tokens = []) {
       fromToken.amount = _returns[0].value
     }
   } catch (error) {
-    throw Error(`check swapAeForExactTokens implementation : `, null, error)
+    console.error('swapAeForExactTokens Error:', error)
   }
 
   return { tokens: [fromToken, toToken], deadline }
@@ -623,7 +739,10 @@ export async function swapAeForExactTokens (transaction, tokens = []) {
  * @returns {Promise<{ tokens: [token], recipient }>}
  */
 export async function createAllowance (transaction, tokens = []) {
-  let token = {}
+  let token = {
+    title: 'Amount',
+    decimals: 18
+  }
   let recipient = null
 
   try {
@@ -636,17 +755,17 @@ export async function createAllowance (transaction, tokens = []) {
     token.amount = _arguments[1].value
 
     // path: list(IAEX9Minimal)
-    let _tokenInfo = tokens.find(
-      (t) => t.contractId === transaction.tx.contractId
-    )
-    token = {
-      title: 'Amount',
-      ...token,
-      ...defaultToken,
-      ..._tokenInfo
+    if (tokens && Array.isArray(tokens)) {
+      token = {
+        ...token,
+        ...defaultToken,
+        ...tokens.find(
+          (t) => t.contractId === transaction.tx.contractId
+        )
+      }
     }
   } catch (error) {
-    throw Error(`check createAllowance implementation : `, null, error)
+    console.error('createAllowance Error:', error)
   }
 
   return { tokens: [token], recipient }
@@ -659,7 +778,10 @@ export async function createAllowance (transaction, tokens = []) {
  * @returns {Promise<{ tokens: [tokenIn], recipient }>}
  */
 export async function changeAllowance (transaction, tokens = []) {
-  let token = {}
+  let token = {
+    title: 'Amount',
+    decimals: 18
+  }
   let recipient = null
 
   try {
@@ -672,17 +794,18 @@ export async function changeAllowance (transaction, tokens = []) {
     token.amount = _arguments[1].value
 
     // path: list(IAEX9Minimal)
-    let _tokenInfo = tokens.find(
-      (t) => t.contractId === transaction.tx.contractId
-    )
-    token = {
-      title: 'Amount',
-      ...token,
-      ...defaultToken,
-      ..._tokenInfo
+    if (tokens && Array.isArray(tokens)) {
+      token = {
+        ...token,
+        ...defaultToken,
+        ...tokens.find(
+          (t) => t.contractId === transaction.tx.contractId
+        )
+      }
     }
   } catch (error) {
-    throw Error(`check changeAllowance implementation : `, null, error)
+    console.error('changeAllowance Error:', error)
+    // throw Error(`check changeAllowance implementation : `, null, error)
   }
 
   return { tokens: [token], recipient }
@@ -695,7 +818,10 @@ export async function changeAllowance (transaction, tokens = []) {
  * @returns {Promise<{ tokens: [token], sender, recipient }>}
  */
 export async function transferAllowance (transaction, tokens = []) {
-  let token = {}
+  let token = {
+    title: 'Amount',
+    decimals: 18
+  }
   let sender = null
   let recipient = null
 
@@ -712,17 +838,17 @@ export async function transferAllowance (transaction, tokens = []) {
     token.amount = _arguments[0].value
 
     // path: list(IAEX9Minimal)
-    let _tokenInfo = tokens.find(
-      (t) => t.contractId === transaction.tx.contractId
-    )
-    token = {
-      title: 'Amount',
-      ...token,
-      ...defaultToken,
-      ..._tokenInfo
+    if (tokens && Array.isArray(tokens)) {
+      token = {
+        ...token,
+        ...defaultToken,
+        ...tokens.find(
+          (t) => t.contractId === transaction.tx.contractId
+        )
+      }
     }
   } catch (error) {
-    throw Error(`check transferAllowance implementation : `, null, error)
+    console.error('transferAllowance Error:', error)
   }
 
   return { tokens: [token], sender, recipient }

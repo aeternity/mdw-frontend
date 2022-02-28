@@ -49,7 +49,7 @@ export const actions = {
       .join('')
 
     if (!transactionTokenInfoResolvers[_function]) {
-      console.warn(`${_function} resolver is not implemented.`)
+      console.error(`${_function} resolver is not implemented.`)
       return null
     }
 
