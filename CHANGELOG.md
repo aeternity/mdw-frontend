@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.6.2](https://www.github.com/aeternity/mdw-frontend/compare/v0.6.1...v0.6.2) (2022-03-22)
+
+
+### Bug Fixes
+
+* **tx-details:** only show tx arguments on contract call [#172](https://www.github.com/aeternity/mdw-frontend/issues/172) ([817a08b](https://www.github.com/aeternity/mdw-frontend/commit/817a08b9717238eb8cdd41c6280309fbf5ffbf76))
+
 ### [0.6.1](https://www.github.com/aeternity/mdw-frontend/compare/v0.6.0...v0.6.1) (2022-02-28)
 
 
