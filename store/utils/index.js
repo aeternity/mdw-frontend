@@ -137,6 +137,10 @@ export const transformTxType = (transaction) => {
 }
 
 export const fixContractCreateTx = (c) => {
+  if (c.tx.type !== 'ContractCallTx') {
+    return c
+  }
+
   let _return = {
     type: 'bool',
     value: c.tx.returnType === 'ok' ? 'true' : 'false'
