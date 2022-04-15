@@ -32,7 +32,7 @@ export const actions = {
 
   getContractCreateTx: async function ({ rootGetters: { middleware }, commit }, { contract, limit }) {
     try {
-      const contractTx = await middleware.getTxBackward({ type: 'contract_create', limit, contract })
+      const contractTx = await middleware.getTxBackward({ limit, contract })
       return contractTx.data
     } catch (e) {
       console.log(e)
