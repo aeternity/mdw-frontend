@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://www.github.com/aeternity/mdw-frontend/compare/v0.6.1...v0.7.0) (2022-04-18)
+
+
+### Features
+
+* ga contract support [#135](https://www.github.com/aeternity/mdw-frontend/issues/135) ([83e5e60](https://www.github.com/aeternity/mdw-frontend/commit/83e5e60f6282c8f12a48b05fb7e884c828622b2a))
+
+
+### Bug Fixes
+
+* **tx-details:** only show tx arguments on contract call [#172](https://www.github.com/aeternity/mdw-frontend/issues/172) ([817a08b](https://www.github.com/aeternity/mdw-frontend/commit/817a08b9717238eb8cdd41c6280309fbf5ffbf76))
+
 ### [0.6.1](https://www.github.com/aeternity/mdw-frontend/compare/v0.6.0...v0.6.1) (2022-02-28)
 
 
