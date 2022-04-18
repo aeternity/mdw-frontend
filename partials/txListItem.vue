@@ -19,6 +19,7 @@ import NameTransferTx from './txListType/nameTransferTx.vue'
 import NameUpdateTx from './txListType/nameUpdateTx.vue'
 import NameRevokeTx from './txListType/nameRevokeTx.vue'
 import ContractCallTx from './txListType/contractCallTx.vue'
+import PayingForTx from './txListType/payingForTx.vue'
 import ContractCreateTx from './txListType/contractCreateTx.vue'
 import GAAttachTx from './txListType/gaAttachTx.vue'
 import Aex9ReceivedTx from './txListType/aex9ReceivedTx.vue'
@@ -43,7 +44,8 @@ export default {
     GAAttachTx,
     Aex9ReceivedTx,
     Aex9SentTx,
-    InternalTx
+    InternalTx,
+    PayingForTx
   },
   props: {
     data: {
