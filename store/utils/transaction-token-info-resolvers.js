@@ -373,7 +373,7 @@ export async function swapExactTokensForTokens (transaction, tokens = []) {
         title: 'To Token',
         ...toToken,
         ...defaultToken,
-        ...tokens.find((t) => t.contractId === contracts[1].value)
+        ...tokens.find((t) => t.contractId === contracts[contracts.length - 1].value)
       }
     }
 
@@ -429,7 +429,7 @@ export async function swapTokensForExactTokens (transaction, tokens = []) {
 
     fromToken = {
       ...fromToken,
-      contractId: contracts[1].value
+      contractId: contracts[contracts.length - 1].value
     }
 
     if (tokens && Array.isArray(tokens)) {
@@ -442,7 +442,7 @@ export async function swapTokensForExactTokens (transaction, tokens = []) {
       fromToken = {
         ...fromToken,
         ...defaultToken,
-        ...tokens.find((t) => t.contractId === contracts[1].value)
+        ...tokens.find((t) => t.contractId === contracts[contracts.length - 1].value)
       }
     }
 
@@ -492,7 +492,7 @@ export async function swapExactAeForTokens (transaction, tokens = []) {
 
     toToken = {
       ...toToken,
-      contractId: contracts[1].value
+      contractId: contracts[contracts.length - 1].value
     }
     fromToken = {
       ...fromToken,
@@ -503,7 +503,7 @@ export async function swapExactAeForTokens (transaction, tokens = []) {
       toToken = {
         ...toToken,
         ...defaultToken,
-        ...tokens.find((t) => t.contractId === contracts[1].value)
+        ...tokens.find((t) => t.contractId === contracts[contracts.length - 1].value)
       }
       fromToken = {
         ...fromToken,
@@ -560,7 +560,7 @@ export async function swapTokensForExactAe (transaction, tokens = []) {
 
     toToken = {
       ...toToken,
-      contractId: contracts[1].value
+      contractId: contracts[contracts.length - 1].value
     }
 
     fromToken = {
@@ -572,7 +572,7 @@ export async function swapTokensForExactAe (transaction, tokens = []) {
       toToken = {
         ...toToken,
         ...defaultToken,
-        ...tokens.find((t) => t.contractId === contracts[1].value)
+        ...tokens.find((t) => t.contractId === contracts[contracts.length - 1].value)
       }
       fromToken = {
         ...fromToken,
@@ -634,7 +634,7 @@ export async function swapExactTokensForAe (transaction, tokens = []) {
     }
     toToken = {
       ...toToken,
-      contractId: contracts[1].value
+      contractId: contracts[contracts.length - 1].value
     }
 
     if (tokens && Array.isArray(tokens)) {
@@ -646,7 +646,7 @@ export async function swapExactTokensForAe (transaction, tokens = []) {
       toToken = {
         ...toToken,
         ...defaultToken,
-        ...tokens.find((t) => t.contractId === contracts[1].value)
+        ...tokens.find((t) => t.contractId === contracts[contracts.length - 1].value)
       }
     }
 
@@ -702,7 +702,7 @@ export async function swapAeForExactTokens (transaction, tokens = []) {
     }
     toToken = {
       ...toToken,
-      contractId: contracts[1].value
+      contractId: contracts[contracts.length - 1].value
     }
 
     if (tokens && Array.isArray(tokens)) {
@@ -714,7 +714,7 @@ export async function swapAeForExactTokens (transaction, tokens = []) {
       toToken = {
         ...toToken,
         ...defaultToken,
-        ...tokens.find((t) => t.contractId === contracts[1].value)
+        ...tokens.find((t) => t.contractId === contracts[contracts.length - 1].value)
       }
     }
 
