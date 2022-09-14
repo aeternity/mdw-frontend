@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.7.1](https://www.github.com/aeternity/mdw-frontend/compare/v0.7.0...v0.7.1) (2022-09-14)
+
+
+### Bug Fixes
+
+* show no error if no tokens ([82520f9](https://www.github.com/aeternity/mdw-frontend/commit/82520f946d016801cdb5dd702e3181f0d90e23e5))
+* swap tx tokens display [#177](https://www.github.com/aeternity/mdw-frontend/issues/177) ([193d4dc](https://www.github.com/aeternity/mdw-frontend/commit/193d4dc684e1d20d9979f792f384e436a0af84c9))
+
 ## [0.7.0](https://www.github.com/aeternity/mdw-frontend/compare/v0.6.1...v0.7.0) (2022-04-18)
 
 
