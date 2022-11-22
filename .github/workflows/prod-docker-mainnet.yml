@@ -75,11 +75,13 @@ jobs:
           context: .
           file: nginx.Dockerfile
           build-args: |
-            NUXT_APP_NODE_URL: "https://mainnet.aeternity.io/mdw"
-            NUXT_APP_NODE_WS: "wss://mainnet.aeternity.io/mdw/websocket"
-            NUXT_APP_NETWORK_NAME: "MAIN NET"
-            NUXT_APP_ENABLE_FAUCET: "false"
-            NUXT_APP_FAUCET_API: "https://testnet.faucet.aepps.com/account"
+            NUXT_APP_NODE_URL: https://mainnet.aeternity.io/v3
+            NUXT_APP_NODE_WS: wss://mainnet.aeternity.io/mdw/websocket
+            NUXT_APP_MDW_URL: https://mainnet.aeternity.io/mdw
+            NUXT_APP_OTHER_DEPLOYMENTS: TESTNET@https://explorer.testnet.aeternity.io
+            NUXT_APP_NETWORK_NAME: MAIN NET
+            NUXT_APP_ENABLE_FAUCET: false
+            NUXT_APP_FAUCET_API: https://testnet.faucet.aepps.com/account
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
