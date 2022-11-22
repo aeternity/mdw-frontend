@@ -58,12 +58,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: aeternity/mdw-frontend:testnet
+          images: aeternity/mdw-frontend-testnet
           tags: |
-            type=raw,value=latest,enable=${{ endsWith(GitHub.ref, 'main') }}
-            type=raw,value=${{ steps.release.outputs.tag_name }},enable=${{ endsWith(GitHub.ref, 'main') }}
-            type=ref,event=tag
-            type=ref,event=pr
+            type=raw,value=testnet,enable=${{ endsWith(GitHub.ref, 'master') }}
+            type=raw,value=${{ steps.release.outputs.tag_name }},enable=${{ endsWith(GitHub.ref, 'master') }}
 
       - name: Build and push docker image
         if: |
@@ -74,7 +72,7 @@ jobs:
           context: .
           file: nginx.Dockerfile
           build-args: |
-            NUXT_APP_NETWORK_NAME: "TESTNET v0.7.1" 
+            NUXT_APP_NETWORK_NAME: "TESTNET" 
             NUXT_APP_NODE_URL: "https://testnet.aeternity.io/v3" 
             NUXT_APP_MDW_URL: "https://testnet.aeternity.io/mdw" 
             NUXT_APP_NODE_WS: "wss://testnet.aeternity.io/mdw/websocket"  
