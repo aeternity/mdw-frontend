@@ -9,7 +9,7 @@ on:
 
 env:
   ENV: "prd"
-  APP: "mdw-frontend-testnet"
+  APP: "mdw-frontend"
 
 jobs:
   main:
@@ -61,7 +61,7 @@ jobs:
           images: aeternity/mdw-frontend-testnet
           tags: |
             type=raw,value=testnet,enable=${{ endsWith(GitHub.ref, 'master') }}
-            type=raw,value=${{ steps.release.outputs.tag_name }},enable=${{ endsWith(GitHub.ref, 'master') }}
+            type=raw,value=${{ steps.release.outputs.tag_name }},enable=${{ endsWith(GitHub.ref, 'master') }}-testnet
 
       - name: Build and push docker image
         if: |
