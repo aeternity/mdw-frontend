@@ -6,9 +6,9 @@ on:
     types: [ opened, synchronize, closed ]
 
 env:
-  PR_NUMBER: ${{ github.event.pull_request.number }}
+  PR_NUMBER: ${{ github.event.pull_request.number }}-mainnet
   ENV: "stg"
-  APP: "mdw-frontend-mainnet"
+  APP: "mdw-frontend"
 
 jobs:
   main:
@@ -48,7 +48,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: aeternity/mdw-frontend-mainnet
+          images: aeternity/mdw-frontend
           tags: type=ref,event=pr
       
       - name: Get commit sha on PR Sync
