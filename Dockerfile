@@ -2,8 +2,6 @@ FROM node:12-alpine as frontend-build
 WORKDIR /app
 RUN apk add make gcc g++ python3 git
 
-ENV PATH=./node_modules/.bin/:${PATH}
-
 ARG NUXT_APP_NODE_URL=https://mainnet.aeternity.io/v3
 ARG NUXT_APP_NODE_WS=wss://mainnet.aeternity.io/mdw/websocket
 ARG NUXT_APP_MDW_URL=https://mainnet.aeternity.io/mdw
@@ -17,19 +15,7 @@ ARG NUXT_SSR=true
 ARG HOST=0.0.0.0
 ARG PORT=3000
 
-ENV NUXT_APP_NODE_URL=${NUXT_APP_NODE_URL}
-ENV NUXT_APP_NODE_WS=${NUXT_APP_NODE_WS}
-ENV NUXT_APP_MDW_URL=${NUXT_APP_MDW_URL}
-ENV NUXT_APP_NETWORK_NAME=${NUXT_APP_NETWORK_NAME}
-ENV NUXT_APP_OTHER_DEPLOYMENTS=${NUXT_APP_OTHER_DEPLOYMENTS}
-ENV NUXT_APP_ENABLE_FAUCET=${NUXT_APP_ENABLE_FAUCET}
-ENV NUXT_APP_FAUCET_API=${NUXT_APP_FAUCET_API}
-ENV NUXT_APP_API_DOCS=${NUXT_APP_API_DOCS}
-ENV NUXT_TARGET=${NUXT_TARGET}
-ENV NUXT_SSR=${NUXT_SSR}
-ENV HOST=${HOST}
-ENV PORT=${PORT}
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 
 COPY package*.json ./
 RUN npm ci; npm cache clean --force

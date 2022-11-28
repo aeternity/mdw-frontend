@@ -19,8 +19,10 @@ NUXT_TARGET?=static
 NUXT_SSR?=false
 PORT?=3000
 
+all: docker-build
+
 .PHONY: list
-list:
+help:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
 clean:
@@ -78,7 +80,3 @@ deploy-k8s:
 	@echo deploy k8s
 	kubectl -n $(K8S_NAMESPACE) patch deployment $(DOCKER_IMAGE) --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/image", "value":"$(DOCKER_REGISTRY)/$(DOCKER_IMAGE):$(K8S_NAMESPACE)-$(DOCKER_TAG)"}]'
 	@echo deploy k8s done
-
-.PHONY: help
-help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

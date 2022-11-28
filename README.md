@@ -9,7 +9,7 @@
     - Prod: `npm run build && npm start`
 
 
-## Supported Environment Variables
+## Supported Environment Variables (build argiments)
 
 | Name                  | Description           | Value                                                                             | 
 | :---                      |    :----:             |        ----:                                        | 
@@ -22,7 +22,7 @@
 | `NUXT_APP_FAUCET_API`     | Faucet Api URL        |  (default) `https://testnet.faucet.aepps.com/account`| 
 | `NUXT_APP_OTHER_DEPLOYMENTS` | Other Deployments  |  (default) `TESTNET@https://explorer.testnet.aeternity.io`| 
 
-## Build a docker container (nodeJS server)
+## Build a docker container (nodeJS server) - recommended
 
 Use `make docker-build` to create a production-ready server container (`aeternity/mdw-frontend`) that uses nodeJS server (it's fast enough). You can use the above env vars to control the build default configuration. The container is runtime configurable by the environment.
 
