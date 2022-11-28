@@ -2,6 +2,7 @@ Dockerfile
 Makefile
 node_modules
 .nuxt
+dist/
 .postcssrc.js
 .travis.yml
 .editorconfig
