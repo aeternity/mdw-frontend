@@ -1,5 +1,3 @@
-import { fetchMiddleware } from './utils'
-
 export const state = () => ({
   contracts: [],
   nextPageUrl: ''
@@ -25,12 +23,13 @@ export const actions = {
       return []
     }
   },
-  getMore: async function ({ state: { nextPageUrl }, commit }) {
+  getMore: async function ({ rootGetters: { fetchMiddleware }, state: { nextPageUrl }, commit }) {
     const contracts = await fetchMiddleware(nextPageUrl)
     commit('addContracts', contracts)
   },
 
   getContractCreateTx: async function ({ rootGetters: { middleware }, commit }, { contract, limit }) {
+    if (!contract) return { transactions: [] }
     try {
       const contractTx = await middleware.getTxBackward({ limit, contract })
       return contractTx.data
@@ -40,7 +39,7 @@ export const actions = {
       return { transactions: [] }
     }
   },
-  getContractCalls: async function ({ rootGetters: { middleware }, commit }, { contract, page, limit }) {
+  getContractCalls: async function ({ rootGetters: { middleware, fetchMiddleware }, commit }, { contract, page, limit }) {
     try {
       if (page !== null) {
         const res = await fetchMiddleware(page)

@@ -3,10 +3,10 @@ import camelcaseKeysDeep from 'camelcase-keys-deep'
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger'
 import swag from './../../swagger.json'
 
-export const initMiddleware = () => {
+export const initMiddleware = (state) => {
   swag.paths = {
     ...swag.paths,
-    'name/auction/{name}': {
+    '/name/auction/{name}': {
       get: {
         operationId: 'getAuctionInfoByName',
         parameters: [
@@ -19,7 +19,7 @@ export const initMiddleware = () => {
         ]
       }
     },
-    'txs/backward': {
+    '/txs/backward': {
       get: {
         operationId: 'getTxBackward',
         parameters: [
@@ -71,7 +71,7 @@ export const initMiddleware = () => {
 
   const swg = Swagger.compose({
     methods: {
-      urlFor: (path) => process.env.middlewareURL + path,
+      urlFor: (path) => `${state.middlewareURL}${path}`,
       axiosError: () => ''
     }
   })({ swag })
@@ -80,11 +80,22 @@ export const initMiddleware = () => {
   return camelcaseKeysDeep(swg.api)
 }
 
-export const fetchMiddleware = async (path) => {
-  return camelcaseKeysDeep(await fetchJson(`${process.env.middlewareURL}/${path}`))
+export const fetchMiddleware = async (path, url = '') => {
+  // don't prefix with url if `path` is absolute
+  const uri = path.indexOf('http') === 0 ? `${path}` : `${url}${path}`
+  const json = camelcaseKeysDeep(await fetchJson(uri))
+  // some endpoints return array
+  if (Array.isArray(json)) return json
+
+  // result is paginated
+  return { data: {}, next: null, ...json }
 }
-export const fetchNode = async (path) => {
-  return camelcaseKeysDeep(await fetchJson(`${process.env.nodeURL}/${path}`))
+
+export const fetchNode = async (path, url = '') => {
+  //  don't prefix with url if `path` is absolute
+  const uri = path.indexOf('http') === 0 ? `${path}` : `${url}${path}`
+
+  return camelcaseKeysDeep(await fetchJson(uri))
 }
 
 // replacement for lodash times function in vanilla ES5
@@ -93,7 +104,7 @@ export const times = (count, func) => {
   let per
   let results = []
   count = count || 0
-  func = func || function () {}
+  func = func || function () { }
 
   // while i is less than len
   while (i < count) {

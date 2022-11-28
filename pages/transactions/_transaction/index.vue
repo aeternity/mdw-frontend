@@ -45,7 +45,7 @@ import GenerationDetails from '../../../partials/generationDetails'
 import TransactionDetails from '../../../partials/transactionDetails'
 import FunctionCalls from '../../../partials/functionCalls'
 import PageHeader from '../../../components/PageHeader'
-import { transformMetaTx, fixContractCreateTx, fetchNode } from '../../../store/utils'
+import { transformMetaTx, fixContractCreateTx } from '../../../store/utils'
 
 export default {
   name: 'AppTransaction',
@@ -72,7 +72,7 @@ export default {
       )
     }
     if (!txDetails) {
-      txDetails = await fetchNode(`transactions/${transaction}`)
+      txDetails = await store.getters.fetchNode(`/transactions/${transaction}`)
 
       if (txDetails) {
         status = txDetails.block_height < 0 ? 'pending' : 'mined'

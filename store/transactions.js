@@ -1,4 +1,4 @@
-import { transformMetaTx, fetchMiddleware } from './utils'
+import { transformMetaTx } from './utils'
 
 export const state = () => ({
   transactions: []
@@ -15,7 +15,7 @@ export const mutations = {
 
 export const actions = {
   getLatest: async function (
-    { state, rootGetters: { middleware }, commit },
+    { rootGetters: { middleware, fetchMiddleware }, commit },
     { limit, page }
   ) {
     try {
@@ -32,7 +32,7 @@ export const actions = {
     }
   },
   getTxByType: async function (
-    { rootGetters: { middleware }, commit },
+    { rootGetters: { middleware, fetchMiddleware }, commit },
     { page, limit, type }
   ) {
     try {
@@ -62,7 +62,7 @@ export const actions = {
     }
   },
   getTransactionByAccount: async function (
-    { rootGetters: { middleware }, commit },
+    { rootGetters: { middleware, fetchMiddleware }, commit },
     { account, limit, page, txtype }
   ) {
     try {
@@ -83,11 +83,11 @@ export const actions = {
       return { data: null, next: false }
     }
   },
-  getTransactionFunctionCalls: async function ({ state }, txi) {
-    const { data } = await fetchMiddleware(`contracts/calls/txi/${txi}`)
+  getTransactionFunctionCalls: async function ({ _ }, txi) {
+    const { data } = await this.getters.fetchMiddleware(`/contracts/calls/txi/${txi}`)
     return data
   },
-  getInternalTransactions: async function ({ state }, { account, gen, page }) {
+  getInternalTransactions: async function ({ rootGetters: { fetchMiddleware } }, { account, gen, page }) {
     if (page) {
       const { data, next } = await fetchMiddleware(page)
       return { data: data.map(t => ({ tx: { type: 'InternalTx' }, ...t })), next }
@@ -99,7 +99,7 @@ export const actions = {
     if (account) {
       queryStr = `backward?account=${account}`
     }
-    const { data, next } = await fetchMiddleware(`transfers/${queryStr}`)
+    const { data, next } = await fetchMiddleware(`/transfers/${queryStr}`)
     return { data: data.map(t => ({ tx: { type: 'InternalTx' }, ...t })), next }
   }
 }
