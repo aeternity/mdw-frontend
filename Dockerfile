@@ -1,6 +1,6 @@
 FROM node:12-alpine as frontend-build
 WORKDIR /app
-RUN apk add make gcc g++ python3 git
+RUN apk add g++ python3
 
 ARG NUXT_APP_NODE_URL=https://mainnet.aeternity.io/v3
 ARG NUXT_APP_NODE_WS=wss://mainnet.aeternity.io/mdw/websocket
@@ -19,6 +19,7 @@ ENV NODE_ENV=development
 
 COPY package*.json ./
 RUN npm ci; npm cache clean --force
+
 COPY . .
 
 RUN NUXT_TARGET=server NUXT_SSR=true npm run build
@@ -27,6 +28,7 @@ RUN NUXT_TARGET=static NUXT_SSR=false npm run generate
 # make cleaner docker image
 FROM node:12-alpine as frontend
 WORKDIR /app
+RUN apk add g++ python3 && rm -rf /var/cache/apk/*
 
 ENV NUXT_APP_NODE_URL=${NUXT_APP_NODE_URL}
 ENV NUXT_APP_NODE_WS=${NUXT_APP_NODE_WS}
@@ -50,8 +52,7 @@ COPY LICENSE.md LICENSE.md
 
 COPY package.json package.json
 RUN npm install --only=prod \
-    && npm audit fix\
-    && npm cache clean --force
+  && npm cache clean --force
 
 VOLUME /app/.nuxt /app/dist
 EXPOSE ${PORT}

@@ -93,7 +93,17 @@ module.exports = {
         autoprefixer: {}
       }
     },
-    extend (config, { isDev, isClient }) {
+
+    loaders: {
+      scss: {
+        implementation: require('sass'),
+        sassOptions: {
+          quietDeps: true
+        }
+      }
+    },
+
+    extend(config, { isDev, isClient }) {
       if (isDev && isClient) {
         const options = {
           exclude: ['node_modules'],

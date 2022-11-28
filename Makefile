@@ -48,6 +48,7 @@ docker-build:
 	--build-arg NUXT_APP_FAUCET_API="${NUXT_APP_FAUCET_API}" \
 	--build-arg NUXT_APP_API_DOCS="${NUXT_APP_API_DOCS}" \
 	--build-arg PORT="${PORT}" \
+	--no-cache \
 	-f Dockerfile .
 	@echo done
 
