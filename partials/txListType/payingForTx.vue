@@ -138,7 +138,7 @@ export default {
           return 'Swap'
         }
 
-        return transaction.tx.function.replaceAll('_ae', '').replaceAll('_', ' ')
+        return transaction.tx.function.replace(/_ae/g, '').replace(/_/g, ' ')
       }
       return 'token transfer'
     },

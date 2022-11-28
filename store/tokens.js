@@ -41,7 +41,7 @@ export const actions = {
     if (!transaction.tx.function) return null
 
     let _function = String(transaction.tx.function)
-      .replaceAll('_', ' ')
+      .replace(/_/g, ' ')
       .split(' ')
       .map((text, index) =>
         index === 0 ? text : text.charAt(0).toUpperCase() + text.slice(1)
