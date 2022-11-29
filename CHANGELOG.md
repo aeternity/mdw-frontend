@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.7.2](https://www.github.com/aeternity/mdw-frontend/compare/v0.7.1...v0.7.2) (2022-11-29)
+
+
+### Bug Fixes
+
+* **docker:** universal docker image (with SSR) ([#183](https://www.github.com/aeternity/mdw-frontend/issues/183)) ([db23014](https://www.github.com/aeternity/mdw-frontend/commit/db230147e21011f54259b531046207ff554d99c5))
+
 ### [0.7.1](https://www.github.com/aeternity/mdw-frontend/compare/v0.7.0...v0.7.1) (2022-09-14)
 
 
