@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import { fetchMiddleware, fetchJson } from './utils'
 import * as transactionTokenInfoResolvers from './utils/transaction-token-info-resolvers'
 
 export const state = () => ({
@@ -20,12 +19,12 @@ export const mutations = {
 }
 
 export const actions = {
-  getAllTokens: async function ({ state, commit }) {
+  getAllTokens: async function ({ rootGetters: { fetchMiddleware }, state, commit }) {
     if (state.tokens.length) {
       return state.tokens
     }
     try {
-      const tokens = await fetchMiddleware('aex9/by_name')
+      const tokens = await fetchMiddleware('/aex9/by_name')
       commit('setTokens', tokens)
       return tokens
     } catch (e) {
@@ -41,7 +40,7 @@ export const actions = {
     if (!transaction.tx.function) return null
 
     let _function = String(transaction.tx.function)
-      .replaceAll('_', ' ')
+      .replace(/_/g, ' ')
       .split(' ')
       .map((text, index) =>
         index === 0 ? text : text.charAt(0).toUpperCase() + text.slice(1)
@@ -86,21 +85,19 @@ export const actions = {
     })
   },
   getAex9Transfers: async function (
-    { state: { transfers }, commit },
+    { rootGetters: { fetchMiddleware }, state: { transfers }, commit },
     { address, incoming = false }
   ) {
     let addressTransfers = transfers[incoming ? 'to' : 'from'][address]
     if (!addressTransfers) {
-      addressTransfers = await fetchMiddleware(
-        `aex9/transfers/${incoming ? 'to' : 'from'}/${address}`
-      )
+      addressTransfers = await fetchMiddleware(`/aex9/transfers/${incoming ? 'to' : 'from'}/${address}`)
       commit('setTransfers', { address, incoming, transfers: addressTransfers })
     }
     return addressTransfers
   },
-  getAccountBalance: async function ({ state: { tokens } }, { address }) {
+  getAccountBalance: async function ({ state: { tokens }, rootGetters: { fetchMiddleware } }, { address }) {
     try {
-      const balance = await fetchMiddleware(`aex9/balances/account/${address}`)
+      const balance = await fetchMiddleware(`/aex9/balances/account/${address}`)
       if (balance.hasOwnProperty('error')) {
         return []
       }
@@ -117,10 +114,9 @@ export const actions = {
       return null
     }
   },
-  getTokenBalances: async function ({ rootState: { nodeUrl } }, contractId) {
-    const tokenBalances = await fetchJson(
-      `${nodeUrl}/aex9/balances/${contractId}`
-    )
+  getTokenBalances: async function ({ rootGetters: { fetchMiddleware } }, contractId) {
+    const tokenBalances = await fetchMiddleware(`/aex9/balances/${contractId}`)
+
     return Object.entries(tokenBalances.amounts)
   }
 }

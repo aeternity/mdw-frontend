@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import { fetchMiddleware } from './utils'
 
 export const state = () => ({
   generations: {},
@@ -45,7 +44,7 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getMore: async function ({ state: { nextPageUrl }, commit }) {
+  getMore: async function ({ rootGetters: { fetchMiddleware }, state: { nextPageUrl }, commit }) {
     const generations = await fetchMiddleware(nextPageUrl)
     commit('addGenerations', generations.data)
     commit('setNextPageUrl', generations.next)

@@ -1,10 +1,10 @@
 const pkg = require('./package')
 
 module.exports = {
-  target: 'static',
-  ssr: false,
+  target: process.env.NUXT_TARGET || 'static',
+  ssr: process.env.NUXT_SSR === 'true' || false,
   generate: {
-    exclude: [/^\/.+/],
+    exclude: [/^\/.+/], // only pregenerate the index page
     crawler: false
   },
   /*
@@ -46,9 +46,10 @@ module.exports = {
     middlewareWS: process.env.NUXT_APP_NODE_WS || 'wss://mainnet.aeternity.io/mdw/websocket',
     networkName: process.env.NUXT_APP_NETWORK_NAME || 'MAINNET',
     otherDeployments: process.env.NUXT_APP_OTHER_DEPLOYMENTS || 'TESTNET@https://explorer.testnet.aeternity.io',
-    enableFaucet: process.env.NUXT_APP_ENABLE_FAUCET || false,
+    enableFaucet: process.env.NUXT_APP_ENABLE_FAUCET === 'true' || false,
     faucetAPI: process.env.NUXT_APP_FAUCET_API || 'https://testnet.faucet.aepps.com/account',
-    APIDocs: process.env.NUXT_APP_API_DOCS || 'https://github.com/aeternity/ae_mdw#http-endpoints'
+    APIDocs: process.env.NUXT_APP_API_DOCS || 'https://github.com/aeternity/ae_mdw#http-endpoints',
+    version: process.env.npm_package_version
   },
   /*
   ** Plugins to load before mounting the App
@@ -73,6 +74,11 @@ module.exports = {
     '@nuxtjs/moment'
   ],
 
+  buildModules: [
+    '@nuxtjs/style-resources',
+    '@nuxt/postcss8',
+  ],
+
   /*
   ** Build configuration
   */
@@ -87,7 +93,17 @@ module.exports = {
         autoprefixer: {}
       }
     },
-    extend (config, { isDev, isClient }) {
+
+    loaders: {
+      scss: {
+        implementation: require('sass'),
+        sassOptions: {
+          quietDeps: true
+        }
+      }
+    },
+
+    extend(config, { isDev, isClient }) {
       if (isDev && isClient) {
         const options = {
           exclude: ['node_modules'],

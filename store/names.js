@@ -1,5 +1,3 @@
-import { fetchMiddleware } from './utils'
-
 export const state = () => ({
   names: [],
   nextPageUrl: ''
@@ -17,10 +15,10 @@ export const mutations = {
 }
 
 export const actions = {
-  getLatest: async function ({ rootGetters: { middleware }, state: { nextPageUrl }, commit }, { limit, sortby, filterby, search }) {
+  getLatest: async function ({ rootGetters: { middleware, fetchMiddleware }, commit }, { limit, sortby, filterby, search }) {
     try {
       if (search && search.length) {
-        let data = await fetchMiddleware(`names/search/${search}`)
+        let data = await fetchMiddleware(`/names/search/${search}`)
 
         if (filterby === 'active') {
           data = data.filter(item => item.active)
@@ -59,7 +57,7 @@ export const actions = {
       commit('catchError', 'Error', { root: true })
     }
   },
-  getMore: async function ({ state: { nextPageUrl }, commit }) {
+  getMore: async function ({ rootGetters: { fetchMiddleware }, state: { nextPageUrl }, commit }) {
     if (!nextPageUrl) return
     const names = await fetchMiddleware(nextPageUrl)
     commit('addNames', names)
@@ -74,7 +72,7 @@ export const actions = {
       return []
     }
   },
-  getActiveNameAuctions: async function ({ rootGetters: { middleware }, commit }, { page, limit, by, length }) {
+  getActiveNameAuctions: async function ({ rootGetters: { middleware, fetchMiddleware }, commit }, { page, limit, by, length }) {
     try {
       if (page !== null) {
         const res = await fetchMiddleware(page)

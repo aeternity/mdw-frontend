@@ -73,7 +73,7 @@
         </div>
       </AppDefinition>
       <AppDefinition
-        v-else-if="tokensBalance.length === 0"
+        v-else-if="tokensBalance && tokensBalance.length === 0"
         title="tokens"
       >
         <div>

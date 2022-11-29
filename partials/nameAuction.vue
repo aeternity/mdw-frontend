@@ -101,7 +101,7 @@ export default {
     }
   }
 
-  /deep/ .auction-main-info {
+  .auction-main-info {
     display: flex;
     margin-bottom: 0.6rem;
     flex-direction: row;
@@ -139,7 +139,7 @@ export default {
     }
   }
 
-  /deep/ .auction-type-info {
+  .auction-type-info {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;

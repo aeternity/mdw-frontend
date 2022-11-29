@@ -65,7 +65,7 @@
         API docs
       </a>
       <br>
-      {{ mdwVersion }}
+      {{ getVersion }} (mdw {{ mdwVersion }})
     </div>
   </div>
 </template>
@@ -85,6 +85,9 @@ export default {
     Logo
   },
   computed: {
+    getVersion () {
+      return `v${this.$store.state.version}`
+    },
     isFaucetActive () {
       return this.$store.state.enableFaucet
     },

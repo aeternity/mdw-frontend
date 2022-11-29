@@ -1,15 +1,17 @@
 import camelcaseKeysDeep from 'camelcase-keys-deep'
-import { initMiddleware, fetchNode } from './utils'
+import { initMiddleware, fetchNode, fetchMiddleware } from './utils'
 
 export const state = () => ({
   nodeStatus: {},
-  nodeUrl: process.env.middlewareURL,
-  wsUrl: process.env.middlewareWS,
-  networkName: process.env.networkName,
-  otherDeployments: process.env.otherDeployments,
-  enableFaucet: process.env.enableFaucet,
-  faucetApi: process.env.faucetAPI,
-  apiDocs: process.env.APIDocs,
+  nodeUrl: process.env.NUXT_APP_NODE_URL || process.env.nodeURL,
+  middlewareURL: process.env.NUXT_APP_MDW_URL || process.env.middlewareURL,
+  wsUrl: process.env.NUXT_APP_NODE_WS || process.env.middlewareWS,
+  networkName: process.env.NUXT_APP_NETWORK_NAME || process.env.networkName,
+  otherDeployments: process.env.NUXT_APP_OTHER_DEPLOYMENTS || process.env.otherDeployments,
+  enableFaucet: process.env.NUXT_APP_ENABLE_FAUCET === 'true' || process.env.enableFaucet,
+  faucetApi: process.env.NUXT_APP_FAUCET_API || process.env.faucetAPI,
+  apiDocs: process.env.NUXT_APP_API_DOCS || process.env.APIDocs,
+  version: process.env.npm_package_version || process.env.version,
   error: '',
   height: 0,
   status: {},
@@ -39,7 +41,9 @@ export const state = () => ({
 })
 
 export const getters = {
-  middleware: () => initMiddleware()
+  middleware: state => initMiddleware(state), // mdw swagger
+  fetchMiddleware: state => (path) => fetchMiddleware(path, state.middlewareURL), // direct call to mdw
+  fetchNode: state => (path) => fetchNode(path, state.nodeUrl)
 }
 
 export const mutations = {
@@ -54,10 +58,10 @@ export const mutations = {
   /**
    * changeNetwork
    * @param state
-   * @param nodeUrl
+   * @param middlewareURL
    */
-  changeNetworkUrl (state, nodeUrl) {
-    state.nodeUrl = nodeUrl
+  changeNetworkUrl (state, middlewareURL) {
+    state.middlewareURL = middlewareURL
   },
   /**
    * catchError
@@ -95,9 +99,9 @@ export const mutations = {
 }
 
 export const actions = {
-  async height ({ rootGetters: { middleware }, commit }) {
+  async height ({ rootGetters: { fetchNode }, commit }) {
     try {
-      const { height } = await fetchNode('key-blocks/current/height')
+      const { height } = await fetchNode('/key-blocks/current/height')
       commit('setHeight', height)
       return height
     } catch (e) {
