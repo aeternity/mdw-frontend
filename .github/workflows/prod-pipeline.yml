@@ -1,4 +1,4 @@
-name: Production Mainnet Pipeline
+name: Production Pipeline
 
 on:
   push:
@@ -14,7 +14,7 @@ env:
 jobs:
   main:
     runs-on: ubuntu-latest
-    name: Mainnet Production Pipeline
+    name: Production Pipeline
     steps:
       - uses: actions/checkout@v2
         with:
@@ -61,8 +61,8 @@ jobs:
         with:
           images: aeternity/mdw-frontend
           tags: |
-            type=raw,value=mainnet,enable=${{ endsWith(GitHub.ref, 'master') }}
-            type=raw,value=${{ steps.release.outputs.tag_name }},enable=${{ endsWith(GitHub.ref, 'master') }}-mainnet
+            type=raw,value=latest,enable=${{ endsWith(GitHub.ref, 'master') }}
+            type=raw,value=${{ steps.release.outputs.tag_name }},enable=${{ endsWith(GitHub.ref, 'master') }}
 
       - name: Build and push docker image
         if: |
@@ -72,14 +72,6 @@ jobs:
         with:
           context: .
           file: nginx.Dockerfile
-          build-args: |
-            NUXT_APP_NODE_URL: https://mainnet.aeternity.io/v3
-            NUXT_APP_NODE_WS: wss://mainnet.aeternity.io/mdw/websocket
-            NUXT_APP_MDW_URL: https://mainnet.aeternity.io/mdw
-            NUXT_APP_OTHER_DEPLOYMENTS: TESTNET@https://explorer.testnet.aeternity.io
-            NUXT_APP_NETWORK_NAME: MAINNET
-            NUXT_APP_ENABLE_FAUCET: false
-            NUXT_APP_FAUCET_API: https://testnet.faucet.aepps.com/account
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

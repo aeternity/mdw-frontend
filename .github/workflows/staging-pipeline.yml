@@ -1,4 +1,4 @@
-name: Staging Testnet Pipeline
+name: Staging Pipeline
 
 on:
   pull_request:
@@ -6,14 +6,14 @@ on:
     types: [ opened, synchronize, closed ]
 
 env:
-  PR_NUMBER: ${{ github.event.pull_request.number }}-testnet
+  PR_NUMBER: ${{ github.event.pull_request.number }}
   ENV: "stg"
   APP: "mdw-frontend"
 
 jobs:
   main:
     runs-on: ubuntu-latest    
-    name: Testnet Staging Pipeline
+    name: Staging Pipeline
     steps:
       - uses: actions/checkout@v2
         with:
@@ -63,14 +63,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: nginx.Dockerfile
-          build-args: |
-            NUXT_APP_NETWORK_NAME: "TESTNET" 
-            NUXT_APP_NODE_URL: "https://testnet.aeternity.io/v3" 
-            NUXT_APP_MDW_URL: "https://testnet.aeternity.io/mdw" 
-            NUXT_APP_NODE_WS: "wss://testnet.aeternity.io/mdw/websocket"  
-            NUXT_APP_OTHER_DEPLOYMENTS: "MAINNET@https://explorer.aeternity.io" 
-            NUXT_APP_ENABLE_FAUCET: "true"
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
